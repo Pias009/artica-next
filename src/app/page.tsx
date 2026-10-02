@@ -8,7 +8,6 @@ import { OrderJourney } from "@/components/home/OrderJourney";
 import { OrderSheet } from "@/components/home/OrderSheet";
 import { PrivateLabel } from "@/components/home/PrivateLabel";
 import { SampleRequest } from "@/components/home/SampleRequest";
-import { ShopByLine } from "@/components/home/ShopByLine";
 import { UpClose } from "@/components/home/UpClose";
 
 /**
@@ -19,7 +18,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <ShopByLine />
       <BestSellers />
       <BuyerTypes />
       <ColdTest />

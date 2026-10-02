@@ -26,6 +26,13 @@ const paths = {
     </>
   ),
   menu: <path d="M4 8h16M4 16h16" />,
+  /* featured item beside a list */
+  rows: (
+    <>
+      <rect x="3.5" y="5" width="9" height="14" rx="2" />
+      <path d="M15.5 7h5M15.5 12h5M15.5 17h5" />
+    </>
+  ),
   pause: <path d="M9 6v12M15 6v12" />,
   layers: (
     <>
