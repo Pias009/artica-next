@@ -16,7 +16,7 @@ export function CartCount() {
         first.current = false;
         return;
       }
-      gsap.fromTo(ref.current, { scale: 1.45 }, { scale: 1, duration: 0.6, ease: "back.out(3)" });
+      gsap.fromTo(ref.current, { scale: 1.3 }, { scale: 1, duration: 0.6, ease: "expo.out" });
     },
     { dependencies: [n] },
   );
@@ -24,7 +24,7 @@ export function CartCount() {
   return (
     <span
       ref={ref}
-      className="inline-grid h-[22px] min-w-[22px] place-items-center rounded-full bg-on-accent px-1.5 text-xs font-extrabold text-accent tabular-nums"
+      className="inline-grid h-[22px] min-w-[22px] place-items-center rounded-full bg-on-accent px-1.5 text-xs font-bold text-ink tabular-nums"
     >
       {n}
       <span className="sr-only"> {n === 1 ? "style" : "styles"}</span>

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "northStar": "A wholesale catalogue as calm and fresh as a winter morning: the boots and the cold do the selling.",
+  "shadows": {
+    "soft": "0 1px 2px rgb(18 20 22 / 0.04), 0 8px 24px -8px rgb(18 20 22 / 0.08)",
+    "float": "0 18px 40px -16px rgb(18 20 22 / 0.18)",
+    "drawer": "-24px 0 64px rgb(18 20 22 / 0.16)",
+    "boot": "drop-shadow(0 14px 16px rgb(18 20 22 / 0.16))",
+    "hero-boot": "drop-shadow(0 34px 30px rgb(18 20 22 / 0.2)) drop-shadow(0 10px 12px rgb(18 20 22 / 0.08))"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "gsapEase": "expo.out",
+    "reveal": "scroll-driven translateY(28px) to 0, transform only, animation-timeline: view()",
+    "reducedMotion": "finished states, no snowfall animation, no pins, no autoplay"
+  },
+  "breakpoints": { "sm": "33rem", "md": "54rem", "lg": "74rem", "xl": "86rem" },
+  "rules": [
+    "Air, not ink, sets the mood",
+    "One accent: glacier",
+    "No eyebrows, no all-caps headings",
+    "No borders around cards"
+  ]
+}

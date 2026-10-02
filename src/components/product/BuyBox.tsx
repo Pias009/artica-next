@@ -42,7 +42,7 @@ export function BuyBox({ id }: { id: string }) {
           <button type="button" onClick={() => change(-1)} aria-label="Fewer cases" className="hit-44 relative grid size-9 place-items-center rounded-full hover:bg-chip">
             <Icon name="minus" />
           </button>
-          <output className="min-w-10 text-center text-[15px] font-extrabold tabular-nums">{cases}</output>
+          <output className="min-w-10 text-center text-[15px] font-semibold tabular-nums">{cases}</output>
           <button type="button" onClick={() => change(1)} aria-label="More cases" className="hit-44 relative grid size-9 place-items-center rounded-full hover:bg-chip">
             <Icon name="plus" />
           </button>

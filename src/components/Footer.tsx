@@ -9,7 +9,6 @@ const COLS: { title: string; links: [string, string][] }[] = [
       ["Men", "/catalog?line=men"],
       ["Women", "/catalog?line=women"],
       ["Kids", "/catalog?line=kids"],
-      ["Winter", "/catalog?line=insulated"],
       ["Waterproof", "/catalog?line=waterproof"],
       ["All styles", "/catalog"],
     ],
@@ -18,25 +17,21 @@ const COLS: { title: string; links: [string, string][] }[] = [
     title: "For buyers",
     links: [
       ["Line sheet", "/inquiry"],
-      ["MOQ and tiers", "/#partner"],
-      ["Size charts", "/catalog"],
-      ["Shipping terms", "/#service"],
-      ["Private label", "/#partner"],
-      ["FAQ", "#footer"],
+      ["Private label", "/private-label"],
+      ["Shipping terms", "/shipping"],
+      ["Buyer FAQ", "/faq"],
     ],
   },
   {
     title: "Company",
     links: [
-      ["About", "#footer"],
-      ["Factory", "/#tech"],
-      ["Quality", "/#tech"],
-      ["Careers", "#footer"],
-      ["Contact", "#footer"],
+      ["About", "/about"],
+      ["Contact", "/contact"],
     ],
   },
 ];
 
+// Client placeholders: replace with the real phone, email and address.
 const CONTACT: [IconName, string][] = [
   ["phone", "+1 (000) 000-0000"],
   ["mail", "sales@yourbrand.com"],
@@ -53,64 +48,65 @@ const SOCIAL: [IconName, string][] = [
 
 export function Footer() {
   return (
-    <footer id="footer" className="mt-sec rounded-shell border border-line/60 bg-tile p-6 sm:p-10 shadow-soft">
-      <div className="grid grid-cols-2 gap-8 pb-8 sm:grid-cols-3 lg:grid-cols-[1.5fr_repeat(4,minmax(0,1fr))]">
-        <div className="col-span-full lg:col-span-1">
-          <Logo />
-          <p className="mt-3.5 max-w-[30ch] text-[13px] leading-relaxed text-ink-2">
-            Direct wholesale footwear atelier engineered for harsh North American retail conditions.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <span className="mono-label rounded-md bg-accent/10 px-2 py-0.5 text-[9px] font-bold text-accent">
-              VERIFIED OEM ATELIER
-            </span>
-            <span className="mono-label text-[9px] text-muted">[ EST. 2026 ]</span>
-          </div>
-          <div className="mt-5 flex gap-2.5">
-            {SOCIAL.map(([icon, label]) => (
-              <a
-                key={label}
-                href="#"
-                aria-label={label}
-                className="hit-44 relative grid size-9 place-items-center rounded-xl border border-line/60 bg-surface text-ink-2 transition-all hover:bg-chip hover:text-ink hover:border-ink/20 shadow-xs"
-              >
-                <Icon name={icon} className="size-4" />
-              </a>
-            ))}
-          </div>
-        </div>
-        {COLS.map((c) => (
-          <div key={c.title}>
-            <h4 className="mb-3 text-[11px] font-extrabold tracking-[.1em] uppercase text-ink">{c.title}</h4>
-            <ul className="grid gap-1.5 text-[13px] text-ink-2">
-              {c.links.map(([label, href]) => (
-                <li key={label}>
-                  <Link href={href} className="inline-block py-0.5 transition-colors hover:text-ink">
-                    {label}
-                  </Link>
-                </li>
+    <footer id="footer" className="mt-sec bg-tile px-(--shell-pad) pt-16 pb-10">
+      <div className="wrap">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
+          <div>
+            <Logo />
+            <p className="mt-5 max-w-[34ch] text-[15px] text-ink-2">
+              Winter boots for retailers, distributors and private-label brands across North America.
+            </p>
+            <div className="mt-6 flex gap-2">
+              {SOCIAL.map(([icon, label]) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="grid size-11 place-items-center rounded-full bg-white text-ink-2 transition-colors hover:text-ink"
+                >
+                  <Icon name={icon} className="size-[18px]" />
+                </a>
               ))}
-            </ul>
+            </div>
           </div>
-        ))}
-        <div>
-          <h4 className="mb-3 text-[11px] font-extrabold tracking-[.1em] uppercase text-ink">Showroom & Trade</h4>
-          <ul className="grid gap-2.5 text-[13px] text-ink-2">
-            {CONTACT.map(([icon, text]) => (
-              <li key={text} className="flex items-center gap-2">
-                <Icon name={icon} className="size-3.5 text-accent" />
-                {text}
-              </li>
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+            {COLS.map((c) => (
+              <div key={c.title}>
+                <h2 className="mb-4 text-[14px] font-semibold">{c.title}</h2>
+                <ul className="grid gap-2.5 text-[15px] text-ink-2">
+                  {c.links.map(([label, href]) => (
+                    <li key={label}>
+                      <Link href={href} className="transition-colors hover:text-ink hover:underline">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+            <div className="col-span-2 sm:col-span-1">
+              <h2 className="mb-4 text-[14px] font-semibold">Contact</h2>
+              <ul className="grid gap-2.5 text-[15px] text-ink-2">
+                {CONTACT.map(([icon, text]) => (
+                  <li key={text} className="flex items-center gap-2.5">
+                    <Icon name={icon} className="size-4 flex-none text-muted" />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line/60 pt-6 text-xs text-muted">
-        <span>© 2026 ARTICA Wholesale Footwear. All designs protected. Trade buyers direct.</span>
-        <div className="flex gap-4 sm:gap-7 font-medium">
-          <Link href="#footer" className="hover:text-ink">Privacy policy</Link>
-          <Link href="#footer" className="hover:text-ink">Terms of trade</Link>
-          <Link href="#footer" className="hover:text-ink">Compliance standards</Link>
+        <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-[13px] text-muted">
+          <span>© 2026 ARTICA Wholesale. Trade buyers only.</span>
+          <div className="flex gap-6">
+            <Link href="#footer" className="hover:text-ink">
+              Privacy policy
+            </Link>
+            <Link href="#footer" className="hover:text-ink">
+              Terms of trade
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -57,7 +57,7 @@ export function ProductGallery({ shots, badge }: { shots: Shot[]; badge?: ReactN
         ref={stage}
         onPointerMove={onMove}
         onPointerLeave={onLeave}
-        className="bg-studio relative aspect-square overflow-hidden rounded-shell [perspective:900px] md:aspect-[1/0.95]"
+        className="relative aspect-square overflow-hidden rounded-shell bg-tile [perspective:900px] md:aspect-[1/0.95]"
       >
         {badge}
         <div className="absolute right-[14%] bottom-[9%] left-[14%] h-9 rounded-[50%] bg-[radial-gradient(closest-side,rgb(29_30_25/.22),transparent)] blur-[4px]" />

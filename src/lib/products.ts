@@ -41,6 +41,14 @@ export const STEP_CASES = 5;
 export const MOQ_PAIRS = MOQ_CASES * PACK;
 export const PRIVATE_LABEL_MIN = 600;
 export const LEAD = { quote: "24h", samples: "10d", bulk: "45d", delivery: "20d" } as const;
+/** Indicative pallet load (client placeholder; confirmed on each quote). */
+export const CASES_PER_PALLET = 30;
+/** Volume thresholds a buyer moves through, in pairs per style. */
+export const TIERS = [
+  { pairs: MOQ_CASES * PACK, label: "Minimum order" },
+  { pairs: 600, label: "Private label" },
+  { pairs: 1000, label: "Tier pricing" },
+] as const;
 
 export const LINE_LABEL: Record<ProductLine, string> = { men: "Men", women: "Women", kids: "Kids" };
 

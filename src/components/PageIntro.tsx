@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Fragment } from "react";
 
+/**
+ * Page opening: breadcrumb, a calm sentence-case title and one supporting line.
+ * `eyebrow` is accepted for existing pages but intentionally not rendered (the title carries the page).
+ */
 export function PageIntro({
   crumbs,
-  eyebrow,
   title,
   text,
 }: {
@@ -13,30 +16,27 @@ export function PageIntro({
   text?: string;
 }) {
   return (
-    <div className="bg-studio mb-6 rounded-shell px-[clamp(20px,4vw,44px)] py-[clamp(24px,4vw,40px)]">
-      <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-studio-ink-2">
-        {crumbs.map((c, i) => (
-          <Fragment key={c.label}>
-            {i > 0 && <span aria-hidden="true">/</span>}
-            {c.href ? (
-              <Link href={c.href} className="hover:text-ink">
-                {c.label}
-              </Link>
-            ) : (
-              <span aria-current="page" className="font-semibold text-ink">
-                {c.label}
-              </span>
-            )}
-          </Fragment>
-        ))}
-      </nav>
-      {eyebrow && (
-        <span className="glass mb-3 inline-block rounded-full px-3.5 py-2 text-[11px] font-bold tracking-[.14em] text-studio-ink-2 uppercase">
-          {eyebrow}
-        </span>
-      )}
-      <h1 className="text-[clamp(30px,5vw,52px)] leading-none font-extrabold tracking-[-.02em] uppercase">{title}</h1>
-      {text && <p className="mt-3 max-w-[52ch] text-[15px] text-studio-ink-2">{text}</p>}
+    <div className="bleed mb-12 bg-sky px-(--shell-pad) pt-10 pb-14 md:pt-14 md:pb-20">
+      <div className="wrap">
+        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-[14px] text-ink-2">
+          {crumbs.map((c, i) => (
+            <Fragment key={c.label}>
+              {i > 0 && <span aria-hidden="true">/</span>}
+              {c.href ? (
+                <Link href={c.href} className="hover:text-ink hover:underline">
+                  {c.label}
+                </Link>
+              ) : (
+                <span aria-current="page" className="font-medium text-ink">
+                  {c.label}
+                </span>
+              )}
+            </Fragment>
+          ))}
+        </nav>
+        <h1 className="max-w-[18ch] text-[clamp(40px,5.4vw,72px)] leading-[1.02] font-semibold tracking-[-0.04em]">{title}</h1>
+        {text && <p className="mt-5 max-w-[52ch] text-[18px] text-ink-2">{text}</p>}
+      </div>
     </div>
   );
 }

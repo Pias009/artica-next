@@ -12,13 +12,13 @@ const fmt = (n: number, suffix: string) => `${n < 0 ? "−" : ""}${Math.abs(n)}$
 export function TechGrid({
   id = "tech",
   items = TECH,
-  title = "Built for cold.",
-  muted = "Tested for retail.",
+  title = "Built for cold, tested for retail.",
+  sub,
 }: {
   id?: string;
   items?: TechSpec[];
   title?: string;
-  muted?: string;
+  sub?: string;
 }) {
   const ref = useRef<HTMLElement>(null);
 
@@ -46,30 +46,20 @@ export function TechGrid({
   );
 
   return (
-    <section ref={ref} id={id} aria-labelledby={`h-${id}`} className="mt-sec scroll-mt-6">
-      <SectionHead id={`h-${id}`} title={title} muted={muted} />
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {items.map((t, i) => (
-          <div
-            key={t.title}
-            data-reveal
-            className="group flex flex-col items-center gap-2 rounded-card border border-line/60 bg-tile px-3.5 pt-5 pb-5 text-center card-lift transition-all hover:border-ink/25 hover:bg-surface"
-          >
-            <div className="flex w-full items-center justify-between text-[9px] font-mono text-muted">
-              <span>[0{i + 1}]</span>
-              <span className="size-1.5 rounded-full bg-accent/40 group-hover:bg-accent" />
-            </div>
-            <div className="grid size-12 place-items-center rounded-2xl bg-surface border border-line/60 text-ink shadow-xs">
-              <Icon name={t.icon} className="size-6 stroke-[1.4] text-accent" />
-            </div>
-            <b className="mt-1 text-[11px] font-extrabold tracking-[.08em] uppercase text-ink">{t.title}</b>
-            <span className="text-2xl font-extrabold tracking-[-.02em] tabular-nums text-ink">
+    <section ref={ref} id={id} aria-labelledby={`h-${id}`} className="mt-sec scroll-mt-24">
+      <SectionHead id={`h-${id}`} title={title} sub={sub} />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {items.map((t) => (
+          <div key={t.title} data-reveal className="flex flex-col gap-2 rounded-card bg-tile p-5">
+            <Icon name={t.icon} className="size-6 stroke-[1.4] text-glacier" />
+            <span className="mt-4 text-[28px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
               <span aria-hidden="true" data-num={t.value} data-suffix={t.suffix}>
                 {fmt(t.value, t.suffix)}
               </span>
               <span className="sr-only">{fmt(t.value, t.suffix)}</span>
             </span>
-            <span className="text-[11px] leading-snug text-muted">{t.note}</span>
+            <b className="text-[15px] font-semibold">{t.title}</b>
+            <span className="text-[13px] leading-snug text-muted">{t.note}</span>
           </div>
         ))}
       </div>

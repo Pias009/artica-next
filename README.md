@@ -45,7 +45,7 @@ image files are needed. Add a style there and it appears everywhere.
 ## Placeholders to replace
 
 Brand name, style names, the Pop line (kids vs women), sizes and case-pack ratios, MOQ and tiers,
-materials and specs, lead times (24h / 10d / 45d / 20d), partner stats (120+, 68%, 0.4%),
+materials and specs, lead times (24h / 10d / 45d / 20d), pallet load (30 cases, indicative), partner stats (120+, 68%, 0.4%),
 the 12 store photo slots (need real, permissioned partner photos), phone, email, address and social links.
 
 ## Structure

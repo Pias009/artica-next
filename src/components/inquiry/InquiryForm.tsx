@@ -39,6 +39,12 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
     if (prefillEmail && emailRef.current) emailRef.current.value = prefillEmail.value;
   }, [prefillEmail]);
 
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  const prefillNote = useUI((s) => s.prefillNote);
+  useEffect(() => {
+    if (prefillNote && noteRef.current) noteRef.current.value = prefillNote.value;
+  }, [prefillNote]);
+
   // After a failed submit, move focus to the first field with an error.
   useEffect(() => {
     if (state.status === "error") formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
@@ -50,7 +56,7 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         <div className="mx-auto mb-3.5 grid size-14 place-items-center rounded-full bg-badge-new text-accent">
           <Icon name="check" className="size-[26px]" />
         </div>
-        <h3 className="text-xl font-extrabold">Inquiry ready</h3>
+        <h3 className="text-[24px] font-semibold tracking-[-0.02em]">Inquiry ready</h3>
         <p className="mx-auto mt-2 max-w-[32ch] text-[13.5px] text-ink-2">{state.summary}</p>
         <p className="mt-[18px] text-[11.5px] text-muted">Demo form: connect the server action to your inbox or CRM to receive inquiries.</p>
         <button
@@ -142,7 +148,7 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         />
       </Field>
       <Field id={`${uid}-note`} label={<>Notes <span className="font-medium text-muted">(optional)</span></>}>
-        <textarea id={`${uid}-note`} name="note" placeholder="Colors, delivery date, logo…" className="field min-h-[72px] resize-y" />
+        <textarea ref={noteRef} defaultValue={prefillNote?.value} id={`${uid}-note`} name="note" placeholder="Colors, delivery date, logo…" className="field min-h-[72px] resize-y" />
       </Field>
       {errors.form && (
         <p role="alert" className="text-[12.5px] text-danger">
@@ -180,7 +186,7 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         <InquiryLines />
       </div>
       <div className="rounded-card bg-tile p-5 md:sticky md:top-6">
-        <h2 className="text-lg font-extrabold">Your details</h2>
+        <h2 className="text-[20px] font-semibold tracking-[-0.02em]">Your details</h2>
         {form}
         {footer}
       </div>

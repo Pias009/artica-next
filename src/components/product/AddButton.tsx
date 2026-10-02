@@ -18,12 +18,12 @@ export function AddButton({ id, className }: { id: string; className?: string })
       aria-pressed={on}
       aria-label={`${on ? "Remove" : "Add"} ${name} ${on ? "from" : "to"} inquiry list`}
       className={clsx(
-        "hit-44 grid place-items-center rounded-full transition-[background-color,color,scale] duration-200 hover:scale-106",
-        on ? "bg-accent text-on-accent" : "bg-white/85 text-ink",
+        "hit-44 grid place-items-center rounded-full transition-[background-color,color,scale,opacity] duration-200 active:scale-95",
+        on ? "bg-ink text-white" : "bg-white text-ink hover:bg-ink hover:text-white",
         className,
       )}
     >
-      <Icon name={on ? "check" : "plus"} className="size-4" />
+      <Icon name={on ? "check" : "plus"} className="size-[18px]" />
     </button>
   );
 }

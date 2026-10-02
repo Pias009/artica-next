@@ -2,124 +2,79 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Icon, type IconName } from "../Icon";
+import { useRef, useState } from "react";
+import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
 import { AddButton } from "../product/AddButton";
 import { QuickViewButton } from "../ui/QuickViewButton";
 import { gsap, MOTION_OK, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import { byId, img } from "@/lib/products";
-import { useUI } from "@/lib/store";
+import { byId, CASE_PACK, LEAD, LINE_LABEL, MOQ_CASES, MOQ_PAIRS, PACK } from "@/lib/products";
 
-const SLIDES = [
-  { id: "p04", label: "Men", main: img("p04-men-leather-winter-lace-up-outer-view"), back: img("p05-leather-shearling-zip-boot-outer-view") },
-  { id: "p02", label: "Women", main: img("p02-women-tall-suede-outer-view"), back: img("p01-women-suede-ankle-outer-view"), tall: true },
-  { id: "p03", label: "Kids", main: img("p03-pink-patent-lace-up-outer-view"), back: img("p03-pink-patent-lace-up-zip-view") },
+const LINES = [
+  { key: "men", label: "Men", id: "p04" },
+  { key: "women", label: "Women", id: "p01" },
+  { key: "kids", label: "Kids", id: "p03" },
+] as const;
+
+const TERMS: [string, string][] = [
+  [`${MOQ_PAIRS} pairs`, "Minimum per style"],
+  [`${PACK} pairs`, "Mixed-size case"],
+  [LEAD.samples.replace("d", " days"), "Samples"],
+  [LEAD.bulk.replace("d", " days"), "Production"],
+  ["DDP", "US and Canada"],
 ];
 
-const CHIPS: [IconName, string, string][] = [
-  ["truck", "Ships to US & Canada", "DDP, FOB or EXW"],
-  ["sample", "Samples in 10 days", "Before your bulk order"],
-  ["shield", "Every batch inspected", "Photo report included"],
-];
-
-const AUTOPLAY_MS = 5500;
-
-const REDUCE = "(prefers-reduced-motion: reduce)";
-const subscribeReduce = (cb: () => void) => {
-  const mq = window.matchMedia(REDUCE);
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-};
-const subscribeVisibility = (cb: () => void) => {
-  document.addEventListener("visibilitychange", cb);
-  return () => document.removeEventListener("visibilitychange", cb);
+/** The twelve boxes of one case, in size order (e.g. 7, 8, 8, 9, 9, 10, 10, 10 …). */
+const caseSizes = (line: keyof typeof CASE_PACK) => CASE_PACK[line].flatMap(([s, n]) => Array.from({ length: n }, () => s));
+/** The open box: the first pair of the most-stocked size. */
+const openIndex = (line: keyof typeof CASE_PACK) => {
+  const top = CASE_PACK[line].reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+  return caseSizes(line).indexOf(top);
 };
 
+/**
+ * Wholesale hero: one ARTICA case, opened on a packing table. Twelve shoeboxes, each stamped
+ * with its size, show the mixed-size run a store actually receives; one box is open on the boot.
+ */
 export function Hero() {
   const root = useRef<HTMLElement>(null);
   const [cur, setCur] = useState(0);
-  const [hovering, setHovering] = useState(false);
-  const [stopped, setStopped] = useState(false); // user pressed pause
-  const prev = useRef(0);
-  const drawerOpen = useUI((s) => s.drawerOpen);
-  const reduced = useSyncExternalStore(subscribeReduce, () => window.matchMedia(REDUCE).matches, () => false);
-  const tabHidden = useSyncExternalStore(subscribeVisibility, () => document.hidden, () => false);
+  const first = useRef(true);
+  const line = LINES[cur].key;
+  const p = byId[LINES[cur].id];
+  const sizes = caseSizes(line);
+  const open = openIndex(line);
 
-  // Autoplay: user can stop it; it also rests on hover/focus, while the drawer is open,
-  // in a background tab, and for reduced-motion users (WCAG 2.2.2 Pause, Stop, Hide).
-  const autoplay = !stopped && !reduced;
-  const playing = autoplay && !hovering && !drawerOpen && !tabHidden;
-  useEffect(() => {
-    if (!playing) return;
-    const t = setInterval(() => setCur((c) => (c + 1) % SLIDES.length), AUTOPLAY_MS);
-    return () => clearInterval(t);
-  }, [playing]);
-
-  // Intro timeline + idle float.
+  // Intro: the flaps unfold, the boxes are packed in, one lid comes off.
   useGSAP(
     () => {
       gsap.matchMedia().add(MOTION_OK, () => {
-        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-        tl.from("[data-line]", { yPercent: 110, duration: 1, stagger: 0.09 })
-          .from("[data-fade]", { y: 18, autoAlpha: 0, duration: 0.8, stagger: 0.08 }, 0.25)
-          .from('[data-slide="0"] [data-main]', { x: 90, rotation: 10, autoAlpha: 0, duration: 1.3 }, 0.1)
-          .from('[data-slide="0"] [data-back]', { x: 40, rotation: 8, autoAlpha: 0, duration: 1.1 }, 0.3)
-          .from('[data-slide="0"] [data-tag]', { y: 12, autoAlpha: 0, duration: 0.6 }, 0.8)
-          .from("[data-chip]", { x: 30, autoAlpha: 0, duration: 0.8, stagger: 0.08 }, 0.45);
-
-        gsap.to("[data-float]", { y: -10, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1 });
-
-        // Boots follow the mouse slightly (±18px).
-        const el = root.current!;
-        const xTo = gsap.quickTo("[data-parallax]", "x", { duration: 0.8, ease: "power3.out" });
-        const yTo = gsap.quickTo("[data-parallax]", "y", { duration: 0.8, ease: "power3.out" });
-        const onMove = (e: PointerEvent) => {
-          if (e.pointerType !== "mouse") return;
-          const r = el.getBoundingClientRect();
-          xTo(((e.clientX - r.left) / r.width - 0.5) * 36);
-          yTo(((e.clientY - r.top) / r.height - 0.5) * 36);
-        };
-        const onLeave = () => {
-          xTo(0);
-          yTo(0);
-        };
-        el.addEventListener("pointermove", onMove);
-        el.addEventListener("pointerleave", onLeave);
-        return () => {
-          el.removeEventListener("pointermove", onMove);
-          el.removeEventListener("pointerleave", onLeave);
-        };
+        gsap
+          .timeline({ defaults: { ease: "expo.out" } })
+          .from("[data-line]", { yPercent: 105, duration: 1.1, stagger: 0.09 })
+          .from("[data-rise]", { y: 20, opacity: 0, duration: 1, stagger: 0.07 }, 0.3)
+          .from("[data-case]", { y: 40, rotation: -8, opacity: 0, duration: 1.1 }, 0.1)
+          .from("[data-flap=y]", { scaleY: 0, duration: 0.9, ease: "power3.out", stagger: 0.08 }, 0.45)
+          .from("[data-flap=x]", { scaleX: 0, duration: 0.9, ease: "power3.out", stagger: 0.08 }, 0.5)
+          .from("[data-tile]", { y: -26, opacity: 0, scale: 1.08, duration: 0.6, ease: "power3.out", stagger: { each: 0.05, from: "center" } }, 0.7)
+          .fromTo("[data-lid-open]", { x: 0, y: 0, rotation: 0 }, { x: "40%", y: "-46%", rotation: 9, duration: 0.9, ease: "power3.inOut" }, ">-0.1")
+          .from("[data-note]", { opacity: 0, y: 10, duration: 0.7, stagger: 0.1 }, "<0.3");
       });
     },
     { scope: root },
   );
 
-  // Slide change.
+  // Line switch: the boxes flip and re-stamp, the open box gets the next boot.
   useGSAP(
     () => {
-      const from = prev.current;
-      if (from === cur) return;
-      prev.current = cur;
-      const slides = Array.from(root.current!.querySelectorAll<HTMLElement>("[data-slide]"));
-      const out = slides[from];
-      const inn = slides[cur];
-      const q = gsap.utils.selector(inn);
-
-      if (prefersReducedMotion()) {
-        gsap.set(out, { autoAlpha: 0 });
-        gsap.set(inn, { autoAlpha: 1 });
+      if (first.current) {
+        first.current = false;
         return;
       }
-      gsap
-        .timeline({ defaults: { ease: "power3.out", overwrite: "auto" } })
-        .to(out, { autoAlpha: 0, duration: 0.5 })
-        .to(out.querySelector("[data-main]"), { x: -60, autoAlpha: 0, duration: 0.5 }, 0)
-        .fromTo(inn, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5 }, 0.05)
-        .fromTo(q("[data-main]"), { x: 90, rotation: 8, autoAlpha: 0 }, { x: 0, rotation: 0, autoAlpha: 1, duration: 1.1 }, 0.1)
-        .fromTo(q("[data-back]"), { x: 50, rotation: 10, autoAlpha: 0 }, { x: 0, rotation: 0, autoAlpha: 0.95, duration: 1 }, 0.2)
-        .fromTo(q("[data-tag]"), { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6 }, 0.45);
+      if (prefersReducedMotion()) return;
+      gsap.fromTo("[data-stamp]", { rotationX: -90, opacity: 0 }, { rotationX: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: 0.035 });
+      gsap.fromTo("[data-lid-open]", { x: 0, y: 0, rotation: 0 }, { x: "40%", y: "-46%", rotation: 9, duration: 0.8, delay: 0.25, ease: "power3.inOut" });
+      gsap.fromTo("[data-boot]", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.6, delay: 0.5, ease: "expo.out" });
     },
     { dependencies: [cur], scope: root },
   );
@@ -128,209 +83,173 @@ export function Hero() {
     <section
       ref={root}
       id="hero"
-      aria-label="Wholesale collection"
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      onFocus={() => setHovering(true)}
-      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHovering(false)}
-      className="bg-studio relative grid min-h-0 grid-cols-1 overflow-hidden rounded-shell text-ink md:grid-cols-2 lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_230px]"
+      aria-labelledby="hero-title"
+      className="bleed relative isolate overflow-hidden bg-[#f3f4f2] [background-image:linear-gradient(rgb(18_20_22/.045)_1px,transparent_1px),linear-gradient(90deg,rgb(18_20_22/.045)_1px,transparent_1px)] [background-size:44px_44px]"
     >
-      {/* curved slab, echoes a plaza ramp */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-[8%] -bottom-[38%] h-[78%] w-[78%] rounded-[50%_50%_0_0/70%_70%_0_0] bg-linear-to-b from-white/55 to-white/0 to-60%"
-      />
-
-      <div className="relative z-[2] flex flex-col justify-center gap-[20px] px-[22px] pt-7 md:p-[clamp(28px,4vw,52px)]">
-        <div data-fade className="flex items-center gap-2.5">
-          <span className="glass rounded-full px-3.5 py-1.5 mono-label text-studio-ink-2">
-            FW26 · DIRECT ATELIER
-          </span>
-          <span className="mono-label text-[10px] text-muted tracking-widest hidden sm:inline">
-            [ LAT 64°08&apos;N // SERIES 01 ]
-          </span>
-        </div>
-        <h1 className="text-[clamp(34px,10.5vw,44px)] leading-[.96] font-extrabold tracking-[-.03em] text-balance uppercase sm:text-[clamp(38px,5vw,68px)]">
-          {["Winter boots", "built for", "your shelves"].map((t, i) => (
-            <span key={t} className="block overflow-hidden pb-[.04em]">
-              <span data-line className={clsx("block", i > 0 && "text-studio-ink-2")}>
-                {t}
+      <div className="wrap grid items-center gap-x-12 gap-y-10 px-(--shell-pad) pt-[clamp(48px,7vw,96px)] pb-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        {/* words */}
+        <div className="max-w-[600px]">
+          <h1 id="hero-title" className="type-display">
+            {[
+              ["Twelve pairs.", "text-ink"],
+              ["Every size.", "text-glacier"],
+              ["One case.", "text-ink"],
+            ].map(([t, c]) => (
+              <span key={t} className="block overflow-hidden pb-[0.06em]">
+                <span data-line className={clsx("block", c)}>
+                  {t}
+                </span>
               </span>
-            </span>
-          ))}
-        </h1>
-        <p data-fade className="max-w-[34ch] text-[15px] leading-relaxed text-studio-ink-2">
-          Men, women and kids. From 300 pairs, packed 12 per case, shipped direct to the US and Canada.
-        </p>
-
-        {/* Quick line selector pills */}
-        <div data-fade className="flex items-center gap-1 rounded-full border border-line/70 bg-surface/75 p-1 w-fit backdrop-blur-md">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setCur(i)}
-              className={clsx(
-                "h-7 rounded-full px-3 text-xs font-bold transition-all",
-                cur === i
-                  ? "bg-accent text-on-accent shadow-[0_2px_8px_rgb(71_76_56/0.25)]"
-                  : "text-ink-2 hover:text-ink hover:bg-chip",
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
-        <div data-fade className="flex flex-wrap gap-2.5 pt-1">
-          <OpenInquiryButton className="btn btn-dark">
-            Request line sheet
-            <span className="-mr-2 grid size-[26px] place-items-center rounded-full bg-white/15">
-              <Icon name="arrow" className="size-3.5" />
-            </span>
-          </OpenInquiryButton>
-          <Link href="/catalog" className="btn glass text-ink hover:bg-white/80">
-            View catalog
-          </Link>
-        </div>
-      </div>
-
-      <div className="relative z-[1] min-h-[320px] md:min-h-[420px]" aria-live={autoplay ? "off" : "polite"}>
-        <span aria-hidden="true" className="type-giant text-outline pointer-events-none absolute right-[4%] top-[12%] z-0 select-none text-[clamp(70px,13vw,160px)] opacity-35">
-          ARTICA
-        </span>
-        <div className="absolute right-[10%] bottom-[10%] left-[14%] h-9 rounded-[50%] bg-[radial-gradient(closest-side,rgb(29_30_25/.22),transparent)] blur-[4px]" />
-        <div data-parallax className="absolute inset-0">
-        {SLIDES.map((s, i) => {
-          const p = byId[s.id];
-          return (
-            <div
-              key={s.id}
-              data-slide={i}
-              inert={i !== cur}
-              className={clsx("absolute inset-0", i !== 0 && "invisible opacity-0")}
-            >
-              <div
-                data-back
-                className={clsx(
-                  "absolute opacity-95",
-                  s.tall ? "right-[4%] bottom-[18%] h-[44%] w-[46%] rotate-[8deg]" : "top-[10%] right-[2%] h-[44%] w-[40%] rotate-[8deg]",
-                )}
-              >
-                <Image src={s.back} alt="" fill sizes="(max-width: 864px) 40vw, 240px" className="object-contain drop-shadow-[0_18px_16px_rgb(29_30_25/.2)]" />
-              </div>
-              <div
-                data-main
-                className={clsx(
-                  "absolute",
-                  s.tall ? "bottom-[10%] left-[10%] h-[84%] w-[52%] -rotate-3" : "bottom-[15%] left-[4%] h-[74%] w-[92%] -rotate-6",
-                )}
-              >
-                <QuickViewButton id={p.id} data-float aria-label={`View details: ARTICA ${p.name}`} className="relative block size-full cursor-zoom-in">
-                  <Image
-                    src={s.main}
-                    alt={p.desc}
-                    fill
-                    loading="eager"
-                    fetchPriority={i === 0 ? "high" : "auto"}
-                    sizes="(max-width: 864px) 90vw, 560px"
-                    className="object-contain drop-shadow-hero"
-                  />
-                </QuickViewButton>
-              </div>
-              <div
-                data-tag
-                className="glass-card absolute top-[10%] left-[6%] z-[3] flex items-center gap-3 rounded-2xl py-2.5 pr-2.5 pl-4 shadow-soft"
-              >
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="mono-label text-[9px] text-accent">SPEC.0{i + 1}</span>
-                    <span className="text-line">•</span>
-                    <span className="mono-label text-[9px] text-muted">{s.label}</span>
-                  </div>
-                  <QuickViewButton id={p.id} className="block text-left text-sm font-extrabold uppercase hover:text-accent">
-                    ARTICA {p.name}
-                  </QuickViewButton>
-                  <span className="block text-[11px] font-medium text-studio-ink-2">12/case · MOQ 300 pr</span>
-                </div>
-                <AddButton id={p.id} className="relative size-8 bg-accent text-on-accent shadow-sm" />
-              </div>
-            </div>
-          );
-        })}
-        </div>
-      </div>
-
-      <aside className="relative z-[2] col-span-full flex flex-col gap-3 px-4 pb-10 md:flex-row md:items-center md:px-[clamp(20px,3vw,40px)] md:pb-11 lg:col-span-1 lg:flex-col lg:items-stretch lg:justify-between lg:py-7 lg:pr-6 lg:pl-0">
-        <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 md:mx-0 md:flex-1 md:px-0 lg:flex-col lg:overflow-visible">
-          {CHIPS.map(([icon, title, sub]) => (
-            <div key={title} data-chip className="glass-card flex min-w-[210px] snap-start items-start gap-3 rounded-card p-4 card-lift lg:min-w-0">
-              <span className="grid size-9 flex-none place-items-center rounded-xl bg-accent/10 text-accent">
-                <Icon name={icon} className="size-4" />
-              </span>
-              <span>
-                <b className="block text-[13px] leading-tight font-bold">{title}</b>
-                <span className="mt-[3px] block text-[11.5px] text-studio-ink-2">{sub}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-        <div data-chip className="glass-card flex flex-none items-center gap-3 self-start rounded-full py-2.5 pr-4 pl-2.5 md:self-center lg:self-stretch">
-          <span className="flex" aria-hidden="true">
-            {["p04", "p01", "p03"].map((id, i) => (
-              <i key={id} className={clsx("relative grid size-[34px] place-items-center overflow-hidden rounded-full border-2 border-white bg-photo shadow-xs", i && "-ml-2.5")}>
-                <Image src={byId[id].outer.src} alt="" fill sizes="34px" className="object-contain p-0.5" />
-              </i>
             ))}
-          </span>
-          <span>
-            <b className="block text-[13px] font-extrabold tabular-nums">120+ retail partners</b>
-            <span className="block text-[11px] text-studio-ink-2">68% reorder rate across NA</span>
-          </span>
+          </h1>
+          <p data-rise className="mt-7 max-w-[44ch] text-[18px] leading-relaxed text-ink-2">
+            Each ARTICA case holds a full size run, so one order stocks a whole shelf. Winter boots for men, women and kids, from {MOQ_CASES} cases per style, delivered
+            DDP to the US and Canada.
+          </p>
+          <div data-rise className="mt-8 flex flex-wrap gap-3">
+            <OpenInquiryButton className="btn btn-dark">
+              Get wholesale pricing <Icon name="arrow" className="size-4" />
+            </OpenInquiryButton>
+            <a href="#samples" className="btn btn-line">
+              <Icon name="sample" className="size-4" /> Order samples
+            </a>
+          </div>
+          <p data-rise className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px] text-ink-2">
+            <span className="flex items-center gap-1.5">
+              <Icon name="box" className="size-4 text-glacier" /> Factory direct
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Icon name="shield" className="size-4 text-glacier" /> Trade buyers only
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Icon name="clock" className="size-4 text-glacier" /> Tier pricing within 24 hours
+            </span>
+          </p>
         </div>
-      </aside>
 
-      <div className="absolute bottom-2.5 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-1">
-        <button
-          type="button"
-          onClick={() => setStopped((v) => !v)}
-          aria-label={autoplay ? "Pause slideshow" : "Play slideshow"}
-          className="hit-44 relative grid size-7 place-items-center rounded-full text-ink/70 transition-colors hover:bg-white/60 hover:text-ink"
-        >
-          <Icon name={autoplay ? "pause" : "play"} className="size-3.5" />
-        </button>
-        <div role="group" aria-label="Choose slide" className="flex">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              aria-current={i === cur}
-              aria-label={`Show slide ${i + 1} of ${SLIDES.length}: ${s.label}`}
-              onClick={() => setCur(i)}
-              className="group grid h-7 min-w-6 place-items-center px-2"
-            >
-              <span
-                className={clsx(
-                  "relative block h-1 overflow-hidden rounded-full bg-ink/20 transition-[width,background-color] duration-400 ease-soft",
-                  i === cur ? "w-7" : "w-2 group-hover:bg-ink/40",
-                )}
-              >
-                {i === cur && (
-                  // Fills over one autoplay interval; restarts on every slide change.
-                  <span
-                    key={cur}
-                    className="absolute inset-0 origin-left rounded-full bg-ink/70"
-                    style={
-                      autoplay
-                        ? { animation: `dot-fill ${AUTOPLAY_MS}ms linear both`, animationPlayState: playing ? "running" : "paused" }
-                        : undefined
-                    }
-                  />
-                )}
-              </span>
-            </button>
-          ))}
+        {/* the open case */}
+        <div className="relative px-[9%] py-[11%] sm:px-[10%]">
+          <div data-case className="relative @container">
+            <div className="relative -rotate-[2.5deg]">
+              <p className="sr-only">
+                One case of ARTICA {p.name}: {PACK} pairs in sizes {sizes.join(", ")}.
+              </p>
+
+              {/* flaps, folded out around the opening */}
+              <span aria-hidden="true" data-flap="y" className="absolute right-0 bottom-full left-0 h-[17%] origin-bottom bg-[linear-gradient(0deg,#cfb28b,#dcc4a1)] [clip-path:polygon(6%_0,94%_0,100%_100%,0_100%)]" />
+              <span aria-hidden="true" data-flap="y" className="absolute top-full right-0 left-0 h-[17%] origin-top bg-[linear-gradient(180deg,#c4a57d,#d8bf9a)] [clip-path:polygon(0_0,100%_0,94%_100%,6%_100%)]" />
+              <span aria-hidden="true" data-flap="x" className="absolute top-0 right-full bottom-0 w-[12%] origin-right bg-[linear-gradient(270deg,#c8aa82,#d9c19c)] [clip-path:polygon(0_8%,100%_0,100%_100%,0_92%)]" />
+              <span aria-hidden="true" data-flap="x" className="absolute top-0 bottom-0 left-full w-[12%] origin-left bg-[linear-gradient(90deg,#c8aa82,#d9c19c)] [clip-path:polygon(0_0,100%_8%,100%_92%,0_100%)]" />
+
+              {/* carton walls + floor */}
+              <div className="relative rounded-[6px] bg-[#b8966c] p-[2.6cqw] shadow-[0_40px_60px_-30px_rgb(18_20_22/.45)]">
+                <div className="grid grid-cols-4 gap-[1.4cqw] rounded-[3px] bg-[#9c7b54] p-[1.6cqw] shadow-[inset_0_6px_14px_rgb(60_40_20/.45)]">
+                  {sizes.map((s, i) =>
+                    i === open ? (
+                      <div key={`open-${line}`} data-tile className="relative aspect-[1.25/1]">
+                        {/* the open box: tissue and the boot lying on its side */}
+                        <QuickViewButton
+                          id={p.id}
+                          aria-label={`View details: ARTICA ${p.name}`}
+                          className="absolute inset-0 cursor-zoom-in overflow-hidden rounded-[4px] bg-[radial-gradient(ellipse_at_40%_40%,#ffffff_0%,#e6ecee_70%)] shadow-[inset_0_0_0_0.6cqw_#ffffff,inset_0_4px_10px_rgb(18_20_22/.18)]"
+                        >
+                          <span data-boot className="absolute inset-[5%_3%]">
+                            <Image src={p.outer.src} alt={p.desc} fill loading="eager" fetchPriority="high" sizes="200px" className="object-contain drop-shadow-boot" />
+                          </span>
+                        </QuickViewButton>
+                        {/* the lid, set aside on the next box (GSAP owns its transform; it rests open by default) */}
+                        <span
+                          aria-hidden="true"
+                          data-lid-open
+                          className="pointer-events-none absolute inset-0 z-[3] rounded-[4px] bg-white shadow-[0_18px_28px_-10px_rgb(18_20_22/.45),inset_0_0_0_0.6cqw_#f1f3f4]"
+                          style={{ transform: "translate(40%, -46%) rotate(9deg)" }}
+                        >
+                          <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">ARTICA</span>
+                          <span className="absolute bottom-[12%] left-[10%] text-[3.4cqw] leading-none font-semibold tabular-nums">
+                            <span className="mr-[0.6cqw] text-[1.5cqw] font-medium text-muted">US</span>
+                            {s}
+                          </span>
+                        </span>
+                      </div>
+                    ) : (
+                      <div key={i} data-tile aria-hidden="true" className="group/box relative aspect-[1.25/1] [perspective:400px]">
+                        <span data-stamp className="absolute inset-0">
+                          <span className="absolute inset-0 rounded-[4px] bg-white shadow-[0_2px_0_rgb(18_20_22/.06),0_8px_14px_-8px_rgb(18_20_22/.35),inset_0_0_0_0.6cqw_#f1f3f4] transition-transform duration-300 ease-soft group-hover/box:-translate-y-[0.8cqw] group-hover/box:-rotate-2">
+                            <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">ARTICA</span>
+                            <span className="absolute top-[12%] right-[10%] text-[1.3cqw] text-muted tabular-nums">{String(i + 1).padStart(2, "0")}/12</span>
+                            <span className="absolute bottom-[12%] left-[10%] text-[4.2cqw] leading-none font-semibold tracking-[-0.03em] tabular-nums">
+                              <span className="mr-[0.6cqw] text-[1.5cqw] font-medium tracking-normal text-muted">US</span>
+                              {s}
+                            </span>
+                            <span className="absolute right-[10%] bottom-[14%] flex h-[2.6cqw] items-stretch gap-[0.25cqw]">
+                              {[1, 2, 1, 3, 1, 1, 2, 1].map((w, k) => (
+                                <span key={k} className="bg-ink/80" style={{ width: `${w * 0.16}cqw` }} />
+                              ))}
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* annotations around the case */}
+          <span data-note className="absolute top-[4%] left-0 hidden items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold shadow-soft sm:flex">
+            <span className="size-1.5 rounded-full bg-glacier" /> Mixed sizes · {p.sizes}
+          </span>
+          <span data-note className="absolute top-0 right-[2%] hidden items-center gap-2 rounded-full bg-ink px-3 py-1.5 text-[13px] font-semibold text-white sm:flex">
+            1 case = {PACK} pairs
+          </span>
+          <span data-note className="absolute right-0 bottom-[3%] hidden items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold shadow-soft sm:flex">
+            <Icon name="box" className="size-4 text-glacier" /> Shelf-ready boxes
+          </span>
         </div>
+      </div>
+
+      {/* switcher + order slip */}
+      <div className="wrap flex flex-wrap items-center justify-between gap-4 px-(--shell-pad)">
+        <div data-rise className="flex flex-wrap items-center gap-3">
+          <span className="text-[14px] font-medium text-ink-2">Open a case:</span>
+          <div role="group" aria-label="Show a line" className="flex rounded-full bg-white p-1 shadow-soft">
+            {LINES.map((l, i) => (
+              <button
+                key={l.key}
+                type="button"
+                aria-pressed={i === cur}
+                onClick={() => setCur(i)}
+                className="h-10 rounded-full px-5 text-[14px] font-semibold text-ink-2 transition-colors hover:text-ink aria-pressed:bg-ink aria-pressed:text-white"
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div data-rise className="flex items-center gap-3 rounded-full bg-white py-1.5 pr-1.5 pl-5 shadow-soft">
+          <p className="text-[14px] leading-tight">
+            <b className="block font-semibold">
+              ARTICA {p.name} <span className="font-normal text-muted">· {LINE_LABEL[p.line]}</span>
+            </b>
+            <span className="text-muted tabular-nums">
+              Min. {MOQ_CASES} cases · {MOQ_PAIRS} pairs
+            </span>
+          </p>
+          <AddButton id={p.id} className="relative size-11 bg-ink! text-white!" />
+        </div>
+      </div>
+
+      {/* wholesale terms, like the head of a packing slip */}
+      <div className="wrap px-(--shell-pad) pt-8 pb-10">
+        <dl className="grid grid-cols-2 overflow-hidden rounded-card bg-white shadow-soft sm:grid-cols-3 lg:grid-cols-5">
+          {TERMS.map(([v, k], i) => (
+            <div key={k} className={clsx("px-5 py-4", i > 0 && "lg:border-l lg:border-line", i === TERMS.length - 1 && "max-sm:col-span-2")}>
+              <dd className="text-[22px] font-semibold tracking-[-0.02em] tabular-nums">{v}</dd>
+              <dt className="text-[13px] text-muted">{k}</dt>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

@@ -49,7 +49,7 @@ export function InquiryLines({ onNavigate }: { onNavigate?: () => void }) {
                 <Image src={p.outer.src} alt="" fill sizes="64px" className="object-contain p-1.5" />
               </span>
               <span className="min-w-0">
-                <Link href={`/products/${p.slug}`} onClick={onNavigate} className="block text-[12.5px] font-extrabold uppercase hover:underline">
+                <Link href={`/products/${p.slug}`} onClick={onNavigate} className="block text-[14px] font-semibold hover:underline">
                   ARTICA {p.name}
                 </Link>
                 <span className="block text-[11.5px] text-muted tabular-nums">
@@ -63,7 +63,7 @@ export function InquiryLines({ onNavigate }: { onNavigate?: () => void }) {
                 <button type="button" onClick={() => step(id, -1)} aria-label="Fewer cases" className="hit-44 relative grid size-7 place-items-center rounded-full hover:bg-chip">
                   <Icon name="minus" />
                 </button>
-                <output className="min-w-[30px] text-center text-[13px] font-extrabold tabular-nums">{cases}</output>
+                <output className="min-w-[30px] text-center text-[13px] font-semibold tabular-nums">{cases}</output>
                 <button type="button" onClick={() => step(id, 1)} aria-label="More cases" className="hit-44 relative grid size-7 place-items-center rounded-full hover:bg-chip">
                   <Icon name="plus" />
                 </button>

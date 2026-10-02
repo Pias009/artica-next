@@ -8,7 +8,7 @@ import { Icon } from "../Icon";
 import { Badge } from "../ui/Badge";
 import { CropImage } from "../ui/CropImage";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
-import { byId, CASE_PACK, cropsFor, LEAD, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
+import { byId, CASE_PACK, cropsFor, LEAD, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 import { useInCart, useInquiry, useUI } from "@/lib/store";
 
 /** The one product detail dialog every boot on the site opens. */
@@ -74,25 +74,22 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
   return (
     <div
       data-qv-panel
-      className="relative grid max-h-[inherit] grid-cols-1 overflow-y-auto overscroll-contain rounded-shell border border-line/60 bg-surface shadow-drawer max-md:rounded-b-none md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:overflow-hidden"
+      className="relative grid max-h-[inherit] grid-cols-1 overflow-y-auto overscroll-contain rounded-shell bg-white shadow-drawer max-md:rounded-b-none md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:overflow-hidden"
     >
       <button
         type="button"
         data-autofocus
         onClick={onClose}
         aria-label="Close details"
-        className="glass absolute top-4 right-4 z-[4] grid size-10 place-items-center rounded-full text-ink transition-all hover:bg-chip hover:scale-105 active:scale-95 shadow-sm"
+        className="absolute top-4 right-4 z-[4] grid size-11 place-items-center rounded-full bg-white text-ink shadow-soft transition-colors hover:bg-chip"
       >
         <Icon name="close" className="size-4" />
       </button>
 
       {/* gallery */}
-      <div className="bg-studio relative flex flex-col gap-3 p-4 md:p-6 border-b md:border-b-0 md:border-r border-line/60">
+      <div className="relative flex flex-col gap-3 bg-tile p-4 md:p-6">
         <div className="absolute top-5 left-5 z-[2] flex items-center gap-2">
           <Badge badge={p.badge} />
-          <span className="mono-label rounded-md bg-white/80 px-2 py-0.5 text-[9px] font-bold text-ink">
-            {p.id.toUpperCase()}
-          </span>
         </div>
         <div className="relative aspect-square w-full overflow-hidden rounded-ph md:aspect-auto md:min-h-[420px] md:flex-1">
           {crop ? (
@@ -105,7 +102,7 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
                 alt={view === "zip" ? `${p.name}, zip side view` : p.desc}
                 fill
                 sizes="(max-width: 864px) 90vw, 540px"
-                className="-rotate-3 object-contain drop-shadow-hero"
+                className="-rotate-3 object-contain drop-shadow-boot"
               />
             </span>
           )}
@@ -121,8 +118,8 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
                 aria-label={v.label}
                 aria-pressed={view === v.key}
                 className={clsx(
-                  "relative size-16 flex-none overflow-hidden rounded-xl border-2 bg-photo transition-all shadow-xs",
-                  view === v.key ? "border-accent scale-102" : "border-transparent hover:border-line",
+                  "relative size-16 flex-none overflow-hidden rounded-xl border-2 bg-white transition-colors",
+                  view === v.key ? "border-ink" : "border-transparent hover:border-ink/20",
                 )}
               >
                 {c ? (
@@ -139,15 +136,12 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
       {/* details */}
       <div className="relative flex flex-col gap-5 p-5 md:overflow-y-auto md:p-8">
         <div className="md:pr-12">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="mono-label text-[9.5px] text-accent font-bold">CORE ARCHIVE SPEC</span>
-            <span className="text-line">•</span>
-            <span className="mono-label text-[9.5px] text-muted">{p.line}</span>
-          </div>
-          <h2 id="qv-title" className="text-[clamp(26px,3vw,36px)] leading-none font-extrabold tracking-[-.02em] uppercase text-ink">
+          <h2 id="qv-title" className="text-[clamp(28px,3vw,38px)] leading-tight font-semibold tracking-[-0.03em]">
             ARTICA {p.name}
           </h2>
-          <p className="mt-1 text-sm font-medium text-ink-2">{p.type} · {p.sizes}</p>
+          <p className="mt-1 text-[16px] text-ink-2">
+            {p.type} · {LINE_LABEL[p.line]} · {p.sizes}
+          </p>
         </div>
 
         <dl className="grid grid-cols-3 gap-2.5">
@@ -156,26 +150,26 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
             [String(PACK), "Pairs / case"],
             [LEAD.bulk, "Lead time"],
           ].map(([v, k]) => (
-            <div key={k} className="flex flex-col-reverse justify-end rounded-ph border border-line/60 bg-tile px-3.5 py-3 shadow-xs">
-              <dt className="mt-0.5 text-[11px] font-semibold text-muted">{k}</dt>
-              <dd className="text-xl font-extrabold tracking-[-.01em] tabular-nums text-ink">{v}</dd>
+            <div key={k} className="flex flex-col-reverse justify-end rounded-ph bg-tile px-4 py-3.5">
+              <dt className="mt-0.5 text-[13px] text-muted">{k}</dt>
+              <dd className="text-[22px] font-semibold tracking-[-0.02em] tabular-nums">{v}</dd>
             </div>
           ))}
         </dl>
 
         <section aria-labelledby="qv-mat">
-          <h3 id="qv-mat" className="type-label mb-2.5 text-muted">
+          <h3 id="qv-mat" className="mb-3 text-[15px] font-semibold">
             Materials
           </h3>
           <ul className="grid gap-x-4 gap-y-2.5 sm:grid-cols-2">
             {p.materials.map((m) => (
               <li key={m.label} className="flex items-center gap-2.5">
-                <span className="grid size-9 flex-none place-items-center rounded-full bg-tile text-ink-2">
+                <span className="grid size-9 flex-none place-items-center rounded-full bg-frost text-glacier">
                   <Icon name={m.icon} className="size-4" />
                 </span>
                 <span className="min-w-0 leading-tight">
-                  <span className="block text-[11.5px] text-muted">{m.label}</span>
-                  <span className="block text-[13px] font-semibold">{m.value}</span>
+                  <span className="block text-[12.5px] text-muted">{m.label}</span>
+                  <span className="block text-[14px] font-semibold">{m.value}</span>
                 </span>
               </li>
             ))}
@@ -200,7 +194,7 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
             Request sample
           </button>
         </div>
-        <Link href={`/products/${p.slug}`} onClick={onClose} className="-mt-2 self-start py-2 text-[13px] font-semibold text-ink-2 underline-offset-4 hover:text-ink hover:underline">
+        <Link href={`/products/${p.slug}`} onClick={onClose} className="-mt-2 self-start py-2 text-[14px] font-semibold text-ink underline decoration-ink/25 underline-offset-[6px] hover:decoration-ink">
           Full product page →
         </Link>
       </div>
@@ -208,7 +202,7 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
   );
 }
 
-/** Pairs per size inside one case: a single-series bar chart, olive on tile. */
+/** Pairs per size inside one case: a single-series bar chart, glacier on snow. */
 function CasePackChart({ p }: { p: Product }) {
   const pack = CASE_PACK[p.line];
   const max = Math.max(...pack.map(([, n]) => n));
@@ -230,7 +224,7 @@ function CasePackChart({ p }: { p: Product }) {
             >
               {n}
             </span>
-            <span data-bar className="block w-full max-w-7 rounded-t-[4px] bg-accent" style={{ height: `${(n / max) * 100}%` }} />
+            <span data-bar className="block w-full max-w-7 rounded-t-[4px] bg-glacier" style={{ height: `${(n / max) * 100}%` }} />
           </div>
         ))}
       </div>

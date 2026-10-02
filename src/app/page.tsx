@@ -1,42 +1,35 @@
-import { ColdBanner } from "@/components/home/ColdBanner";
-import { Explorer } from "@/components/home/Explorer";
-import { FullLineStrip } from "@/components/home/FullLineStrip";
+import { BestSellers } from "@/components/home/BestSellers";
+import { BuyerTypes } from "@/components/home/BuyerTypes";
+import { ColdTest } from "@/components/home/ColdTest";
 import { Hero } from "@/components/home/Hero";
+import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
-import { LineTiles } from "@/components/home/LineTiles";
-import { MaterialsGallery } from "@/components/home/MaterialsGallery";
-import { NewSeason } from "@/components/home/NewSeason";
-import { PartnerProgram } from "@/components/home/PartnerProgram";
-import { ProductFinder } from "@/components/home/ProductFinder";
-import { ServiceStrip } from "@/components/home/ServiceStrip";
+import { OrderJourney } from "@/components/home/OrderJourney";
+import { OrderSheet } from "@/components/home/OrderSheet";
+import { PrivateLabel } from "@/components/home/PrivateLabel";
+import { SampleRequest } from "@/components/home/SampleRequest";
 import { ShopByLine } from "@/components/home/ShopByLine";
-import { StoreWall } from "@/components/home/StoreWall";
-import { Spotlight } from "@/components/home/Spotlight";
-import { TechGrid } from "@/components/home/TechGrid";
-import { Ticker } from "@/components/home/Ticker";
-import { Timeline } from "@/components/home/Timeline";
+import { UpClose } from "@/components/home/UpClose";
 
-/** Section order follows the ARTICA homepage brief. */
+/**
+ * A wholesale buyer's path: see the range, plan quantities, feel the product,
+ * see how it ships, sample it, build the order sheet, then the terms and the close.
+ */
 export default function Home() {
   return (
     <>
       <Hero />
-      <Ticker />
-      <ProductFinder />
-      <Spotlight />
-      <Explorer />
-      <ColdBanner />
       <ShopByLine />
-      <LineTiles />
-      <NewSeason />
-      <MaterialsGallery />
-      <FullLineStrip />
-      <StoreWall />
-      <TechGrid />
-      <Timeline />
-      <PartnerProgram />
+      <BestSellers />
+      <BuyerTypes />
+      <ColdTest />
+      <HowItShips />
+      <UpClose />
+      <SampleRequest />
+      <OrderSheet />
+      <OrderJourney />
+      <PrivateLabel />
       <LineSheetCta />
-      <ServiceStrip />
     </>
   );
 }

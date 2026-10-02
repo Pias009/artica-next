@@ -52,7 +52,7 @@ export function InquiryDrawer() {
         )}
       >
         <div className="flex items-center justify-between px-6 pt-[22px] pb-3.5">
-          <h2 id="d-title" className="text-lg font-extrabold">
+          <h2 id="d-title" className="text-[20px] font-semibold tracking-[-0.02em]">
             Inquiry list
             <small className="mt-0.5 block text-xs font-medium text-muted">
               {count ? `Minimum ${MOQ_CASES} cases (${MOQ_PAIRS} pairs) per style` : "Add styles, set cases, send once"}

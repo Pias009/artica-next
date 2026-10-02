@@ -1,62 +1,78 @@
 @import "tailwindcss";
 
-/* Design tokens ported from the original ARTICA page.
-   Studio colors stay light on purpose: black leather boots need a light backdrop. */
+/*
+ * ARTICA — "Fresh snow" system.
+ * Clean white canvas, frost-blue air, ink-black actions, product on soft snow-grey.
+ * Calm sentence-case type, almost no borders, motion saved for a few authored moments.
+ * Light theme only (black boots need a light backdrop).
+ */
 @theme {
   --breakpoint-sm: 33rem;
   --breakpoint-md: 54rem;
   --breakpoint-lg: 74rem;
   --breakpoint-xl: 86rem;
 
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 
-  --color-bg: #fbfbf8;
-  --color-surface: #fbfbf8;
-  --color-tile: #f2f1ec;
-  --color-line: rgb(29 30 25 / 0.09);
-  --color-ink: #1d1e19;
-  --color-ink-2: #55564e;
-  --color-muted: #696a61; /* darkened from #7d7e75 to pass WCAG AA (4.5:1) on surface, tile, chip and photo */
-  --color-accent: #474c38;
-  --color-accent-hover: #393d2c;
-  --color-on-accent: #f6f6f1;
-  --color-chip: #f4f3ee;
-  --color-chip-hover: #eae9e2;
-  --color-studio-a: #f5f4f0;
-  --color-studio-b: #dad8ce;
-  --color-studio-ink-2: #4f5048;
-  --color-photo: #edebe5;
-  --color-glass: rgb(255 255 255 / 0.64);
-  --color-glass-line: rgb(255 255 255 / 0.8);
-  --color-badge-new: #e4e6d8;
-  --color-badge-hot: #f2e4d7;
-  --color-badge-hot-ink: #86472a;
-  --color-kraft: #c9a983;
-  --color-kraft-d: #a0805a;
-  --color-label: #fafaf6;
-  --color-danger: #a64b34; /* ≥5:1 on tile and surface */
+  /* canvas + surfaces */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-tile: #f5f5f2; /* snow: product + card ground */
+  --color-photo: #f1f1ee;
+  --color-line: rgb(18 20 22 / 0.1);
 
-  /* scene tones for product panels */
-  --color-sage: #d5d8c6;
-  --color-sand: #e1d8c6;
-  --color-blush: #eedad5;
-  --color-stone: #dedcd5;
+  /* ink */
+  --color-ink: #121416;
+  --color-ink-2: #4b5157;
+  --color-muted: #5f656b; /* ≥4.5:1 on white, snow, photo, frost and ice */
 
-  --radius-shell: 28px;
-  --radius-card: 22px;
-  --radius-ph: 16px;
+  /* actions: ink-black, like a fresh catalogue */
+  --color-accent: #121416;
+  --color-accent-hover: #2c3136;
+  --color-on-accent: #ffffff;
+  --color-chip: #f2f3f3;
+  --color-chip-hover: #e8eaea;
 
-  --shadow-soft: 0 2px 4px rgb(29 30 25 / 0.02), 0 12px 28px -4px rgb(29 30 25 / 0.08);
-  --shadow-float: 0 20px 40px -10px rgb(29 30 25 / 0.12), 0 1px 3px rgb(29 30 25 / 0.04);
-  --shadow-drawer: -24px 0 70px rgb(0 0 0 / 0.22);
-  --shadow-fab: 0 16px 36px -6px rgb(0 0 0 / 0.25);
+  /* winter air */
+  --color-frost: #e8eff2;
+  --color-ice: #d5e3ea;
+  --color-sky: #dce7ec;
+  --color-glacier: #2d5d6f; /* the one cool accent: links, highlights, cold readouts */
 
-  --drop-shadow-boot: 0 14px 18px rgb(29 30 25 / 0.18), 0 4px 6px rgb(29 30 25 / 0.06);
-  --drop-shadow-hero: 0 34px 38px rgb(29 30 25 / 0.24), 0 12px 16px rgb(29 30 25 / 0.1);
-  --drop-shadow-tile: 0 22px 24px rgb(29 30 25 / 0.2), 0 6px 10px rgb(29 30 25 / 0.08);
+  /* legacy aliases, remapped to the new world */
+  --color-studio-a: #f7f9f9;
+  --color-studio-b: #e8eff2;
+  --color-studio-ink-2: #4b5157;
+  --color-glass: rgb(255 255 255 / 0.86);
+  --color-glass-line: rgb(18 20 22 / 0.08);
+  --color-badge-new: #e2eef0;
+  --color-badge-hot: #f3ece4;
+  --color-badge-hot-ink: #7a4a24;
+  --color-kraft: #cdb08b;
+  --color-kraft-d: #a8875f;
+  --color-label: #ffffff;
+  --color-danger: #a64b34;
+
+  /* soft scene tones */
+  --color-sage: #e4ebe6;
+  --color-sand: #f1ece4;
+  --color-blush: #f4e8e5;
+  --color-stone: #eeeeec;
+
+  --radius-shell: 20px;
+  --radius-card: 14px;
+  --radius-ph: 12px;
+
+  --shadow-soft: 0 1px 2px rgb(18 20 22 / 0.04), 0 8px 24px -8px rgb(18 20 22 / 0.08);
+  --shadow-float: 0 18px 40px -16px rgb(18 20 22 / 0.18);
+  --shadow-drawer: -24px 0 64px rgb(18 20 22 / 0.16);
+  --shadow-fab: 0 14px 32px -8px rgb(18 20 22 / 0.3);
+
+  --drop-shadow-boot: 0 14px 16px rgb(18 20 22 / 0.16);
+  --drop-shadow-hero: 0 34px 30px rgb(18 20 22 / 0.2), 0 10px 12px rgb(18 20 22 / 0.08);
+  --drop-shadow-tile: 0 20px 20px rgb(18 20 22 / 0.18);
 
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --animate-marquee: marquee 40s linear infinite;
   --animate-spin-slow: spin-slow 36s linear infinite;
@@ -70,13 +86,12 @@
   }
 }
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
-    transform: scale(1);
   }
   50% {
     opacity: 1;
-    transform: scale(1.08);
   }
 }
 @keyframes hotspot {
@@ -103,7 +118,7 @@
 }
 @keyframes reveal-up {
   from {
-    transform: translateY(32px);
+    transform: translateY(28px);
   }
   to {
     transform: none;
@@ -117,22 +132,37 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    scrollbar-color: #c9d0d4 transparent;
   }
   ::selection {
-    background-color: rgb(71 76 56 / 0.18);
-    color: #1d1e19;
+    background-color: var(--color-ice);
+    color: var(--color-ink);
   }
   body {
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 16px;
+    line-height: 1.55;
+    font-feature-settings: "ss01", "cv11";
+    caret-color: var(--color-glacier);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
   button {
     cursor: pointer;
   }
+  a {
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+  }
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-ink);
     outline-offset: 3px;
-    border-radius: 10px;
+    border-radius: 8px;
   }
   input:user-invalid,
   textarea:user-invalid,
@@ -143,48 +173,44 @@
 
 @layer components {
   .btn {
-    @apply inline-flex h-11 items-center justify-center gap-2.5 rounded-full px-5 text-sm font-semibold tracking-[-0.01em] whitespace-nowrap transition-[background-color,color,transform,box-shadow] duration-300 ease-soft active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex h-12 items-center justify-center gap-2.5 rounded-full px-6 text-[15px] font-semibold whitespace-nowrap transition-[background-color,color,box-shadow,scale] duration-300 ease-soft active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-dark {
-    @apply bg-accent text-on-accent shadow-[0_2px_8px_rgb(71_76_56/0.25)] hover:bg-accent-hover hover:shadow-[0_4px_14px_rgb(71_76_56/0.32)];
+    @apply bg-ink text-white hover:bg-accent-hover;
   }
   .btn-ghost {
     @apply bg-chip text-ink hover:bg-chip-hover;
   }
   .btn-line {
-    @apply border border-line text-ink hover:bg-chip hover:border-ink/20;
+    @apply border border-ink/15 bg-white text-ink hover:border-ink/40;
   }
+  /* Kept for existing pages: now a calm white plate, no frosted-glass effect. */
   .glass {
     border: 1px solid var(--color-glass-line);
     background: var(--color-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.75), 0 8px 24px -6px rgba(29, 30, 25, 0.05);
   }
   .glass-card {
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    background: rgba(251, 251, 248, 0.78);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 16px 36px -10px rgba(29, 30, 25, 0.07);
+    border: 1px solid var(--color-glass-line);
+    background: rgb(255 255 255 / 0.92);
   }
   .h-sec {
-    @apply m-0 text-[15px] font-extrabold tracking-[.04em] uppercase;
+    @apply m-0 text-[17px] font-semibold tracking-[-0.01em];
   }
   .field {
-    @apply w-full min-w-0 rounded-xl border border-line bg-surface px-3.5 py-3 text-base outline-none sm:text-sm transition-colors placeholder:text-muted focus:border-accent aria-invalid:border-danger;
+    @apply w-full min-w-0 rounded-xl border border-ink/12 bg-white px-4 py-3 text-base outline-none transition-colors placeholder:text-muted focus:border-ink sm:text-[15px] aria-invalid:border-danger;
   }
 }
 
 @utility bg-studio {
-  background:
-    radial-gradient(120% 90% at 70% 10%, var(--color-studio-a) 0%, transparent 60%),
-    radial-gradient(80% 60% at 20% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 60%),
-    linear-gradient(160deg, var(--color-studio-a) 0%, var(--color-studio-b) 100%);
+  background: linear-gradient(170deg, var(--color-studio-a) 0%, var(--color-studio-b) 100%);
 }
 @utility bg-studio-side {
-  background: linear-gradient(90deg, var(--color-studio-a) 0%, var(--color-studio-a) 30%, var(--color-studio-b) 100%);
+  background: linear-gradient(90deg, var(--color-tile) 0%, var(--color-frost) 100%);
 }
+@utility bg-sky {
+  background: linear-gradient(180deg, #d9e5eb 0%, #e9f0f3 52%, #ffffff 100%);
+}
+
 /* Extends a small control's tap area to 44×44px without changing how it looks.
    The element must be positioned (relative/absolute). */
 @utility hit-44 {
@@ -198,64 +224,72 @@
     translate: -50% -50%;
   }
 }
-/* Type scale from the brief */
+
+/* Small label: the brand sans, tracked caps. (Formerly monospace.) */
 @utility mono-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-@utility card-lift {
-  transition: transform 0.4s var(--ease-soft), box-shadow 0.4s var(--ease-soft);
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-float);
-  }
 }
 @utility type-label {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+}
+/* Product cards don't jump; the photo does the work. */
+@utility card-lift {
+  transition: box-shadow 0.4s var(--ease-soft);
+}
+
+/* Type scale: calm, sentence case. */
+@utility type-display {
+  font-size: clamp(44px, 6.2vw, 92px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
 }
 @utility type-section {
-  font-size: clamp(28px, 3.6vw, 48px);
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
 }
 @utility type-giant {
-  font-size: clamp(60px, 7.4vw, 118px);
-  font-weight: 800;
-  line-height: 0.86;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
+  font-size: clamp(56px, 7vw, 108px);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
 }
 @utility type-banner {
-  font-size: clamp(96px, 21vw, 300px);
-  font-weight: 800;
-  line-height: 0.8;
+  font-size: clamp(88px, 17vw, 240px);
+  font-weight: 600;
+  line-height: 0.85;
   letter-spacing: -0.05em;
 }
 @utility text-outline {
   color: transparent;
-  -webkit-text-stroke: 1.5px rgb(29 30 25 / 0.22);
+  -webkit-text-stroke: 1.25px rgb(18 20 22 / 0.18);
 }
 
-/* Full-width bands that break out to the shell edges. */
+/* Full-width bands that break out to the page edges. */
 @utility bleed {
   margin-inline: calc(var(--shell-pad) * -1);
 }
+@utility wrap {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
 @utility mt-sec {
-  margin-top: clamp(28px, 4vw, 44px);
+  margin-top: clamp(72px, 9vw, 136px);
 }
 @utility bg-banner {
-  background: linear-gradient(120deg, #e4ddce, #cbc2af);
+  background: linear-gradient(180deg, var(--color-frost), var(--color-ice));
 }
 @utility bg-linesheet {
-  background: linear-gradient(135deg, #e1e3d5, #cbceba);
+  background: linear-gradient(160deg, var(--color-frost) 0%, var(--color-sky) 100%);
 }
 @utility bg-stripes {
   background: repeating-linear-gradient(135deg, var(--color-tile) 0 14px, var(--color-chip-hover) 14px 28px);
@@ -263,7 +297,6 @@
 @utility mask-fade-x {
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {
@@ -277,7 +310,7 @@
     [data-reveal] {
       animation: reveal-up linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 55%;
+      animation-range: entry 0% entry 50%;
     }
   }
 }
@@ -293,4 +326,12 @@
     animation-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* When a page ends on a full-width band, the footer meets it without a gap. */
+main:has(> .bleed:last-child) {
+  padding-bottom: 0;
+}
+main:has(> .bleed:last-child) + footer {
+  margin-top: 0;
 }

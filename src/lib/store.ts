@@ -13,10 +13,12 @@ type UIState = {
   buyerType: BuyerType;
   /** Work email handed over from the line-sheet form. */
   prefillEmail: { value: string; key: number } | null;
+  /** Note text handed over from the sample-request section. */
+  prefillNote: { value: string; key: number } | null;
   quickView: string | null;
   railFilter: Filter;
   toast: { msg: string; key: number } | null;
-  openDrawer: (type?: BuyerType, email?: string) => void;
+  openDrawer: (type?: BuyerType, email?: string, note?: string) => void;
   closeDrawer: () => void;
   openQuickView: (id: string) => void;
   closeQuickView: () => void;
@@ -29,15 +31,17 @@ export const useUI = create<UIState>()((set) => ({
   drawerOpen: false,
   buyerType: "Retailer",
   prefillEmail: null,
+  prefillNote: null,
   quickView: null,
   railFilter: "all",
   toast: null,
-  openDrawer: (type, email) =>
+  openDrawer: (type, email, note) =>
     set((s) => ({
       drawerOpen: true,
       quickView: null,
       buyerType: type ?? s.buyerType,
       prefillEmail: email ? { value: email, key: Date.now() } : s.prefillEmail,
+      prefillNote: note ? { value: note, key: Date.now() } : s.prefillNote,
     })),
   closeDrawer: () => set({ drawerOpen: false }),
   openQuickView: (id) => set({ quickView: id }),
