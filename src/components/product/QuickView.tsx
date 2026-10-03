@@ -137,7 +137,7 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
       <div className="relative flex flex-col gap-5 p-5 md:overflow-y-auto md:p-8">
         <div className="md:pr-12">
           <h2 id="qv-title" className="text-[clamp(28px,3vw,38px)] leading-tight font-semibold tracking-[-0.03em]">
-            ARTICA {p.name}
+            Chime Long {p.name}
           </h2>
           <p className="mt-1 text-[16px] text-ink-2">
             {p.type} · {LINE_LABEL[p.line]} · {p.sizes}

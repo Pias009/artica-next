@@ -18,7 +18,7 @@ export function PrivateLabel() {
             Your brand on our boots.
           </h2>
           <p className="mt-4 max-w-[40ch] text-[17px] text-ink-2">
-            Private label from {PRIVATE_LABEL_MIN} pairs per style, made on the same lines as the ARTICA range.
+            Private label from {PRIVATE_LABEL_MIN} pairs per style, made on the same lines as the Chime Long range.
           </p>
           <ul className="mt-8 grid gap-3">
             {POINTS.map((t) => (

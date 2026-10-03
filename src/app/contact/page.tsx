@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 
 export const metadata: Metadata = {
-  title: "Contact & Showrooms · ARTICA Wholesale",
+  title: "Contact & Showrooms · Chime Long Wholesale",
   description: "Schedule showroom appointments in New York and Montreal, contact our trade desk, or request wholesale line sheets and samples.",
 };
 

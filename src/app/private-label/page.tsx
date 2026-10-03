@@ -72,7 +72,7 @@ const TIERS = [
     name: "Branded Archive",
     moq: "300 pairs",
     leadTime: "30–35 days",
-    desc: "Select any existing ARTICA proven silhouette and apply your custom branded insole, heel emboss, and retail box.",
+    desc: "Select any existing Chime Long proven silhouette and apply your custom branded insole, heel emboss, and retail box.",
     features: [
       "Existing tested lasts and outsoles",
       "Custom branded insole & foil stamped heel",

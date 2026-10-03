@@ -52,7 +52,7 @@ export function SampleRequest() {
   const toggle = (id: string) => setPicked((v) => (v.includes(id) ? v.filter((x) => x !== id) : [...v, id]));
 
   const request = () => {
-    const names = picked.map((id) => `ARTICA ${byId[id].name}`).join(", ");
+    const names = picked.map((id) => `Chime Long ${byId[id].name}`).join(", ");
     openDrawer(undefined, undefined, `Sample request: ${names}. One pair each, mid-run size.`);
   };
 

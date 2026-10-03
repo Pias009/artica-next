@@ -76,6 +76,7 @@ export function OrderSheet() {
           <header className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-ink pb-5">
             <div>
               <Logo />
+              <p className="mt-2 text-[13px] font-semibold text-brand">Guangzhou Chime Long Trading Co., Ltd</p>
               <p className="mt-4 text-[clamp(26px,3vw,36px)] leading-none font-semibold tracking-[-0.03em]">Order sheet</p>
               <p className="mt-1 text-[14px] text-muted">Fall/Winter 26 · Trade buyers only</p>
             </div>
@@ -117,7 +118,7 @@ export function OrderSheet() {
                       <Image src={p.outer.src} alt="" fill sizes="56px" className="object-contain p-1" />
                     </span>
                     <span className="min-w-0 leading-tight">
-                      <b className="block truncate text-[15px] font-semibold">ARTICA {p.name}</b>
+                      <b className="block truncate text-[15px] font-semibold">Chime Long {p.name}</b>
                       <span className="block truncate text-[12.5px] text-muted">
                         {p.color.name} · {LINE_LABEL[p.line]} · {p.sizes}
                       </span>
@@ -125,7 +126,7 @@ export function OrderSheet() {
                   </div>
 
                   <table className="col-span-2 w-full max-w-[420px] border-collapse text-center text-[12.5px] tabular-nums md:col-span-1">
-                    <caption className="sr-only">Pairs per size for ARTICA {p.name}</caption>
+                    <caption className="sr-only">Pairs per size for Chime Long {p.name}</caption>
                     <thead>
                       <tr>
                         {pack.map(([size]) => (

@@ -5,8 +5,8 @@ import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 
 export const metadata: Metadata = {
-  title: "About ARTICA · Wholesale Footwear Atelier",
-  description: "Learn about ARTICA's technical footwear engineering, LWG certified leathers, sub-zero testing laboratory, and ethical manufacturing standards.",
+  title: "About Chime Long · Wholesale Footwear Atelier",
+  description: "Learn about Chime Long's technical footwear engineering, LWG certified leathers, sub-zero testing laboratory, and ethical manufacturing standards.",
 };
 
 const PILLARS = [
@@ -23,7 +23,7 @@ const PILLARS = [
   {
     title: "Waterproof Bootie Sealing",
     subtitle: "4-Hour Immersion Rating",
-    desc: "Unlike topical water-repellent sprays, every ARTICA style is constructed with a sealed hydrophilic inner membrane bootie with heat-welded tape over all needle puncture seams.",
+    desc: "Unlike topical water-repellent sprays, every Chime Long style is constructed with a sealed hydrophilic inner membrane bootie with heat-welded tape over all needle puncture seams.",
   },
   {
     title: "Thermal Foil Strobel",
@@ -43,10 +43,10 @@ export default function AboutPage() {
   return (
     <>
       <PageIntro
-        crumbs={[{ href: "/", label: "Home" }, { label: "About ARTICA" }]}
+        crumbs={[{ href: "/", label: "Home" }, { label: "About Chime Long" }]}
         eyebrow="Specialist Cold-Weather Footwear Engineering"
         title="Engineered for harsh retail realities."
-        text="ARTICA was founded to eliminate the high return rates and poor cold-weather durability of conventional fashion winter boots. We build boots that keep trade buyers and end consumers loyal season after season."
+        text="Chime Long was founded to eliminate the high return rates and poor cold-weather durability of conventional fashion winter boots. We build boots that keep trade buyers and end consumers loyal season after season."
       />
 
       {/* Story & Philosophy */}
@@ -61,7 +61,7 @@ export default function AboutPage() {
               For decades, retail footwear buyers faced an unacceptable trade-off: stock clunky, aesthetic-free rubber pac-boots that sat on shelves, or fashionable leather booties that soaked through during the first January blizzard and resulted in customer returns.
             </p>
             <p className="mt-3 text-sm leading-relaxed text-ink-2">
-              ARTICA bridges this divide. Our design atelier patterns modern, architectural silhouettes using authentic shearling, oiled full-grain leather, and matte hardware, while our engineering laboratory integrates vulcanized arctic traction and sealed waterproof booties.
+              Chime Long bridges this divide. Our design atelier patterns modern, architectural silhouettes using authentic shearling, oiled full-grain leather, and matte hardware, while our engineering laboratory integrates vulcanized arctic traction and sealed waterproof booties.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/catalog" className="btn btn-dark">
@@ -77,7 +77,7 @@ export default function AboutPage() {
             {[
               ["85,000 pr", "Monthly seasonal capacity across 4 lines"],
               ["100%", "Pre-shipment batch inspection before sealing"],
-              ["120+", "Retail partners stocking ARTICA across NA"],
+              ["120+", "Retail partners stocking Chime Long across NA"],
               ["0.4%", "Industry-lowest defect rate"],
             ].map(([val, label]) => (
               <div key={label} className="glass-card rounded-card p-4 shadow-xs">
@@ -155,7 +155,7 @@ export default function AboutPage() {
       {/* Bottom CTA */}
       <section className="mt-sec mb-4 flex flex-col items-center justify-between gap-4 rounded-shell border border-line/60 bg-accent p-8 text-center text-on-accent md:flex-row md:text-left">
         <div>
-          <span className="mono-label text-kraft text-[10px]">PARTNER WITH ARTICA</span>
+          <span className="mono-label text-kraft text-[10px]">PARTNER WITH CHIME LONG</span>
           <h2 className="text-2xl font-extrabold uppercase mt-1">Request seasonal line sheet & samples</h2>
           <p className="mt-1 text-xs text-white/80">Experience the leather hand-feel and sub-zero grip firsthand.</p>
         </div>

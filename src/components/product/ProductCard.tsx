@@ -41,7 +41,7 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
       <div className="mt-4 flex items-start justify-between gap-3">
         <h3 className="text-[16px] font-semibold tracking-[-0.01em]">
           <QuickViewButton id={p.id} className="text-left after:absolute after:inset-0 after:z-[1] after:rounded-card">
-            ARTICA {p.name}
+            Chime Long {p.name}
           </QuickViewButton>
         </h3>
         <span className="mt-1.5 size-3.5 flex-none rounded-full ring-1 ring-ink/15" style={{ background: p.color.hex }} title={p.color.name} />

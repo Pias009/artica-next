@@ -50,7 +50,7 @@ export function InquiryLines({ onNavigate }: { onNavigate?: () => void }) {
               </span>
               <span className="min-w-0">
                 <Link href={`/products/${p.slug}`} onClick={onNavigate} className="block text-[14px] font-semibold hover:underline">
-                  ARTICA {p.name}
+                  Chime Long {p.name}
                 </Link>
                 <span className="block text-[11.5px] text-muted tabular-nums">
                   {cases} cases · {cases * PACK} pairs · {p.sizes}

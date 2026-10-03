@@ -64,7 +64,7 @@ export function BestSellers() {
         <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
           {/* featured stage: the boot does the talking */}
           <div className={clsx("relative isolate flex min-h-[460px] flex-col justify-between overflow-hidden rounded-shell p-6 transition-colors duration-700 ease-soft lg:min-h-[520px] lg:p-8", TONE[p.scene])}>
-            <QuickViewButton id={p.id} aria-label={`View details: ARTICA ${p.name}`} className="group absolute inset-0 z-[1] cursor-zoom-in">
+            <QuickViewButton id={p.id} aria-label={`View details: Chime Long ${p.name}`} className="group absolute inset-0 z-[1] cursor-zoom-in">
               {list.map((x, i) => (
                 <span
                   key={x.id}
@@ -98,7 +98,7 @@ export function BestSellers() {
 
             <div key={p.id} aria-live={autoplay ? "off" : "polite"} className="pointer-events-none relative z-[2] flex animate-rise-in flex-wrap items-end justify-between gap-x-6 gap-y-4">
               <div className="min-w-0">
-                <h3 className="text-[clamp(26px,2.6vw,36px)] leading-tight font-semibold tracking-[-0.03em]">ARTICA {p.name}</h3>
+                <h3 className="text-[clamp(26px,2.6vw,36px)] leading-tight font-semibold tracking-[-0.03em]">Chime Long {p.name}</h3>
                 <p className="mt-1 text-[15px] text-ink-2">
                   {p.type} · {p.sizes}
                 </p>
@@ -110,7 +110,7 @@ export function BestSellers() {
                 </button>
                 <Link
                   href={`/products/${p.slug}`}
-                  aria-label={`Full specs: ARTICA ${p.name}`}
+                  aria-label={`Full specs: Chime Long ${p.name}`}
                   className="grid size-12 place-items-center rounded-full bg-white text-ink transition-transform duration-300 ease-soft hover:translate-x-0.5"
                 >
                   <Icon name="arrow" className="size-4" />
@@ -163,7 +163,7 @@ function RankRow({
           <Image src={p.outer.src} alt="" fill sizes="64px" className={clsx("object-contain p-1.5 transition-transform duration-500 ease-soft", on && "scale-110 -rotate-3")} />
         </span>
         <span className="min-w-0">
-          <span className="block truncate text-[16px] font-semibold tracking-[-0.01em]">ARTICA {p.name}</span>
+          <span className="block truncate text-[16px] font-semibold tracking-[-0.01em]">Chime Long {p.name}</span>
           <span className="block truncate text-[14px] text-muted">
             {p.type} · {LINE_LABEL[p.line]}
           </span>

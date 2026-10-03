@@ -206,11 +206,11 @@ const PROGRAMS: Program[] = [
     tab: "Private label brand",
     icon: "tag",
     buyer: "Private label brand",
-    headline: "Your brand on proven ARTICA boots.",
+    headline: "Your brand on proven Chime Long boots.",
     first: { value: `${fmt(PRIVATE_LABEL_MIN)} pairs`, note: "Minimum per style" },
     facts: [
       ["Branding", "Logo on the zip pull, insole and box"],
-      ["Built on", "Existing ARTICA lasts and outsoles"],
+      ["Built on", "Existing Chime Long lasts and outsoles"],
       ["Pricing", `Tier pricing from ${fmt(TIER)} pairs`],
     ],
     perks: ["Custom boxes and labels", "Samples before bulk production", "Dedicated account manager"],

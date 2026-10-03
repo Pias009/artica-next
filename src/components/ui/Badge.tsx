@@ -8,7 +8,7 @@ export function Badge({ badge, className }: { badge?: Product["badge"]; classNam
     <span
       className={clsx(
         "rounded-full bg-white px-2.5 py-1 text-[12px] font-semibold",
-        badgeTone(badge) === "new" ? "text-glacier" : "text-ink",
+        badgeTone(badge) === "new" ? "text-brand" : "text-brand-red",
         className,
       )}
     >

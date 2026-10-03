@@ -126,7 +126,7 @@ export function ColdTest() {
               className="relative mx-auto"
               style={{ aspectRatio: `${P.outer.w} / ${P.outer.h}`, width: `min(100%, ${Math.round((520 * P.outer.w) / P.outer.h)}px)` }}
             >
-              <QuickViewButton id={P.id} aria-label={`View details: ARTICA ${P.name}`} className="absolute inset-0 cursor-zoom-in">
+              <QuickViewButton id={P.id} aria-label={`View details: Chime Long ${P.name}`} className="absolute inset-0 cursor-zoom-in">
                 <span data-halo className="absolute inset-0">
                   <Image src={P.outer.src} alt={P.desc} fill sizes="(max-width: 864px) 92vw, 760px" className="object-contain drop-shadow-hero" />
                 </span>

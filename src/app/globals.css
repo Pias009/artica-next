@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * ARTICA — "Fresh snow" system.
+ * Chime Long: "Fresh snow" system.
  * Clean white canvas, frost-blue air, ink-black actions, product on soft snow-grey.
  * Calm sentence-case type, almost no borders, motion saved for a few authored moments.
  * Light theme only (black boots need a light backdrop).
@@ -37,7 +37,12 @@
   --color-frost: #e8eff2;
   --color-ice: #d5e3ea;
   --color-sky: #dce7ec;
-  --color-glacier: #2d5d6f; /* the one cool accent: links, highlights, cold readouts */
+  /* brand colours sampled from the Chime Long logo (both pass 4.5:1 on white) */
+  --color-brand: #984080; /* logo purple: headings, links, highlights */
+  --color-brand-deep: #7c3068; /* hover / pressed */
+  --color-brand-soft: #f4e8f1; /* tinted backgrounds */
+  --color-brand-red: #d82020; /* logo red: sparingly, for emphasis */
+  --color-glacier: #984080; /* legacy highlight token, now the brand purple */
 
   /* legacy aliases, remapped to the new world */
   --color-studio-a: #f7f9f9;
@@ -260,6 +265,7 @@
 }
 @utility type-section {
   font-size: clamp(30px, 3.4vw, 46px);
+  color: var(--color-brand);
   font-weight: 600;
   line-height: 1.06;
   letter-spacing: -0.03em;

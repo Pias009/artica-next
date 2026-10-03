@@ -14,7 +14,7 @@ const INCOTERMS = [
     code: "DDP",
     title: "Delivered Duty Paid",
     subtitle: "Recommended for US & Canada",
-    desc: "100% turnkey logistics. ARTICA covers ocean freight, customs tariffs, terminal fees, and inland trucking. The price quoted is the exact landed cost to your loading dock.",
+    desc: "100% turnkey logistics. Chime Long covers ocean freight, customs tariffs, terminal fees, and inland trucking. The price quoted is the exact landed cost to your loading dock.",
     bullets: [
       "No customs broker or import bond required by buyer",
       "US HTS & Canada CBSA duty tariffs included",

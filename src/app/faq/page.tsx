@@ -66,7 +66,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: `What does DDP (Delivered Duty Paid) mean for our store?`,
-        a: `DDP means zero customs headaches for you. ARTICA acts as the importer of record, handles all US Customs (CBP) or Canada (CBSA) clearances, pays all import duties and harbor fees, and delivers directly to your loading dock. The price on your invoice is your final landed cost.`,
+        a: `DDP means zero customs headaches for you. Chime Long acts as the importer of record, handles all US Customs (CBP) or Canada (CBSA) clearances, pays all import duties and harbor fees, and delivers directly to your loading dock. The price on your invoice is your final landed cost.`,
       },
       {
         q: `Can we use our own freight forwarder (FOB terms)?`,

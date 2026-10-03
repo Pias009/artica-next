@@ -33,7 +33,7 @@ const openIndex = (line: keyof typeof CASE_PACK) => {
 };
 
 /**
- * Wholesale hero: one ARTICA case, opened on a packing table. Twelve shoeboxes, each stamped
+ * Wholesale hero: one Chime Long case, opened on a packing table. Twelve shoeboxes, each stamped
  * with its size, show the mixed-size run a store actually receives; one box is open on the boot.
  */
 export function Hero() {
@@ -103,7 +103,7 @@ export function Hero() {
             ))}
           </h1>
           <p data-rise className="mt-7 max-w-[44ch] text-[18px] leading-relaxed text-ink-2">
-            Each ARTICA case holds a full size run, so one order stocks a whole shelf. Winter boots for men, women and kids, from {MOQ_CASES} cases per style, delivered
+            Each Chime Long case holds a full size run, so one order stocks a whole shelf. Winter boots for men, women and kids, from {MOQ_CASES} cases per style, delivered
             DDP to the US and Canada.
           </p>
           <div data-rise className="mt-8 flex flex-wrap gap-3">
@@ -132,7 +132,7 @@ export function Hero() {
           <div data-case className="relative @container">
             <div className="relative -rotate-[2.5deg]">
               <p className="sr-only">
-                One case of ARTICA {p.name}: {PACK} pairs in sizes {sizes.join(", ")}.
+                One case of Chime Long {p.name}: {PACK} pairs in sizes {sizes.join(", ")}.
               </p>
 
               {/* flaps, folded out around the opening */}
@@ -150,7 +150,7 @@ export function Hero() {
                         {/* the open box: tissue and the boot lying on its side */}
                         <QuickViewButton
                           id={p.id}
-                          aria-label={`View details: ARTICA ${p.name}`}
+                          aria-label={`View details: Chime Long ${p.name}`}
                           className="absolute inset-0 cursor-zoom-in overflow-hidden rounded-[4px] bg-[radial-gradient(ellipse_at_40%_40%,#ffffff_0%,#e6ecee_70%)] shadow-[inset_0_0_0_0.6cqw_#ffffff,inset_0_4px_10px_rgb(18_20_22/.18)]"
                         >
                           <span data-boot className="absolute inset-[5%_3%]">
@@ -164,7 +164,7 @@ export function Hero() {
                           className="pointer-events-none absolute inset-0 z-[3] rounded-[4px] bg-white shadow-[0_18px_28px_-10px_rgb(18_20_22/.45),inset_0_0_0_0.6cqw_#f1f3f4]"
                           style={{ transform: "translate(40%, -46%) rotate(9deg)" }}
                         >
-                          <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">ARTICA</span>
+                          <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">CHIME LONG</span>
                           <span className="absolute bottom-[12%] left-[10%] text-[3.4cqw] leading-none font-semibold tabular-nums">
                             <span className="mr-[0.6cqw] text-[1.5cqw] font-medium text-muted">US</span>
                             {s}
@@ -175,7 +175,7 @@ export function Hero() {
                       <div key={i} data-tile aria-hidden="true" className="group/box relative aspect-[1.25/1] [perspective:400px]">
                         <span data-stamp className="absolute inset-0">
                           <span className="absolute inset-0 rounded-[4px] bg-white shadow-[0_2px_0_rgb(18_20_22/.06),0_8px_14px_-8px_rgb(18_20_22/.35),inset_0_0_0_0.6cqw_#f1f3f4] transition-transform duration-300 ease-soft group-hover/box:-translate-y-[0.8cqw] group-hover/box:-rotate-2">
-                            <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">ARTICA</span>
+                            <span className="absolute top-[12%] left-[10%] text-[1.5cqw] font-bold tracking-[0.12em]">CHIME LONG</span>
                             <span className="absolute top-[12%] right-[10%] text-[1.3cqw] text-muted tabular-nums">{String(i + 1).padStart(2, "0")}/12</span>
                             <span className="absolute bottom-[12%] left-[10%] text-[4.2cqw] leading-none font-semibold tracking-[-0.03em] tabular-nums">
                               <span className="mr-[0.6cqw] text-[1.5cqw] font-medium tracking-normal text-muted">US</span>
@@ -230,7 +230,7 @@ export function Hero() {
         <div data-rise className="flex items-center gap-3 rounded-full bg-white py-1.5 pr-1.5 pl-5 shadow-soft">
           <p className="text-[14px] leading-tight">
             <b className="block font-semibold">
-              ARTICA {p.name} <span className="font-normal text-muted">· {LINE_LABEL[p.line]}</span>
+              Chime Long {p.name} <span className="font-normal text-muted">· {LINE_LABEL[p.line]}</span>
             </b>
             <span className="text-muted tabular-nums">
               Min. {MOQ_CASES} cases · {MOQ_PAIRS} pairs

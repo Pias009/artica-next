@@ -52,9 +52,9 @@ export function Footer() {
       <div className="wrap">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
           <div>
-            <Logo />
+            <Logo className="h-14 sm:h-16" />
             <p className="mt-5 max-w-[34ch] text-[15px] text-ink-2">
-              Winter boots for retailers, distributors and private-label brands across North America.
+              Guangzhou Chime Long Trading Co., Ltd. Winter boots for retailers, distributors and private-label brands across North America.
             </p>
             <div className="mt-6 flex gap-2">
               {SOCIAL.map(([icon, label]) => (
@@ -98,7 +98,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-[13px] text-muted">
-          <span>© 2026 ARTICA Wholesale. Trade buyers only.</span>
+          <span>© 2026 Guangzhou Chime Long Trading Co., Ltd. Trade buyers only.</span>
           <div className="flex gap-6">
             <Link href="#footer" className="hover:text-ink">
               Privacy policy

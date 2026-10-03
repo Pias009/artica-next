@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const p = getProduct((await params).slug);
   if (!p) return {};
   return {
-    title: `ARTICA ${p.name} · ${p.type}`,
+    title: `Chime Long ${p.name} · ${p.type}`,
     description: `${p.desc}. Wholesale from ${MOQ_PAIRS} pairs, ${PACK} pairs per case, ${p.sizes}.`,
     openGraph: { images: [p.outer.src] },
   };
@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: Props) {
         <span aria-hidden="true">/</span>
         <Link href={`/catalog?line=${p.line}`} className="capitalize hover:text-ink">{p.line}</Link>
         <span aria-hidden="true">/</span>
-        <span aria-current="page" className="font-medium text-ink">ARTICA {p.name}</span>
+        <span aria-current="page" className="font-medium text-ink">Chime Long {p.name}</span>
       </nav>
 
       <div className="grid gap-[clamp(20px,3vw,40px)] md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: Props) {
 
         <Reveal className="flex flex-col gap-5 md:py-4">
           <div data-reveal>
-            <h1 className="text-[clamp(36px,4.4vw,56px)] leading-[1.02] font-semibold tracking-[-0.04em]">ARTICA {p.name}</h1>
+            <h1 className="text-[clamp(36px,4.4vw,56px)] leading-[1.02] font-semibold tracking-[-0.04em]">Chime Long {p.name}</h1>
             <p className="mt-2 text-[18px] text-ink-2">
               {p.type} · <span className="capitalize">{p.line}</span>
             </p>

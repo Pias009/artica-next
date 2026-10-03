@@ -31,8 +31,8 @@ export function SectionHead({
 /** Text link with an arrow that nudges on hover. */
 export function ArrowLink({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={clsx("group/al inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-ink", className)}>
-      <span className="underline decoration-ink/25 underline-offset-[6px] transition-colors group-hover/al:decoration-ink">{children}</span>
+    <span className={clsx("group/al inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-brand", className)}>
+      <span className="underline decoration-brand/30 underline-offset-[6px] transition-colors group-hover/al:decoration-brand">{children}</span>
       <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-none stroke-current stroke-[1.8] transition-transform duration-300 group-hover/al:translate-x-1">
         <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
