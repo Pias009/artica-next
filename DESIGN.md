@@ -1,6 +1,6 @@
 ---
-name: ARTICA Wholesale
-description: Fresh-snow wholesale catalogue. White canvas, frost-blue air, ink-black actions, boots on snow-grey.
+name: Chime Long Wholesale
+description: Fresh-snow wholesale catalogue. White canvas, frost-blue air, ink-black headings and actions, one purple accent, boots on snow-grey.
 colors:
   canvas: "#ffffff"
   snow: "#f5f5f2"
@@ -14,7 +14,7 @@ colors:
   ink-hover: "#2c3136"
   chip: "#f2f3f3"
   chip-hover: "#e8eaea"
-  glacier: "#2d5d6f"
+  brand: "#984080"
   sand: "#f1ece4"
   blush: "#f4e8e5"
   sage: "#e4ebe6"
@@ -111,13 +111,13 @@ components:
     typography: "{typography.title}"
 ---
 
-# Design System: ARTICA Wholesale
+# Design System: Chime Long Wholesale
 
 ## Overview
 
 A wholesale catalogue as calm and fresh as a winter morning. The boots and the cold do the selling; the interface stays out of the way. Reference point: Quince's clean retail calm, applied to B2B terms (MOQ, case pack, size run, lead time) instead of prices.
 
-The page alternates quiet browsing (line cards, product grid) with a few authored motion moments: the opening case in the hero, a scroll-scrubbed cold test from 0 to −25°C, a pinned zoom into Nord's details, and a small boot walking the order timeline. Everything else is still.
+The page alternates quiet browsing (the range grid) with a few authored motion moments: the opening case in the hero, a scroll-scrubbed cold test from 0 to −25°C, buyer-type scenes, and the live order sheet. Everything else is still. Only one section pins the scroll.
 
 Light theme only. Black boots need a light backdrop.
 
@@ -129,7 +129,7 @@ Restrained strategy: neutrals carry the page, one cool accent, winter air as atm
 - **Ink** `#121416`: text and every primary action (pill buttons, active tabs, inquiry button, selected add-buttons).
 
 ### Secondary
-- **Glacier** `#2D5D6F`: the single accent. Cold readouts, step numbers, fact icons, "New" badge text, chart bars. Never a large fill.
+- **Brand** `#984080`, the purple from the Chime Long logo: the single accent. Links, the hero's middle line, cold readouts, step figures, fact icons, "New" badge text. Never a large fill, never section headings (those stay ink). The token `glacier` is a legacy alias for it.
 
 ### Neutral
 - **Canvas** `#FFFFFF` page; **Snow** `#F5F5F2` product and card ground; **Photo** `#F1F1EE` image wells.
@@ -139,7 +139,7 @@ Restrained strategy: neutrals carry the page, one cool accent, winter air as atm
 
 ### Named Rules
 - **Air, not ink, sets the mood.** Atmosphere comes from frost-to-white gradients behind the product, never from saturated fills.
-- **One accent.** Glacier is the only chromatic UI color; status red (`#A64B34`) is reserved for form errors.
+- **One accent.** Brand purple is the only chromatic UI color; logo red (`#D82020`) appears only in the logo and the "Top reorder" / "Trending" badges, and status red (`#A64B34`) is reserved for form errors.
 
 ## Typography
 
@@ -147,8 +147,8 @@ One family, Hanken Grotesk (400–800), sentence case throughout.
 
 ### Hierarchy
 - **Display** (hero): clamp(44px, 6.2vw, 92px), 600, line-height 0.98, tracking −0.04em, lines revealed from a mask on load.
-- **Section**: clamp(30px, 3.4vw, 46px), 600, tracking −0.03em, with an optional 17px supporting line.
-- **Readout**: the cold-test temperature, clamp(84px, 11vw, 168px), glacier, tabular numerals.
+- **Section**: clamp(30px, 3.4vw, 46px), 600, ink, tracking −0.03em, sentence case ending in a full stop, with an optional 17px supporting line.
+- **Readout**: the cold-test temperature, clamp(84px, 11vw, 168px), brand purple, tabular numerals.
 - **Title**: product names 16px/600; feature titles 19–24px/600.
 - **Body** 16px/1.55; **lead** 18px.
 - **Small** 14–15px for meta lines, controls and list items; **caption** 12.5–13px for units, table heads and footnotes.
@@ -162,7 +162,7 @@ One family, Hanken Grotesk (400–800), sentence case throughout.
 
 - Full-width page with a gutter of clamp(16px, 3.2vw, 48px); content capped at 1440px (`wrap`). Atmospheric bands break out to the page edges (`bleed`).
 - Section rhythm: clamp(72px, 9vw, 136px) between sections, more space above a heading than below.
-- Grids: 16px gaps (20px on wide). Product grid is 5 columns on desktop, 3 on tablet and a snap-scrolling rail on phones.
+- Grids: 16px gaps (20px on wide). Product grid is 5 columns on desktop, 3 on tablet and a snap-scrolling rail on phones. Card rows that would stack four or more deep on phones (close-ups, shipping scenes) also become snap rails.
 - Breakpoints: 528px, 864px, 1184px, 1376px.
 
 ## Elevation & Depth
@@ -185,14 +185,16 @@ Snow photo well (4:5), the boot centered with a drop shadow; hover crossfades to
 Ink announcement bar with the three wholesale terms; sticky white header (68px) with logo, text nav with an ink underline for the current page, search, and the ink "Inquiry list" pill with a live count. Phones get a full-height list menu.
 
 ### Signature moments
-- **Case hero**: "Twelve pairs. Every size. One case." beside an open ARTICA carton seen from above on a packing-table grid. On load the flaps unfold, twelve shoeboxes stamped with the line's real size run drop in, and one lid slides off onto its neighbour to show the boot in tissue. Men/Women/Kids re-stamps the boxes and swaps the open boot. Annotation pills, an order slip and a five-cell terms bar complete it.
-- **Cold test**: pinned, scroll-scrubbed; temperature falls 0 → −25°C, air turns to ice, frost gathers at the edges, callouts pinned to real spots on the photo appear in turn. Phones play it once.
-- **Look closer**: pinned stage zooms into four details of Nord (desktop); close-up crops on phones.
-- **Order journey**: a small boot walks the quote → samples → production → delivery line as you scroll.
-- **Who we supply**: vertical tabs for four buyer types (independent retailer, chain, distributor, private label); each shows an isometric order scene, a typical first order, terms and perks, and a CTA preset to that buyer type. Followed by "Four ways to order": sample → first order → reorder → volume program.
-- **How it ships**: four isometric scenes (shoebox → 12-pair case → pallet → truck) drawn with `components/ui/Iso.tsx`, each building as it scrolls in.
+- **Case hero**: "Twelve pairs. Every size. One case." beside an open Chime Long carton seen from above on a packing-table grid. On load the flaps unfold, twelve shoeboxes stamped with the line's real size run drop in, and the boot rises out of the open box in the middle row, large enough to read at a glance. Men/Women/Kids re-stamps the boxes and lifts the next boot. Annotation pills, an order slip and a five-cell terms bar complete it.
+- **Cold test**: the only pinned section, scroll-scrubbed; temperature falls 0 → −25°C, air turns to ice, frost gathers at the edges, callouts pinned to real spots on the photo appear in turn. Phones play it once. Below it, "Look closer": three static close-up crops of Nord (collar, hooks, welt) that open Quick View.
+- **Who we supply**: vertical tabs for four buyer types (independent retailer, chain, distributor, private label); each shows an isometric order scene, a typical first order, terms and perks, and a CTA preset to that buyer type.
+- **From order to your door**: four isometric scenes (shoebox → 12-pair case → pallet → truck) drawn with `components/ui/Iso.tsx`, each building as it scrolls in, then a frost band with the four-stop timeline (quote → samples → production → delivery, about 11 weeks).
 - **Samples first**: an isometric kraft box whose lid lifts as the boot rises out (clip-path keeps the boot "inside"); style chips prefill the inquiry note.
 - **Order sheet**: a paper purchase-order with letterhead, per-size table per style, cases, pairs, terms and signature line, filled from the live inquiry list (example rows when empty).
+
+## Homepage order
+
+Hero → The FW26 range → Built for real winters (cold test + Look closer) → Who we supply → Order samples first → Order sheet → From order to your door → Private label → Line sheet. Each wholesale term is stated in full in the top bar, the hero and the order sheet; other sections refer to it rather than repeating it.
 
 ## Do's and Don'ts
 

@@ -102,25 +102,38 @@ export function SampleRequest() {
             sub={`Check fit, leather and finish in your own hands. Samples reach you in about ${LEAD.samples.replace("d", "")} days.`}
             className="mb-8!"
           />
-          <p id="sample-pick" className="text-[15px] font-semibold">
-            Choose styles <span className="font-normal text-muted">· one pair each</span>
-          </p>
-          <div role="group" aria-labelledby="sample-pick" className="mt-3 flex flex-wrap gap-2">
-            {products.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                aria-pressed={picked.includes(p.id)}
-                onClick={() => toggle(p.id)}
-                className="flex h-12 items-center gap-2 rounded-full bg-white pr-4 pl-1.5 text-[14px] font-medium transition-colors aria-pressed:bg-ink aria-pressed:text-white"
-              >
-                <span className="relative size-9 rounded-full bg-tile">
-                  <Image src={p.outer.src} alt="" fill sizes="36px" className="object-contain p-1" />
-                </span>
-                {p.name}
-                {picked.includes(p.id) && <Icon name="check" className="size-4" />}
-              </button>
-            ))}
+          <div className="flex items-baseline justify-between gap-3">
+            <p id="sample-pick" className="text-[15px] font-semibold">
+              Choose styles <span className="font-normal text-muted">· one pair each</span>
+            </p>
+            <span aria-live="polite" className="text-[13px] font-medium text-muted tabular-nums">
+              {picked.length ? `${picked.length} selected` : `${products.length} styles`}
+            </span>
+          </div>
+          {/* every style in one scrolling box, so the long range doesn't push the rest of the page down */}
+          <div className="mt-3 w-full overflow-hidden rounded-card bg-white/55 ring-1 ring-ink/5">
+            <div
+              role="group"
+              aria-labelledby="sample-pick"
+              tabIndex={0}
+              className="no-scrollbar flex max-h-[300px] flex-wrap content-start gap-2 overflow-y-auto overscroll-contain p-3 pb-8 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)] lg:max-h-[340px]"
+            >
+              {products.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={picked.includes(p.id)}
+                  onClick={() => toggle(p.id)}
+                  className="flex h-12 items-center gap-2 rounded-full bg-white pr-4 pl-1.5 text-[14px] font-medium transition-colors aria-pressed:bg-ink aria-pressed:text-white"
+                >
+                  <span className="relative size-9 rounded-full bg-tile">
+                    <Image src={p.outer.src} alt="" fill sizes="36px" className="object-contain p-1" />
+                  </span>
+                  {p.name}
+                  {picked.includes(p.id) && <Icon name="check" className="size-4" />}
+                </button>
+              ))}
+            </div>
           </div>
           <ul className="mt-6 grid gap-2 text-[15px] text-ink-2">
             <li className="flex items-center gap-2.5">

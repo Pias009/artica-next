@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type PointerEvent } from "react";
 import { CartCount } from "./CartCount";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
@@ -31,18 +31,62 @@ const MOBILE = [
   { href: "/contact", label: "Contact" },
 ];
 
+/** Below this the bar always shows; past it, scrolling down hides it and scrolling up brings it back. */
+const REVEAL_ZONE = 140;
+/** Pixels of travel in one direction before the bar reacts, so trackpad jitter doesn't flicker it. */
+const SCROLL_SLACK = 8;
+
+type Pill = { left: number; width: number; on: boolean };
+
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [pill, setPill] = useState<Pill>({ left: 0, width: 0, on: false });
+  const progress = useRef<HTMLSpanElement>(null);
   const openDrawer = useUI((s) => s.openDrawer);
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    let anchor = window.scrollY;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = Math.max(0, window.scrollY);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress.current?.style.setProperty("scale", `${max > 0 ? Math.min(1, y / max) : 0} 1`);
+      setScrolled(y > 8);
+      if (y < REVEAL_ZONE) {
+        setHidden(false);
+        anchor = y;
+      } else if (Math.abs(y - anchor) > SCROLL_SLACK) {
+        setHidden(y > anchor);
+        anchor = y;
+      }
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
+
+  // Slide the hover pill under whichever link is pointed at or focused.
+  const pillTo = (e: PointerEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
+    const a = (e.target as HTMLElement).closest("a");
+    if (!a) return;
+    setPill({ left: a.offsetLeft, width: a.offsetWidth, on: true });
+  };
+  const pillOff = () => setPill((p) => ({ ...p, on: false }));
+
+  const floating = scrolled && !menuOpen;
+  const tucked = hidden && !menuOpen;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -69,13 +113,48 @@ export function Header() {
 
       <header
         className={clsx(
-          "sticky top-0 z-30 bg-white/95 backdrop-blur-md transition-shadow duration-300",
-          scrolled && "shadow-[0_1px_0_rgb(18_20_22/.08)]",
+          "sticky top-0 z-30 transition-[translate,padding,background-color] duration-500 ease-soft focus-within:translate-y-0!",
+          floating ? "px-(--shell-pad) pt-3" : "bg-white/95 backdrop-blur-md",
+          tucked && "-translate-y-[calc(100%+12px)]",
         )}
       >
-        <div className="wrap flex h-[68px] items-center gap-6 px-(--shell-pad)">
+        <div
+          className={clsx(
+            "wrap relative flex items-center gap-6 transition-[height,padding,border-radius,background-color,box-shadow,max-width] duration-500 ease-soft",
+            floating
+              ? "h-[60px] max-w-[1280px] rounded-full bg-white/80 pr-2 pl-5 shadow-float ring-1 ring-line backdrop-blur-xl backdrop-saturate-150"
+              : "h-[68px] px-(--shell-pad)",
+          )}
+        >
+          {/* reading progress, clipped to the pill */}
+          <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+            <span
+              ref={progress}
+              className={clsx(
+                "absolute inset-x-0 bottom-0 h-[2px] origin-left bg-brand transition-opacity duration-500",
+                floating ? "opacity-100" : "opacity-0",
+              )}
+              style={{ scale: "0 1" }}
+            />
+          </span>
+
           <Logo />
-          <nav aria-label="Main" className="hidden flex-1 items-center gap-7 text-[15px] font-medium md:flex">
+          <nav
+            aria-label="Main"
+            onPointerOver={pillTo}
+            onFocus={pillTo}
+            onPointerLeave={pillOff}
+            onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && pillOff()}
+            className="relative hidden flex-1 items-center gap-1 text-[15px] font-medium md:flex"
+          >
+            <span
+              aria-hidden
+              className={clsx(
+                "pointer-events-none absolute top-1/2 h-10 -translate-y-1/2 rounded-full bg-chip transition-[left,width,opacity] duration-300 ease-soft",
+                pill.on ? "opacity-100" : "opacity-0",
+              )}
+              style={{ left: pill.left, width: pill.width }}
+            />
             {NAV.map((n) => {
               const active = n.href === "/catalog" ? pathname === "/catalog" : pathname === n.href;
               return (
@@ -84,8 +163,8 @@ export function Header() {
                   href={n.href}
                   aria-current={active ? "page" : undefined}
                   className={clsx(
-                    "relative py-2 text-ink-2 transition-colors hover:text-ink",
-                    "after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-ink after:transition-transform after:duration-300 hover:after:scale-x-100 aria-[current=page]:text-ink aria-[current=page]:after:scale-x-100",
+                    "relative rounded-full px-3.5 py-2.5 text-ink-2 transition-colors hover:text-ink focus-visible:text-ink",
+                    "after:absolute after:bottom-1 after:left-1/2 after:size-1 after:-translate-x-1/2 after:scale-0 after:rounded-full after:bg-brand after:transition-transform after:duration-300 aria-[current=page]:text-ink aria-[current=page]:after:scale-100",
                     n.opt && "hidden lg:inline",
                   )}
                 >

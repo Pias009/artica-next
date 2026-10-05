@@ -3,6 +3,9 @@
  * Style names, sizes, specs, ratios and lead times are client placeholders (see README).
  */
 
+import { kidsPhotoStyles, womenPhotoStyles, type PhotoStyle } from "./catalog-photos";
+import shots from "./cloudinary-shots.json";
+
 export type ProductLine = "men" | "women" | "kids";
 export type Filter = ProductLine | "waterproof" | "insulated" | "all";
 export type Scene = "sage" | "sand" | "blush" | "stone";
@@ -61,6 +64,39 @@ export const CASE_PACK: Record<ProductLine, [size: string, pairs: number][]> = {
 
 export const img = (file: string) => `/images/${file}.webp`;
 const shot = (file: string, w: number, h: number): Shot => ({ src: img(file), w, h });
+
+const SIZES: Record<ProductLine, string> = { men: "US 7–13", women: "US 5–10", kids: "Youth 11–4" };
+const SCENES: Scene[] = ["sage", "sand", "blush", "stone"];
+const cloudShots: Record<string, Shot> = shots;
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+/** Turns a studio photo row (catalog-photos.ts) into a full style, cutout served from Cloudinary. */
+const fromPhoto = (line: ProductLine) => (s: PhotoStyle, i: number): Product => {
+  const tags = [line, ...(s.tags ?? [])];
+  return {
+    id: `${line[0]}${String(i + 1).padStart(2, "0")}`,
+    slug: slugify(s.name),
+    name: s.name,
+    type: s.type,
+    line,
+    sizes: SIZES[line],
+    sizeRun: CASE_PACK[line].map(([size]) => size),
+    spec: `${s.upper} · ${s.heel ?? s.sole}`,
+    tags,
+    outer: cloudShots[s.photo],
+    desc: s.desc,
+    materials: [
+      { icon: "boot", label: "Upper", value: s.upper },
+      ...(tags.includes("insulated") ? [{ icon: "snow", label: "Lining", value: "Warm lining" } as const] : []),
+      { icon: /zip/i.test(s.closure) ? "zip" : "tag", label: "Closure", value: s.closure },
+      { icon: "sole", label: "Outsole", value: s.sole },
+      ...(s.heel ? [{ icon: "heel", label: "Heel", value: s.heel } as const] : []),
+    ],
+    hotspots: [],
+    color: { name: s.color[0], hex: s.color[1] },
+    scene: SCENES[i % SCENES.length],
+  };
+};
 
 export const products: Product[] = [
   {
@@ -214,6 +250,8 @@ export const products: Product[] = [
     color: { name: "Pink", hex: "#EFC3C6" },
     scene: "blush",
   },
+  ...womenPhotoStyles.map(fromPhoto("women")),
+  ...kidsPhotoStyles.map(fromPhoto("kids")),
 ];
 
 export const byId: Record<string, Product> = Object.fromEntries(products.map((p) => [p.id, p]));
