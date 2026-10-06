@@ -11,7 +11,7 @@ import { Badge } from "../ui/Badge";
 import { QuickViewButton } from "../ui/QuickViewButton";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
 import { MotionToggle } from "../ui/MotionToggle";
-import { inLine, LINE_LABEL, products, type ProductLine, type Scene } from "@/lib/products";
+import { collapse, inLine, LINE_LABEL, products, stylesIn, type ProductLine, type Scene } from "@/lib/products";
 import { prefersReducedMotion } from "@/lib/gsap";
 import { useInCart, useInquiry } from "@/lib/store";
 import { useAutoCycle } from "@/lib/useAutoCycle";
@@ -28,7 +28,7 @@ const LINES: ProductLine[] = ["men", "women", "kids"];
  * List: a featured stage that walks through the ranked list.
  */
 export function BestSellers() {
-  const list = products;
+  const list = collapse(products);
   const ref = useRef<HTMLElement>(null);
   const [view, setView] = useState<View>("rows");
   const [stopped, setStopped] = useState(false);
@@ -215,7 +215,7 @@ function ViewSwitch({ view, onChange }: { view: View; onChange: (v: View) => voi
 
 /** One line's styles in a sliding row, closed by a "View all" tile. */
 function LineRow({ line }: { line: ProductLine }) {
-  const styles = inLine(line);
+  const styles = stylesIn(line);
   const label = LINE_LABEL[line];
   const track = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
@@ -244,7 +244,7 @@ function LineRow({ line }: { line: ProductLine }) {
         <h3 id={`row-${line}`} className="text-[clamp(24px,2.4vw,32px)] leading-none font-semibold tracking-[-0.03em]">
           {label}
           <span className="ml-2.5 text-[15px] font-normal tracking-normal text-muted">
-            {styles.length} style{styles.length > 1 ? "s" : ""}
+            {inLine(line).length} styles · {styles.length} {styles.length > 1 ? "categories" : "category"}
           </span>
         </h3>
         <div className="flex items-center gap-2">

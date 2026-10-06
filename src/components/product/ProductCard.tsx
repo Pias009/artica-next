@@ -3,13 +3,19 @@ import Image from "next/image";
 import { Badge } from "../ui/Badge";
 import { QuickViewButton } from "../ui/QuickViewButton";
 import { AddButton } from "./AddButton";
-import { LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
+import { categoryOf, groupOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
+
+const DOTS = 4;
 
 /**
- * Catalogue card: the photo does the work. Hover swaps to the zip-side view;
- * the whole card opens Quick View (Enter on the name button).
+ * Catalogue card for a category (or a single style): the photo does the work. Hover swaps to the zip-side view, or to the
+ * category's next style; the whole card opens Quick View (Enter on the name button).
  */
 export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", className }: { p: Product; sizes?: string; className?: string }) {
+  const group = groupOf(p);
+  // A card that stands for a whole category is named after it; a one-shoe category keeps the shoe's name.
+  const many = group.length > 1;
+  const alt = p.zip ?? group.find((x) => x.id !== p.id)?.outer;
   return (
     <article data-card data-flip-id={p.id} className={clsx("group relative flex min-w-0 flex-col", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-tile">
@@ -24,11 +30,11 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
             alt={p.desc}
             fill
             sizes={sizes}
-            className={clsx("object-contain drop-shadow-boot transition-opacity duration-500", p.zip && "group-hover:opacity-0")}
+            className={clsx("object-contain drop-shadow-boot transition-opacity duration-500", alt && "group-hover:opacity-0")}
           />
-          {p.zip && (
+          {alt && (
             <Image
-              src={p.zip.src}
+              src={alt.src}
               alt=""
               fill
               sizes={sizes}
@@ -41,13 +47,26 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
       <div className="mt-4 flex items-start justify-between gap-3">
         <h3 className="text-[16px] font-semibold tracking-[-0.01em]">
           <QuickViewButton id={p.id} className="text-left after:absolute after:inset-0 after:z-[1] after:rounded-card">
-            Chime Long {p.name}
+            {many ? categoryOf(p) : `Chime Long ${p.name}`}
           </QuickViewButton>
         </h3>
-        <span className="mt-1.5 size-3.5 flex-none rounded-full ring-1 ring-ink/15" style={{ background: p.color.hex }} title={p.color.name} />
+        <span className="mt-1.5 flex flex-none items-center -space-x-1" title={group.map((x) => `${x.name} (${x.color.name})`).join(", ")}>
+          {group.slice(0, DOTS).map((x) => (
+            <span key={x.id} className="size-3.5 rounded-full ring-2 ring-white inset-ring inset-ring-ink/15" style={{ background: x.color.hex }} />
+          ))}
+          {group.length > DOTS && <span className="pl-2 text-[12px] font-semibold text-muted tabular-nums">+{group.length - DOTS}</span>}
+        </span>
       </div>
       <p className="mt-0.5 text-[14px] text-muted">
-        {p.type} · {LINE_LABEL[p.line]}
+        {many ? (
+          <>
+            <span className="font-medium text-brand">{group.length} styles</span> · {p.name} and {group.length - 1} more · {LINE_LABEL[p.line]}
+          </>
+        ) : (
+          <>
+            {p.type} · {LINE_LABEL[p.line]}
+          </>
+        )}
       </p>
       <p className="mt-2 text-[14px] font-semibold tabular-nums">
         {MOQ_PAIRS} pairs MOQ

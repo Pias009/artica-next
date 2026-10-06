@@ -5,7 +5,7 @@ import { EmptyResults } from "./EmptyResults";
 import { FilterPills, SearchBox } from "./FilterControls";
 import { ProductCard } from "./ProductCard";
 import { Flip, gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
-import { filterProducts, products, type Filter } from "@/lib/products";
+import { collapse, filterProducts, MOQ_PAIRS, PACK, products, type Filter } from "@/lib/products";
 
 /** Catalog grid. Filtering animates cards to their new spots with GSAP Flip. */
 export function CatalogView({ initialFilter, initialQuery }: { initialFilter: Filter; initialQuery: string }) {
@@ -13,7 +13,8 @@ export function CatalogView({ initialFilter, initialQuery }: { initialFilter: Fi
   const [query, setQuery] = useState(initialQuery);
   const gridRef = useRef<HTMLDivElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
-  const list = filterProducts(products, filter, query);
+  const matches = filterProducts(products, filter, query);
+  const list = collapse(matches);
 
   const update = (next: { filter?: Filter; query?: string }) => {
     if (gridRef.current && !prefersReducedMotion()) {
@@ -53,7 +54,7 @@ export function CatalogView({ initialFilter, initialQuery }: { initialFilter: Fi
         <FilterPills value={filter} onChange={(f) => update({ filter: f })} />
       </div>
       <p className="mt-5 mb-3 text-[13px] text-muted" aria-live="polite">
-        {list.length} style{list.length === 1 ? "" : "s"} · MOQ 300 pairs each · 12 pairs per case
+        {list.length} {list.length === 1 ? "category" : "categories"} · {matches.length} style{matches.length === 1 ? "" : "s"} · MOQ {MOQ_PAIRS} pairs each · {PACK} pairs per case
       </p>
       <div ref={gridRef} className="relative grid grid-cols-1 gap-3.5 min-[26rem]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {list.map((p) => (

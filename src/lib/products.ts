@@ -258,6 +258,54 @@ export const byId: Record<string, Product> = Object.fromEntries(products.map((p)
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 export const inLine = (line: ProductLine) => products.filter((p) => p.line === line);
 
+/* ---------- categories: shoes of the same kind in a line are one listing, shown once ---------- */
+
+/** First match on the shoe's type wins, so the specific kinds (chelsea, hiker…) come before the broad ones (lace-up, zip). */
+const CATEGORY_RULES: [test: RegExp, label: string][] = [
+  [/chelsea/, "Chelsea boots"],
+  [/knee-high|tall/, "Tall boots"],
+  [/snow boot/, "Snow boots"],
+  [/hiker|work boot/, "Hiker boots"],
+  [/sandal|slide/, "Sandals & slides"],
+  [/loafer/, "Loafers"],
+  [/derby|mary jane/, "Derbies & Mary Janes"],
+  [/pump/, "Pumps"],
+  [/flat/, "Flats"],
+  [/sneaker|high-top/, "Sneakers"],
+  [/combat/, "Combat boots"],
+  [/lace|cuff/, "Lace-up boots"],
+  [/ankle|zip/, "Ankle boots"],
+];
+const ruleFor = (p: Product) => CATEGORY_RULES.find(([re]) => re.test(p.type.toLowerCase()))?.[1] ?? "Boots";
+// Kids have a single lace-up, so it joins their ankle boots rather than standing alone.
+const CATEGORY: Record<string, string> = Object.fromEntries(
+  products.map((p) => {
+    const c = ruleFor(p);
+    return [p.id, p.line === "kids" && c === "Lace-up boots" ? "Ankle boots" : c];
+  }),
+);
+/** The category a shoe is listed under: "Chelsea boots", "Loafers"… */
+export const categoryOf = (p: Product) => CATEGORY[p.id];
+
+const groupKey = (p: Product) => `${p.line}:${categoryOf(p)}`;
+const GROUPS = new Map<string, Product[]>();
+for (const p of products) GROUPS.set(groupKey(p), [...(GROUPS.get(groupKey(p)) ?? []), p]);
+
+/** Every shoe in p's category and line, p included, in catalogue order. */
+export const groupOf = (p: Product) => GROUPS.get(groupKey(p)) ?? [p];
+/** One shoe per category, keeping the first of each in list order (so a filter's best match fronts its category). */
+export function collapse(list: Product[]) {
+  const seen = new Set<string>();
+  return list.filter((p) => {
+    const k = groupKey(p);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+/** A line's categories, one lead shoe each. */
+export const stylesIn = (line: ProductLine) => collapse(inLine(line));
+
 /* ---------- detail crops (cut from the same photos with CSS, no extra files) ---------- */
 
 export type Crop = {
@@ -310,16 +358,21 @@ export const FILTERS: { id: Filter; label: string; icon: "man" | "woman" | "kid"
 
 export const isFilter = (v: unknown): v is Filter => FILTERS.some((f) => f.id === v);
 
+/** Every query word must start a word somewhere in the style's text ("red" finds "Red", not "flared"). */
 export function filterProducts(list: Product[], filter: Filter, query: string) {
-  const q = query.trim().toLowerCase();
-  return list.filter(
-    (p) =>
-      (filter === "all" || p.tags.includes(filter)) &&
-      (!q || [p.name, p.type, p.spec, p.line, p.id, ...p.tags].join(" ").toLowerCase().includes(q)),
-  );
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const starts = words.map((w) => new RegExp(`(^|[^a-z0-9])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+  return list.filter((p) => {
+    if (filter !== "all" && !p.tags.includes(filter)) return false;
+    const text = [p.name, p.type, categoryOf(p), p.spec, p.line, p.id, p.color.name, p.desc, ...p.tags].join(" ").toLowerCase();
+    return starts.every((re) => re.test(text));
+  });
 }
 
-export const related = (p: Product, n = 4) =>
-  [...products.filter((x) => x.id !== p.id && x.line === p.line), ...products.filter((x) => x.line !== p.line)].slice(0, n);
+/** Other categories to stock alongside p: its own line first, never p's own category (that has its own picker). */
+export const related = (p: Product, n = 4) => {
+  const others = products.filter((x) => groupKey(x) !== groupKey(p));
+  return collapse([...others.filter((x) => x.line === p.line), ...others.filter((x) => x.line !== p.line)]).slice(0, n);
+};
 
 export const badgeTone = (b?: Product["badge"]) => (b === "New" ? "new" : "hot");

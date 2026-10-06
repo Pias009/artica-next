@@ -10,6 +10,7 @@ import { CropImage } from "../ui/CropImage";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { byId, CASE_PACK, cropsFor, LEAD, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 import { useInCart, useInquiry, useUI } from "@/lib/store";
+import { VersionPicker } from "./VersionPicker";
 
 /** The one product detail dialog every boot on the site opens. */
 export function QuickView() {
@@ -143,6 +144,8 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
             {p.type} · {LINE_LABEL[p.line]} · {p.sizes}
           </p>
         </div>
+
+        <VersionPicker id={p.id} inDialog />
 
         <dl className="grid grid-cols-3 gap-2.5">
           {[

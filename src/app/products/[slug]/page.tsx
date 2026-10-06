@@ -6,9 +6,10 @@ import { Icon, type IconName } from "@/components/Icon";
 import { BuyBox } from "@/components/product/BuyBox";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { VersionPicker } from "@/components/product/VersionPicker";
 import { Badge } from "@/components/ui/Badge";
 import { Reveal } from "@/components/Reveal";
-import { getProduct, MOQ_PAIRS, PACK, products, related } from "@/lib/products";
+import { categoryOf, getProduct, MOQ_PAIRS, PACK, products, related } from "@/lib/products";
 import { TECH } from "@/lib/tech";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -52,6 +53,8 @@ export default async function ProductPage({ params }: Props) {
         <span aria-hidden="true">/</span>
         <Link href={`/catalog?line=${p.line}`} className="capitalize hover:text-ink">{p.line}</Link>
         <span aria-hidden="true">/</span>
+        <Link href={`/catalog?line=${p.line}&q=${encodeURIComponent(categoryOf(p))}`} className="hover:text-ink">{categoryOf(p)}</Link>
+        <span aria-hidden="true">/</span>
         <span aria-current="page" className="font-medium text-ink">Chime Long {p.name}</span>
       </nav>
 
@@ -68,6 +71,10 @@ export default async function ProductPage({ params }: Props) {
               {p.type} · <span className="capitalize">{p.line}</span>
             </p>
             <p className="mt-4 max-w-[46ch] text-[16px] text-ink-2">{p.desc}.</p>
+          </div>
+
+          <div data-reveal>
+            <VersionPicker id={p.id} />
           </div>
 
           <dl data-reveal className="grid grid-cols-3 gap-2">
