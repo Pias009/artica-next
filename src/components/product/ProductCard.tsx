@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Badge } from "../ui/Badge";
 import { QuickViewButton } from "../ui/QuickViewButton";
 import { AddButton } from "./AddButton";
+import { GroupAddButton } from "./ColorChooser";
 import { categoryOf, groupOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 
 const DOTS = 4;
@@ -20,10 +21,18 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
     <article data-card data-flip-id={p.id} className={clsx("group relative flex min-w-0 flex-col", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-tile">
         <Badge badge={p.badge} className="absolute top-3 left-3 z-[2]" />
-        <AddButton
-          id={p.id}
-          className="absolute right-3 bottom-3 z-[3] size-11 shadow-soft transition-[opacity,background-color,color,scale] md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 md:aria-pressed:opacity-100"
-        />
+        {/* several colours: the + opens a colour chooser; a single style adds straight away */}
+        {many ? (
+          <GroupAddButton
+            id={p.id}
+            className="absolute right-3 bottom-3 z-[3] size-11 shadow-soft md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 md:data-[on=true]:opacity-100"
+          />
+        ) : (
+          <AddButton
+            id={p.id}
+            className="absolute right-3 bottom-3 z-[3] size-11 shadow-soft transition-[opacity,background-color,color,scale] md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 md:aria-pressed:opacity-100"
+          />
+        )}
         <span className="absolute inset-[18%_9%] transition-transform duration-700 ease-soft group-hover:scale-[1.06]">
           <Image
             src={p.outer.src}

@@ -116,7 +116,7 @@ export function SampleRequest() {
               role="group"
               aria-labelledby="sample-pick"
               tabIndex={0}
-              className="no-scrollbar flex max-h-[300px] flex-wrap content-start gap-2 overflow-y-auto overscroll-contain p-3 pb-8 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)] lg:max-h-[340px]"
+              className="scrollbar-soft mask-fade-bottom flex max-h-[300px] flex-wrap content-start gap-2 overflow-y-auto overscroll-contain p-3 pr-2 pb-8 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink lg:max-h-[340px]"
             >
               {products.map((p) => (
                 <button

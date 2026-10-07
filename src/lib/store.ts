@@ -60,6 +60,11 @@ type InquiryState = {
   setCases: (id: string, cases: number) => void;
   step: (id: string, dir: 1 | -1) => void;
   remove: (id: string) => void;
+  /**
+   * Makes the list match a colour choice for one style group: `picked` colours are in (at `cases`, or kept / MOQ when
+   * omitted), the group's other colours are out. Lines outside the group are untouched.
+   */
+  syncGroup: (groupIds: string[], picked: string[], cases?: number) => void;
   clear: () => void;
 };
 
@@ -93,6 +98,15 @@ export const useInquiry = create<InquiryState>()(
         set((s) => ({ lines: s.lines.map((l) => (l.id === id ? { ...l, cases: n } : l)) }));
       },
       remove: (id) => set((s) => ({ lines: s.lines.filter((l) => l.id !== id) })),
+      syncGroup: (groupIds, picked, cases) =>
+        set((s) => {
+          const n = cases === undefined ? undefined : Math.max(MOQ_CASES, cases);
+          const kept = s.lines
+            .filter((l) => !groupIds.includes(l.id) || picked.includes(l.id))
+            .map((l) => (n !== undefined && picked.includes(l.id) ? { ...l, cases: n } : l));
+          const added = picked.filter((id) => !kept.some((l) => l.id === id)).map((id) => ({ id, cases: n ?? MOQ_CASES }));
+          return { lines: [...kept, ...added] };
+        }),
       clear: () => set({ lines: [] }),
     }),
     {

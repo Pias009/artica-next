@@ -36,6 +36,15 @@ export function BestSellers() {
   const p = list[index];
   const inCart = useInCart(p?.id ?? "");
   const toggle = useInquiry((s) => s.toggle);
+  const listRef = useRef<HTMLOListElement>(null);
+
+  // Keep the active row centred inside the list's own scroll box (never scrolls the page).
+  useEffect(() => {
+    const ol = listRef.current;
+    const li = ol?.children[index] as HTMLElement | undefined;
+    if (!ol || !li) return;
+    ol.scrollTo({ top: li.offsetTop - (ol.clientHeight - li.offsetHeight) / 2, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }, [index, view]);
 
   return (
     <section ref={ref} id="styles" aria-labelledby="h-styles" className="mt-sec scroll-mt-24">
@@ -61,9 +70,9 @@ export function BestSellers() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
           {/* featured stage: the boot does the talking */}
-          <div className={clsx("relative isolate flex min-h-[460px] flex-col justify-between overflow-hidden rounded-shell p-6 transition-colors duration-700 ease-soft lg:min-h-[520px] lg:p-8", TONE[p.scene])}>
+          <div className={clsx("relative isolate flex h-[440px] flex-col justify-between overflow-hidden rounded-shell p-6 transition-colors duration-700 ease-soft sm:h-[500px] lg:h-[560px] lg:p-8", TONE[p.scene])}>
             <QuickViewButton id={p.id} aria-label={`View details: Chime Long ${p.name}`} className="group absolute inset-0 z-[1] cursor-zoom-in">
               {list.map((x, i) => (
                 <span
@@ -119,12 +128,16 @@ export function BestSellers() {
             </div>
           </div>
 
-          {/* ranked list */}
-          <div>
-            <p className="mb-3 flex items-center justify-between text-[13px] text-muted">
+          {/* ranked list: same height as the stage on desktop, scrolls inside */}
+          <div className="flex flex-col lg:h-[560px]">
+            <p className="mb-3 flex flex-none items-center justify-between text-[13px] text-muted">
               {list.length} style{list.length > 1 ? "s" : ""} · ranked by reorders
             </p>
-            <ol aria-label="Top reorders" className="grid gap-2">
+            <ol
+              ref={listRef}
+              aria-label="Top reorders"
+              className="relative grid max-h-[440px] min-h-0 auto-rows-max content-start gap-2 overflow-y-auto overscroll-contain pr-1.5 scrollbar-soft lg:max-h-none lg:flex-1"
+            >
               {list.map((x, i) => (
                 <RankRow key={x.id} p={x} rank={i + 1} on={i === index} onPick={() => setIndex(i)} progress={i === index && autoplay ? { running: playing, key: index } : null} />
               ))}
