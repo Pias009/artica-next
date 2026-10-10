@@ -10,7 +10,7 @@ const COLS: { title: string; links: [string, string][] }[] = [
       ["Women", "/catalog?line=women"],
       ["Kids", "/catalog?line=kids"],
       ["Waterproof", "/catalog?line=waterproof"],
-      ["All styles", "/catalog"],
+      ["All products", "/catalog"],
     ],
   },
   {

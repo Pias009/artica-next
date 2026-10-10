@@ -8,6 +8,7 @@ import { OrderJourney } from "@/components/home/OrderJourney";
 import { OrderSheet } from "@/components/home/OrderSheet";
 import { PrivateLabel } from "@/components/home/PrivateLabel";
 import { SampleRequest } from "@/components/home/SampleRequest";
+import { Showroom } from "@/components/showroom/Showroom";
 import { UpClose } from "@/components/home/UpClose";
 
 /**
@@ -19,6 +20,7 @@ export default function Home() {
     <>
       <Hero />
       <BestSellers />
+      <Showroom />
       <BuyerTypes />
       <ColdTest />
       <HowItShips />

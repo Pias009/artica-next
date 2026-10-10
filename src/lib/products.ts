@@ -353,7 +353,7 @@ export const FILTERS: { id: Filter; label: string; icon: "man" | "woman" | "kid"
   { id: "kids", label: "Kids", icon: "kid" },
   { id: "waterproof", label: "Waterproof", icon: "drop" },
   { id: "insulated", label: "Insulated", icon: "snow" },
-  { id: "all", label: "All styles", icon: "grid" },
+  { id: "all", label: "All products", icon: "grid" },
 ];
 
 export const isFilter = (v: unknown): v is Filter => FILTERS.some((f) => f.id === v);

@@ -18,7 +18,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Catalog" }]}
         eyebrow="Fall/Winter 26 line sheet"
-        title={filter === "all" ? "All styles" : `${label} styles`}
+        title={filter === "all" ? "All products" : `${label} styles`}
         text="Every style ships from 300 pairs, packed 12 per case with mixed size runs."
       />
       {/* key: remount when the header nav changes the query */}
