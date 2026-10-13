@@ -13,6 +13,7 @@
   --breakpoint-xl: 86rem;
 
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
   /* canvas + surfaces */
   --color-bg: #ffffff;
@@ -86,6 +87,15 @@
   --animate-rise-in: rise-in 0.55s var(--ease-soft) both;
 }
 
+/* Rides an element along its offset-path (the hero's V shelf). */
+@keyframes ride {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
 @keyframes marquee {
   to {
     transform: translateX(-50%);

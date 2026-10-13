@@ -117,7 +117,7 @@ components:
 
 A wholesale catalogue as calm and fresh as a winter morning. The boots and the cold do the selling; the interface stays out of the way. Reference point: Quince's clean retail calm, applied to B2B terms (MOQ, case pack, size run, lead time) instead of prices.
 
-The page alternates quiet browsing (the range grid) with a few authored motion moments: the opening case in the hero, a scroll-scrubbed cold test from 0 to −25°C, buyer-type scenes, and the live order sheet. Everything else is still. Only one section pins the scroll.
+The page alternates quiet browsing (the range grid) with a few authored motion moments: the shelf lineup in the hero, a scroll-scrubbed cold test from 0 to −25°C, buyer-type scenes, and the live order sheet. Everything else is still. Only one section pins the scroll.
 
 Light theme only. Black boots need a light backdrop.
 
@@ -129,11 +129,11 @@ Restrained strategy: neutrals carry the page, one cool accent, winter air as atm
 - **Ink** `#121416`: text and every primary action (pill buttons, active tabs, inquiry button, selected add-buttons).
 
 ### Secondary
-- **Brand** `#984080`, the purple from the Chime Long logo: the single accent. Links, the hero's middle line, cold readouts, step figures, fact icons, "New" badge text. Never a large fill, never section headings (those stay ink). The token `glacier` is a legacy alias for it.
+- **Brand** `#984080`, the purple from the Chime Long logo: the single accent. Links, cold readouts, step figures, fact icons, "New" badge text. Never a large fill, never section headings (those stay ink). The token `glacier` is a legacy alias for it.
 
 ### Neutral
 - **Canvas** `#FFFFFF` page; **Snow** `#F5F5F2` product and card ground; **Photo** `#F1F1EE` image wells.
-- **Frost** `#E8EFF2`, **Sky** `#DCE7EC`, **Ice** `#D5E3EA`: winter air for the hero, cold test, order journey and line-sheet bands.
+- **Frost** `#E8EFF2`, **Sky** `#DCE7EC`, **Ice** `#D5E3EA`: winter air for the cold test, order journey and line-sheet bands.
 - **Ink soft** `#4B5157` body copy; **Muted** `#5F656B` captions (≥4.5:1 on canvas, snow, frost and ice).
 - Scene tones for product panels: **Sand** `#F1ECE4`, **Blush** `#F4E8E5`, **Sage** `#E4EBE6`; **Kraft** `#CDB08B` only on the carton illustration.
 
@@ -143,10 +143,10 @@ Restrained strategy: neutrals carry the page, one cool accent, winter air as atm
 
 ## Typography
 
-One family, Hanken Grotesk (400–800), sentence case throughout.
+Hanken Grotesk (400–800) for everything, sentence case throughout; Fraunces italic only for the hero's accent word.
 
 ### Hierarchy
-- **Display** (hero): clamp(44px, 6.2vw, 92px), 600, line-height 0.98, tracking −0.04em, lines revealed from a mask on load.
+- **Display** (hero h1 only): clamp(40px, min(4vw, 7.2vh), 70px), 600, line-height 0.98, tracking −0.04em; one accent word in Fraunces italic 400, brand purple. Fraunces appears nowhere else.
 - **Section**: clamp(30px, 3.4vw, 46px), 600, ink, tracking −0.03em, sentence case ending in a full stop, with an optional 17px supporting line.
 - **Readout**: the cold-test temperature, clamp(84px, 11vw, 168px), brand purple, tabular numerals.
 - **Title**: product names 16px/600; feature titles 19–24px/600.
@@ -185,7 +185,7 @@ Snow photo well (4:5), the boot centered with a drop shadow; hover crossfades to
 Ink announcement bar with the three wholesale terms; sticky white header (68px) with logo, text nav with an ink underline for the current page, search, and the ink "Inquiry list" pill with a live count. Phones get a full-height list menu.
 
 ### Signature moments
-- **Case hero**: "Twelve pairs. Every size. One case." beside an open Chime Long carton seen from above on a packing-table grid. On load the flaps unfold, twelve shoeboxes stamped with the line's real size run drop in, and the boot rises out of the open box in the middle row, large enough to read at a glance. Men/Women/Kids re-stamps the boxes and lifts the next boot. Annotation pills, an order slip and a five-cell terms bar complete it.
+- **Shelf lineup (hero)**: a V-shaped shelf. The oak edge of a warm stone counter runs down a long left arm to a low point two-thirds across, then up a short right arm (the last third); the stone body fills everything below the V. Pairs ride the edge left to right on a CSS motion path (offset-path, upright), evenly spaced; how many ride at once follows the screen width, and each one takes the next style in the range every time it leaves the frame, so all kinds cycle through. The V is measured and drawn in JS on resize so neither arm rises within 24 px of the text column. Pairs are sized by height (knee boots tallest, then boots, sneakers, low shoes and sandals; kids a step smaller). Hover or focus pauses the ride and shows a name tag; a Pause control stops it; reduced motion parks the pairs evenly along the V. Any pair opens Quick View. Top right, aligned to the header's grid (the column is as wide as the headline, so its longest line ends exactly where the header ends): a white eyebrow pill ("FW26 wholesale range · N styles", brand dot), the h1 "Factory-direct footwear / for North American shelves." in Hanken Grotesk 600 ink with only "shelves." set in Fraunces italic brand purple, one 17px ink-soft line on who it is for, then "Get wholesale pricing" (ink pill) beside "Browse the range" (line pill, hidden on phones). Each piece rises in on load, staggered 80 ms. No text shadows, no glow (the top bar carries the terms). Centred above the shelf on phones.
 - **Cold test**: the only pinned section, scroll-scrubbed; temperature falls 0 → −25°C, air turns to ice, frost gathers at the edges, callouts pinned to real spots on the photo appear in turn. Phones play it once. Below it, "Look closer": three static close-up crops of Nord (collar, hooks, welt) that open Quick View.
 - **Who we supply**: vertical tabs for four buyer types (independent retailer, chain, distributor, private label); each shows an isometric order scene, a typical first order, terms and perks, and a CTA preset to that buyer type.
 - **From order to your door**: four isometric scenes (shoebox → 12-pair case → pallet → truck) drawn with `components/ui/Iso.tsx`, each building as it scrolls in, then a frost band with the four-stop timeline (quote → samples → production → delivery, about 11 weeks).
@@ -194,7 +194,7 @@ Ink announcement bar with the three wholesale terms; sticky white header (68px) 
 
 ## Homepage order
 
-Hero → The FW26 range → Built for real winters (cold test + Look closer) → Who we supply → Order samples first → Order sheet → From order to your door → Private label → Line sheet. Each wholesale term is stated in full in the top bar, the hero and the order sheet; other sections refer to it rather than repeating it.
+Hero → The FW26 range → Built for real winters (cold test + Look closer) → Who we supply → Order samples first → Order sheet → From order to your door → Private label → Line sheet. Each wholesale term is stated in full in the top bar and the order sheet; other sections refer to it rather than repeating it.
 
 ## Do's and Don'ts
 

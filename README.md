@@ -30,7 +30,7 @@ npm run build && npm start
 
 ## Homepage sections (in order)
 
-Hero (open case) → The FW26 range → Built for real winters (cold test + Look closer) → Who we supply
+Hero (shelf lineup) → The FW26 range → Built for real winters (cold test + Look closer) → Who we supply
 → Order samples first → Order sheet → From order to your door (packing + timeline) → Private label → FW26 line sheet.
 
 Every boot opens the shared **Quick View** (`components/product/QuickView.tsx`, native `<dialog>`,
