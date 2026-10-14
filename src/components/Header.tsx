@@ -316,6 +316,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => openDrawer()}
+              data-inquiry-target
               className="inline-flex h-11 items-center gap-2 rounded-xl bg-ink pr-2 pl-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-accent-hover lg:pl-4"
             >
               <span className="max-lg:sr-only">Inquiry list</span>

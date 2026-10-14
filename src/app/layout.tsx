@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Hanken_Grotesk } from "next/font/google";
+import { Fraunces, Hanken_Grotesk, Playfair_Display } from "next/font/google";
 import { Fab } from "@/components/Fab";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -21,6 +21,13 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["400", "500"],
   style: ["italic"],
+});
+
+/** Signage serif for the hero headline. */
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -45,7 +52,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${hanken.variable} ${fraunces.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${hanken.variable} ${fraunces.variable} ${playfair.variable}`} data-scroll-behavior="smooth">
       <body className="bg-white font-sans text-ink antialiased">
         <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />
         <StoreHydrator />
