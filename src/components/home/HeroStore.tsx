@@ -12,7 +12,7 @@ const PICK: Record<ProductLine, string[]> = {
   men: ["Lace-up boots", "Hiker boots"],
 };
 const sharpest = (p: Product) => groupOf(p).reduce((a, b) => (b.outer.w > a.outer.w ? b : a));
-const pick = (line: ProductLine) => {
+export const pick = (line: ProductLine) => {
   const leads = stylesIn(line);
   const lead = PICK[line].map((c) => leads.find((p) => categoryOf(p) === c)).find(Boolean) ?? leads[0];
   return sharpest(lead);
@@ -33,8 +33,8 @@ const PLINTHS: { line: ProductLine; tall?: boolean; view: string; grain: string 
  * gradient (lit top, deeper base); the depth sits on a copy behind it: a thin plum edge in three steps, then a soft
  * shadow on the wall. In em, so the depth stays in proportion from phone to desktop.
  */
-const HEADLINE = "Factory-direct footwear for your shelves.";
-const PLUM_DEPTH = [
+export const HEADLINE = "Factory-direct footwear for your shelves.";
+export const PLUM_DEPTH = [
   "0 0.012em 0 #7c3a6a",
   "0 0.024em 0 #6d325d",
   "0 0.036em 0 #5e2a50",

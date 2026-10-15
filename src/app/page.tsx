@@ -1,7 +1,7 @@
 import { BestSellers } from "@/components/home/BestSellers";
 import { BuyerTypes } from "@/components/home/BuyerTypes";
 import { ColdTest } from "@/components/home/ColdTest";
-import { HeroStore } from "@/components/home/HeroStore";
+import { HeroStore3D } from "@/components/home/HeroStore3D";
 import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
 import { OrderJourney } from "@/components/home/OrderJourney";
@@ -18,7 +18,7 @@ import { UpClose } from "@/components/home/UpClose";
 export default function Home() {
   return (
     <>
-      <HeroStore />
+      <HeroStore3D />
       <BestSellers />
       <Showroom />
       <BuyerTypes />
