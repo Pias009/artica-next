@@ -133,6 +133,39 @@
     transform: scaleX(1);
   }
 }
+/* Spotlight hero: the new pair renders out of a small circle while turning into its poised pose; the old one leaves. */
+@keyframes spot-in {
+  from {
+    clip-path: circle(6% at 50% 55%);
+    transform: rotate(20deg) scale(0.75);
+    opacity: 0.3;
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    clip-path: circle(85% at 50% 55%);
+    transform: rotate(6deg) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes spot-out {
+  to {
+    transform: translateX(10%) rotate(0deg) scale(0.92);
+    opacity: 0;
+  }
+}
+/* The little circle the pair grows out of: a ring that swells and fades. */
+@keyframes spot-pulse {
+  from {
+    transform: translate(-50%, -50%) scale(0.15);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
 /* Content swapped in by a picker or autoplay: a short rise into place. */
 @keyframes rise-in {
   from {

@@ -2,18 +2,20 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
+import { HeroShelf } from "./HeroShelf";
 import { inLine, products, type ProductLine } from "@/lib/products";
-import hiker from "../../../public/images/hero-boot-hiker-cut.webp";
 import leather from "../../../public/images/hero-boot-leather-cut.webp";
-import shearling from "../../../public/images/hero-boot-shearling-cut.webp";
+import lilac from "../../../public/images/hero-boot-lilac-cut.webp";
+import lynx from "../../../public/images/hero-boot-lynx-cut.webp";
 import plate from "../../../public/images/hero-gallery-bg.jpg";
 
 /**
  * First view, a sunlit gallery. The room is one photograph (hero-gallery-bg.jpg: the approved mockup with its copy,
  * labels and placeholder shoes removed, see design/hero-concepts/make_plate.py), so the window light, sun beams,
- * boxes and plinth shadows are real. On top: one premium studio boot per line (cut out of public/images/hero-boot-*.jpg,
- * see design/hero-concepts/cut_boots.py) standing on the empty plinths,
- * the plinth labels, and the copy, all live HTML.
+ * boxes and plinth shadows are real. On top: one boot per line standing on the empty plinths (Lynx and Lilac are the
+ * catalogue cutouts at full size; the men's leather boot is cut from hero-boot-left.jpg, see
+ * design/hero-concepts/cut_boots.py), the plinth labels, and the copy, all live HTML. Under the photo, HeroShelf
+ * turns the first screen into a place to start an order.
  *
  * Everything on the stage is placed in the plate's own pixels (1600 x 875) and converted to cqw, so it stays locked
  * to the photograph at any width. Phones get the copy first, then the stage cropped in on the plinths.
@@ -27,8 +29,6 @@ const PLINTHS: {
   line: ProductLine;
   n: string;
   shoe: StaticImageData;
-  /** mirror the photo so every boot faces the same way */
-  flip?: boolean;
   name: string;
   ink: string;
   /** centre x of the pair, the y it stands on, its height */
@@ -37,9 +37,9 @@ const PLINTHS: {
   /** the clickable plinth: left, top, right, bottom */
   hit: [number, number, number, number];
 }[] = [
-  { line: "women", n: "01", shoe: shearling, flip: true, name: "Shearling-cuff suede boot", ink: "#8a5440", stand: { x: 946, y: 504, h: 168 }, label: { x: 856, y: 692 }, hit: [831, 320, 1064, 760] },
-  { line: "men", n: "02", shoe: leather, name: "Leather work boot", ink: "#eef0e6", stand: { x: 1186, y: 409, h: 176 }, label: { x: 1102, y: 671 }, hit: [1064, 220, 1232, 740] },
-  { line: "kids", n: "03", shoe: hiker, name: "Waterproof winter hiker", ink: "#4b6578", stand: { x: 1356, y: 530, h: 138 }, label: { x: 1282, y: 707 }, hit: [1232, 380, 1488, 775] },
+  { line: "women", n: "01", shoe: lynx, name: "Fur-cuff heeled boot", ink: "#8a5440", stand: { x: 944, y: 504, h: 150 }, label: { x: 856, y: 698 }, hit: [831, 330, 1064, 760] },
+  { line: "men", n: "02", shoe: leather, name: "Leather work boot", ink: "#eef0e6", stand: { x: 1184, y: 409, h: 156 }, label: { x: 1102, y: 677 }, hit: [1064, 240, 1232, 740] },
+  { line: "kids", n: "03", shoe: lilac, name: "Toggle-lace hiker", ink: "#4b6578", stand: { x: 1354, y: 530, h: 120 }, label: { x: 1282, y: 713 }, hit: [1232, 395, 1488, 775] },
 ];
 const LABEL: Record<ProductLine, string> = { women: "WOMEN", men: "MEN", kids: "KIDS" };
 
@@ -51,26 +51,26 @@ export function HeroGallery() {
 
       <div className="@container relative mx-auto w-full max-w-[1920px]">
         {/* the copy: its own block on phones, over the empty wall on larger screens */}
-        <div className="relative z-[3] px-(--shell-pad) pt-8 pb-2 md:absolute md:top-[5.4cqw] md:left-[6.9cqw] md:p-0">
-          <p className="animate-rise-in text-[12px] font-medium tracking-[0.2em] text-[#6b5f63] motion-reduce:animate-none md:text-[max(11px,1.12cqw)]">
+        <div className="relative z-[3] px-(--shell-pad) pt-8 pb-2 md:absolute md:top-[6.6cqw] md:left-[6.9cqw] md:p-0">
+          <p className="animate-rise-in text-[11px] font-medium tracking-[0.22em] text-[#6b5f63] motion-reduce:animate-none md:text-[max(10px,0.86cqw)]">
             FW26 WHOLESALE COLLECTION
           </p>
           <h1
             id="hero-title"
-            className="mt-3 animate-rise-in font-headline text-[clamp(34px,9vw,44px)] leading-[1.06] font-semibold tracking-[-0.012em] text-[#1d1a1b] [animation-delay:70ms] motion-reduce:animate-none md:mt-[1.15cqw] md:text-[max(30px,4.7cqw)] md:leading-[1.07]"
+            className="mt-3 animate-rise-in font-headline text-[clamp(30px,8vw,38px)] leading-[1.08] font-semibold tracking-[-0.01em] text-[#1d1a1b] [animation-delay:70ms] motion-reduce:animate-none md:mt-[1cqw] md:text-[max(28px,3.85cqw)] md:leading-[1.1]"
           >
             Factory-direct footwear
             <br className="max-md:hidden" /> built for your <em className="text-brand">shelves.</em>
           </h1>
-          <div className="mt-6 flex animate-rise-in flex-wrap items-center gap-x-7 gap-y-2 [animation-delay:140ms] motion-reduce:animate-none md:mt-[1.7cqw] md:gap-x-[1.7cqw]">
-            <OpenInquiryButton className="inline-flex h-12 items-center gap-2.5 rounded-[6px] bg-brand px-6 text-[15px] font-semibold text-white shadow-[0_10px_22px_-12px_rgb(110_45_95/.7)] transition-colors hover:bg-brand-deep md:h-[max(44px,3.75cqw)] md:px-[max(20px,1.8cqw)] md:text-[max(14px,1.3cqw)]">
+          <div className="mt-5 flex animate-rise-in flex-wrap items-center gap-x-6 gap-y-2 [animation-delay:140ms] motion-reduce:animate-none md:mt-[1.6cqw] md:gap-x-[1.5cqw]">
+            <OpenInquiryButton className="inline-flex h-11 items-center gap-2 rounded-[5px] bg-brand px-5 text-[14px] font-semibold text-white shadow-[0_8px_18px_-10px_rgb(110_45_95/.65)] transition-colors hover:bg-brand-deep md:h-[max(40px,3.05cqw)] md:px-[max(18px,1.45cqw)] md:text-[max(13px,1.02cqw)]">
               Get wholesale pricing <Icon name="arrow" className="size-4" />
             </OpenInquiryButton>
-            <Link href="/catalog" className="text-[15px] font-semibold text-[#1d1a1b] underline-offset-4 hover:underline md:text-[max(14px,1.3cqw)]">
+            <Link href="/catalog" className="text-[14px] font-semibold text-[#1d1a1b] underline-offset-4 hover:underline md:text-[max(13px,1.02cqw)]">
               Browse {products.length} styles
             </Link>
           </div>
-          <p className="mt-5 animate-rise-in text-[13px] text-[#6b5f63] [animation-delay:210ms] motion-reduce:animate-none md:mt-[1.5cqw] md:text-[max(12px,1.2cqw)]">
+          <p className="mt-4 animate-rise-in text-[12.5px] text-[#6b5f63] [animation-delay:210ms] motion-reduce:animate-none md:mt-[1.35cqw] md:text-[max(12px,0.94cqw)]">
             From 300 pairs per style · Samples in 10 days · Door-to-door US &amp; Canada
           </p>
         </div>
@@ -87,13 +87,16 @@ export function HeroGallery() {
             </nav>
           </div>
         </div>
+
+        {/* the working half: best sellers on one shelf, each a Quick View or a straight add to the inquiry list */}
+        <HeroShelf />
       </div>
     </section>
   );
 }
 
 function Plinth({ pl, i }: { pl: (typeof PLINTHS)[number]; i: number }) {
-  const { line, n, shoe, flip, name, ink, stand, label, hit } = pl;
+  const { line, n, shoe, name, ink, stand, label, hit } = pl;
   const w = (stand.h * shoe.width) / shoe.height;
   return (
     <Link
@@ -116,16 +119,15 @@ function Plinth({ pl, i }: { pl: (typeof PLINTHS)[number]; i: number }) {
           fill
           quality={90}
           sizes="(min-width: 54rem) 20vw, 40vw"
-          // a mirrored photo mirrors its shadow too, so it gets the opposite offset to still fall left
-          className={`object-contain object-bottom ${flip ? "-scale-x-100 drop-shadow-[0.45cqw_0.25cqw_0.4cqw_rgb(55_38_22/.28)]" : "drop-shadow-[-0.45cqw_0.25cqw_0.4cqw_rgb(55_38_22/.28)]"}`}
+          className="object-contain object-bottom drop-shadow-[-0.4cqw_0.22cqw_0.35cqw_rgb(55_38_22/.26)]"
         />
       </span>
       {/* label on the plinth face */}
       <span className="absolute block" style={{ left: u(label.x - hit[0]), top: u(label.y - hit[1]), color: ink }}>
-        <span className="block text-[max(10px,1.2cqw)] leading-tight tracking-[0.02em] underline-offset-4 group-hover:underline group-focus-visible:underline">
+        <span className="block text-[max(9px,0.98cqw)] leading-tight tracking-[0.04em] underline-offset-4 group-hover:underline group-focus-visible:underline">
           {n} / {LABEL[line]}
         </span>
-        <span className="mt-[0.2cqw] block text-[0.92cqw] leading-tight opacity-90 max-md:hidden">{name}</span>
+        <span className="mt-[0.2cqw] block text-[0.76cqw] leading-tight opacity-90 max-md:hidden">{name}</span>
       </span>
     </Link>
   );

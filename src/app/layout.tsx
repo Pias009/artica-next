@@ -19,7 +19,6 @@ const hanken = Hanken_Grotesk({
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["400", "500"],
   style: ["italic"],
 });
 
