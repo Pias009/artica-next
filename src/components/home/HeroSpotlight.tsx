@@ -151,7 +151,7 @@ export function HeroSpotlight() {
               <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
               <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
             </span>
-            Wholesale Footwear Collection · North America
+            Wholesale Footwear Collection · Worldwide
           </span>
           <h1 id="hero-title" className="mt-3.5 animate-rise-in [animation-delay:70ms] motion-reduce:animate-none lg:mt-5">
             <span className="block text-[clamp(40px,6vw,90px)] leading-[0.9] font-black tracking-[-0.04em] text-ink drop-shadow-[0_2px_12px_rgb(0_0_0/.04)]">
@@ -162,7 +162,7 @@ export function HeroSpotlight() {
             </span>
           </h1>
           <p className="mt-3.5 max-w-[25rem] animate-rise-in text-[14.5px] leading-[1.55] text-ink-2 [animation-delay:140ms] motion-reduce:animate-none max-lg:mx-auto lg:mt-5 lg:text-[15.5px]">
-            Factory-direct boots, sneakers and sandals for North American retailers and distributors.
+            Factory-direct boots, sneakers and sandals for retailers and distributors worldwide.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3 max-lg:justify-center animate-rise-in [animation-delay:210ms] motion-reduce:animate-none lg:mt-7">
             <OpenInquiryButton className="group relative overflow-hidden inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-[12.5px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_12px_26px_-10px_rgb(152_64_128/.65)] transition-all duration-300 hover:bg-brand-deep hover:shadow-[0_20px_36px_-10px_rgb(152_64_128/.85)] hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] lg:h-12 lg:px-7 lg:text-[13px]">
@@ -194,7 +194,7 @@ export function HeroSpotlight() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
               <span className="size-1.5 rounded-full bg-brand animate-pulse [animation-delay:500ms]" />
-              DDP US &amp; Canada
+              Door-to-door worldwide
             </span>
           </div>
         </div>

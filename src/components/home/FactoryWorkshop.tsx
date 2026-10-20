@@ -146,8 +146,7 @@ export function FactoryWorkshop() {
           </div>
 
           <p className="mt-4 animate-rise-in text-[12.5px] font-medium text-ink-2 [animation-delay:220ms] motion-reduce:animate-none md:text-[max(11px,0.88cqw)]">
-            From 300 pairs per style · Samples in 10 days · Door-to-door US &
-            Canada
+            From 300 pairs per style · Samples in 10 days · Door-to-door worldwide
           </p>
         </div>
 
@@ -267,8 +266,7 @@ export function FactoryWorkshop() {
             </Link>
           </div>
           <p className="mt-3 text-[12px] text-ink-2">
-            From 300 pairs per style · Samples in 10 days · Door-to-door US &
-            Canada
+            From 300 pairs per style · Samples in 10 days · Door-to-door worldwide
           </p>
         </div>
 

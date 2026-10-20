@@ -44,7 +44,7 @@ const CONTRACT = `<!--
 THESIS: A wholesale catalogue as calm and fresh as a winter morning: the boots and the cold do the selling, not badges, boxes or jargon. Refuses the busy B2B portal (dense grids, glass chips, mono "spec" labels).
 OWN-WORLD: White canvas, frost-blue air (#E8EFF2 to #D5E3EA), product on snow-grey #F5F5F2, ink-black pill actions, one glacier accent #2D5D6F. Hanken Grotesk, sentence case, almost no borders.
 STORY: Buyer sees the range, feels the cold it is built for, learns the wholesale terms, adds styles and requests the line sheet.
-FIRST VIEWPORT: A studio still life in slow motion: one pair of every kind drifts left to right along a floating oak shelf sloping down to the bottom right; any pair opens its details. Top right: "Factory-direct footwear for North American shelves.", the style counts per line, "Get wholesale pricing".
+FIRST VIEWPORT: A studio still life in slow motion: one pair of every kind drifts left to right along a floating oak shelf sloping down to the bottom right; any pair opens its details. Top right: "Factory-direct footwear for retail shelves.", the style counts per line, "Get wholesale pricing".
 FORM: User-pinned reference (Quince, clean and fresh) over the seeded roll c4c2f88a. Signature motion: shelf-lineup hero, scroll-scrubbed cold test (0 to −25°C), pinned up-close zoom, order journey.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
 -->`;

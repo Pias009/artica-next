@@ -7,7 +7,7 @@
 web
 
 ## Users
-Wholesale buyers in North America (US and Canada): independent footwear and outdoor retailers, regional chains, distributors, and private-label brands. They are sourcing winter boots for an upcoming season, usually comparing several factories, and need to judge quality, minimums, lead times and shipping terms quickly before requesting a line sheet or samples.
+Wholesale buyers worldwide: independent footwear and outdoor retailers, regional chains, distributors, and private-label brands. They are sourcing winter boots for an upcoming season, usually comparing several factories, and need to judge quality, minimums, lead times and shipping terms quickly before requesting a line sheet or samples.
 
 The site is commissioned by the manufacturer (the client), who reviews and approves the design. Two earlier designs were rejected by this client.
 
@@ -17,7 +17,7 @@ A wholesale storefront for ARTICA winter boots (men, women, kids). Its only goal
 Success: a buyer understands the range and the wholesale terms within a minute, builds an inquiry list of styles with case quantities, and sends it.
 
 ## Positioning
-Factory-direct winter boots for North American shelves: every style is offered in mixed-size cases of 12 pairs from 300 pairs per style, with samples before bulk, inspected batches, and door-to-door delivery to the US and Canada. Private label is available from a higher minimum.
+Factory-direct winter boots for retail shelves: every style is offered in mixed-size cases of 12 pairs from 300 pairs per style, with samples before bulk, inspected batches, and door-to-door delivery worldwide. Private label is available from a higher minimum.
 
 ## Operating Context
 - Buyers build an "inquiry list" (styles plus number of cases, steps of 5 cases, minimum 25 cases) and submit one form: buyer type (retailer, distributor, private-label brand), company, ship-to country, work email, notes.
