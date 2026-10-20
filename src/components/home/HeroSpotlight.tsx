@@ -110,6 +110,18 @@ export function HeroSpotlight() {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
+      {/* Dynamic atmospheric color wash that smoothly breathes and transitions with active shoe tint */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[28%] -right-[6%] size-[min(680px,78vw)] -translate-y-1/2 rounded-full blur-[100px] transition-all duration-1000 ease-out animate-[ambient-pulse-slow_8s_ease-in-out_infinite] motion-reduce:animate-none"
+        style={{
+          background: `radial-gradient(circle, ${s.tint}40 0%, ${s.tint}14 45%, transparent 70%)`,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[16%] left-[4%] size-[min(480px,52vw)] rounded-full blur-[90px] bg-brand/6 transition-all duration-1000 ease-out animate-[ambient-pulse-slow_11s_ease-in-out_infinite_reverse] motion-reduce:animate-none"
+      />
 
       {/* side links, set vertically like a magazine spine */}
       <nav aria-label="Buying information" className="absolute top-1/2 left-[clamp(10px,1.6vw,28px)] z-[3] -translate-y-1/2 max-lg:hidden">
@@ -118,9 +130,13 @@ export function HeroSpotlight() {
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="block py-2 text-[12px] font-semibold tracking-[0.16em] text-muted uppercase transition-colors [writing-mode:vertical-rl] rotate-180 hover:text-ink"
+                className="group relative block py-2 text-[12px] font-semibold tracking-[0.16em] text-muted uppercase transition-all duration-300 [writing-mode:vertical-rl] rotate-180 hover:text-ink hover:-translate-x-0.5"
               >
-                {l.label}
+                <span className="relative z-[1]">{l.label}</span>
+                <span
+                  aria-hidden="true"
+                  className="absolute right-0 bottom-0 top-0 w-0.5 bg-brand scale-y-0 transition-transform duration-300 origin-bottom group-hover:scale-y-100"
+                />
               </Link>
             </li>
           ))}
@@ -130,15 +146,18 @@ export function HeroSpotlight() {
       <div className="wrap relative grid gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6 lg:pl-[clamp(48px,6vw,104px)]">
         {/* the promise */}
         <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-14">
-          <span className="inline-flex animate-rise-in items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1 text-[10.5px] font-bold tracking-[0.16em] text-brand uppercase shadow-soft backdrop-blur-sm motion-reduce:animate-none">
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-brand animate-pulse" />
+          <span className="inline-flex animate-rise-in items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1 text-[10.5px] font-bold tracking-[0.16em] text-brand uppercase shadow-soft backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02] motion-reduce:animate-none">
+            <span aria-hidden="true" className="relative flex size-1.5">
+              <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
+            </span>
             FW26 Wholesale Collection · North America
           </span>
           <h1 id="hero-title" className="mt-3.5 animate-rise-in [animation-delay:70ms] motion-reduce:animate-none lg:mt-5">
-            <span className="block text-[clamp(40px,6vw,90px)] leading-[0.9] font-black tracking-[-0.04em] text-ink">
+            <span className="block text-[clamp(40px,6vw,90px)] leading-[0.9] font-black tracking-[-0.04em] text-ink drop-shadow-[0_2px_12px_rgb(0_0_0/.04)]">
               WINTER
             </span>
-            <span className="mt-1 block text-[clamp(24px,3.6vw,54px)] leading-[1.05] font-light tracking-[-0.02em] whitespace-nowrap bg-gradient-to-r from-brand via-brand-deep to-brand bg-clip-text text-transparent">
+            <span className="mt-1 block text-[clamp(24px,3.6vw,54px)] leading-[1.05] font-light tracking-[-0.02em] whitespace-nowrap bg-gradient-to-r from-brand via-brand-deep to-brand bg-[length:200%_auto] bg-clip-text text-transparent animate-[text-gradient-shimmer_6s_ease-in-out_infinite] motion-reduce:animate-none">
               STOCK, SORTED.
             </span>
           </h1>
@@ -146,8 +165,14 @@ export function HeroSpotlight() {
             Factory-direct boots, sneakers and sandals for North American retailers and distributors.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3 max-lg:justify-center animate-rise-in [animation-delay:210ms] motion-reduce:animate-none lg:mt-7">
-            <OpenInquiryButton className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-[12.5px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_12px_26px_-10px_rgb(152_64_128/.65)] transition-all hover:bg-brand-deep hover:shadow-[0_18px_32px_-10px_rgb(152_64_128/.85)] hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] lg:h-12 lg:px-7 lg:text-[13px]">
-              Get wholesale pricing <Icon name="arrow" className="size-3.5 lg:size-4" />
+            <OpenInquiryButton className="group relative overflow-hidden inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-[12.5px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_12px_26px_-10px_rgb(152_64_128/.65)] transition-all duration-300 hover:bg-brand-deep hover:shadow-[0_20px_36px_-10px_rgb(152_64_128/.85)] hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] lg:h-12 lg:px-7 lg:text-[13px]">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-[button-sheen_4.5s_ease-in-out_infinite] motion-reduce:hidden"
+              />
+              <span className="relative z-[1] flex items-center gap-2">
+                Get wholesale pricing <Icon name="arrow" className="size-3.5 transition-transform duration-300 group-hover:translate-x-1 lg:size-4" />
+              </span>
             </OpenInquiryButton>
             <a
               href="#styles"
@@ -159,16 +184,16 @@ export function HeroSpotlight() {
 
           {/* Dynamic wholesale feature badges */}
           <div className="mt-5 flex flex-wrap items-center gap-2 max-lg:justify-center animate-rise-in [animation-delay:280ms] motion-reduce:animate-none lg:mt-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs">
-              <span className="size-1.5 rounded-full bg-brand" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
+              <span className="size-1.5 rounded-full bg-brand animate-pulse" />
               300 prs MOQ
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs">
-              <span className="size-1.5 rounded-full bg-brand" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
+              <span className="size-1.5 rounded-full bg-brand animate-pulse [animation-delay:250ms]" />
               10-day custom samples
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs">
-              <span className="size-1.5 rounded-full bg-brand" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
+              <span className="size-1.5 rounded-full bg-brand animate-pulse [animation-delay:500ms]" />
               DDP US &amp; Canada
             </span>
           </div>
@@ -180,28 +205,29 @@ export function HeroSpotlight() {
           onPointerMove={handleStagePointerMove}
           onPointerLeave={handleStagePointerLeave}
         >
-          {/* Dynamic floating live status capsule */}
+          {/* Dynamic floating live status capsule with decoupled mouse parallax + ambient float */}
           <div
-            className="pointer-events-none absolute top-[8%] right-[4%] z-[3] flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in max-sm:hidden"
+            className="pointer-events-none absolute top-[8%] right-[4%] z-[3] transition-transform duration-200 ease-out max-sm:hidden"
             style={{
               transform: reduced
                 ? undefined
-                : `translate(${(tilt.x * -8).toFixed(1)}px, ${(tilt.y * -8).toFixed(1)}px)`,
-              transition: "transform 200ms ease-out",
+                : `translate(${(tilt.x * -10).toFixed(1)}px, ${(tilt.y * -10).toFixed(1)}px)`,
             }}
           >
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">
-              FW26 Production · 10d Samples
-            </span>
+            <div className="flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-[hero-float-soft_4.8s_ease-in-out_infinite] motion-reduce:animate-none">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              </span>
+              <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">
+                FW26 Production · 10d Samples
+              </span>
+            </div>
           </div>
 
           {/* the ring: grand orbit circle showing only the left half arc, with completely transparent/unfilled interior */}
           <div className="absolute top-[44%] aspect-square w-[min(82%,58vh,520px)] -translate-y-1/2 lg:right-[clamp(16px,2.5vw,52px)] lg:left-auto max-lg:right-1/2 max-lg:w-[min(74%,310px)] max-lg:translate-x-1/2 lg:translate-x-0">
-            {/* SVG half-circle arc: only the left 180° semi-circle framing the swatches, right half is 100% open */}
+            {/* SVG half-circle arc: animated flowing dashes along the circular orbit */}
             <svg
               viewBox="0 0 1000 1000"
               fill="none"
@@ -215,13 +241,29 @@ export function HeroSpotlight() {
                   <stop offset="90%" stopColor="currentColor" stopOpacity="0.85" />
                   <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
                 </linearGradient>
+                <linearGradient id="halfRingGlow" x1="0" y1="0" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+                  <stop offset="25%" stopColor="#984080" stopOpacity="0.3" />
+                  <stop offset="75%" stopColor="#984080" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                </linearGradient>
               </defs>
+              {/* Outer soft ambient arc track */}
+              <path
+                d="M 500 2 A 498 498 0 0 0 500 998"
+                stroke="url(#halfRingGlow)"
+                strokeWidth="5"
+                strokeLinecap="round"
+                className="opacity-35"
+              />
+              {/* Dynamic streaming dash arc */}
               <path
                 d="M 500 2 A 498 498 0 0 0 500 998"
                 stroke="url(#halfRingGrad)"
                 strokeWidth="2.2"
                 strokeDasharray="6 8"
                 strokeLinecap="round"
+                className="animate-[ring-dash-flow_3.2s_linear_infinite] motion-reduce:animate-none"
               />
             </svg>
 
@@ -229,7 +271,14 @@ export function HeroSpotlight() {
               {spots.map((x, i) => {
                 const on = i === cur;
                 return (
-                  <li key={x.slug} className="absolute -translate-1/2" style={onRing(ANGLES[i])}>
+                  <li
+                    key={x.slug}
+                    className="absolute -translate-1/2 transition-transform duration-500 animate-[swatch-idle-float_4.2s_ease-in-out_infinite] motion-reduce:animate-none"
+                    style={{
+                      ...onRing(ANGLES[i]),
+                      animationDelay: `${i * 0.35}s`,
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => go(i)}
@@ -238,20 +287,28 @@ export function HeroSpotlight() {
                       className={`group relative grid size-11 place-items-center rounded-full border-2 transition-all duration-300 lg:size-12 ${
                         on
                           ? "scale-115 border-brand shadow-[0_0_0_4px_rgb(152_64_128/.25),0_16px_32px_-4px_rgb(152_64_128/.35)]"
-                          : "border-white shadow-soft hover:scale-110 hover:border-ink/40 hover:shadow-float"
+                          : "border-white shadow-soft hover:scale-115 hover:border-ink/40 hover:shadow-float"
                       }`}
                       style={{
                         background: x.tint,
-                        boxShadow: on ? `0 0 0 4px ${x.tint}55, 0 14px 28px -4px rgba(0,0,0,0.3)` : undefined,
+                        boxShadow: on
+                          ? `0 0 0 4px ${x.tint}55, 0 0 22px ${x.tint}88, 0 14px 28px -4px rgba(0,0,0,0.3)`
+                          : undefined,
                       }}
                     >
                       {on && (
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute -inset-2 rounded-full border border-brand/35 animate-ping opacity-60 motion-reduce:hidden"
-                        />
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -inset-2 rounded-full border border-brand/40 animate-ping opacity-60 motion-reduce:hidden"
+                          />
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute -inset-1 rounded-full border border-white/60 animate-pulse opacity-75"
+                          />
+                        </>
                       )}
-                      <span className="relative block size-[84%]">
+                      <span className="relative block size-[84%] transition-transform duration-300 group-hover:scale-110">
                         <Image src={x.p.outer.src} alt="" fill sizes="48px" className="-scale-x-100 object-contain drop-shadow-[0_2px_4px_rgb(0_0_0/.2)]" />
                       </span>
                       {/* Name tooltip */}
@@ -265,7 +322,7 @@ export function HeroSpotlight() {
             </ul>
           </div>
 
-          {/* the pair: 3D levitation with interactive mouse tilt */}
+          {/* the pair: 3D levitation with continuous ambient floating and interactive mouse tilt */}
           <div
             className="pointer-events-none absolute top-[44%] aspect-[1.35] w-[min(70%,50vh,490px)] -translate-y-1/2 lg:right-0 lg:left-auto lg:translate-x-2 max-lg:right-1/2 max-lg:w-[min(66%,310px)] max-lg:translate-x-[68%]"
             style={{ perspective: "1200px" }}
@@ -275,52 +332,55 @@ export function HeroSpotlight() {
               style={{
                 transform: reduced
                   ? undefined
-                  : `rotateX(${(-tilt.y * 10).toFixed(2)}deg) rotateY(${(tilt.x * 12).toFixed(2)}deg) translateZ(10px)`,
+                  : `rotateX(${(-tilt.y * 12).toFixed(2)}deg) rotateY(${(tilt.x * 14).toFixed(2)}deg) translateZ(12px)`,
                 transitionDuration: tilt.x === 0 && tilt.y === 0 ? "600ms" : "150ms",
                 transformStyle: "preserve-3d",
               }}
             >
-              {prev !== null && prev !== cur && (
-                <Pair key={`out-${prev}`} p={spots[prev].p} className="[animation:spot-out_650ms_cubic-bezier(.4,0,.2,1)_both]" />
-              )}
-              <Pair
-                key={`in-${cur}`}
-                p={s.p}
-                preload={cur === 0}
-                shadowOffset={tilt}
-                className={reduced ? "rotate-[6deg]" : "[animation:spot-in_900ms_cubic-bezier(.22,1,.36,1)_both]"}
-              />
+              {/* Continuous weightless levitation container */}
+              <div className="size-full animate-[hero-shoe-levitate_5.5s_ease-in-out_infinite] motion-reduce:animate-none">
+                {prev !== null && prev !== cur && (
+                  <Pair key={`out-${prev}`} p={spots[prev].p} className="[animation:spot-out_650ms_cubic-bezier(.4,0,.2,1)_both]" />
+                )}
+                <Pair
+                  key={`in-${cur}`}
+                  p={s.p}
+                  preload={cur === 0}
+                  shadowOffset={tilt}
+                  className={reduced ? "rotate-[6deg]" : "[animation:spot-in_900ms_cubic-bezier(.22,1,.36,1)_both]"}
+                />
+              </div>
             </div>
           </div>
 
           {/* Luxury floating console below the shoe on the right with Antigravity Glassmorphism */}
-          <div className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-2 max-lg:right-1/2 max-lg:translate-x-1/2">
+          <div className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-2 max-lg:right-1/2 max-lg:translate-x-1/2 animate-[hero-float-counter_5.8s_ease-in-out_infinite] motion-reduce:animate-none">
             <button
               type="button"
               onClick={() => go(cur - 1)}
               aria-label="Previous style"
-              className="grid size-10 place-items-center rounded-full border border-ink/10 bg-white/80 text-ink shadow-[0_8px_20px_-6px_rgb(18_20_22/.12)] backdrop-blur-xl transition-all duration-300 hover:border-brand hover:text-brand hover:scale-108 hover:bg-white active:scale-95"
+              className="group grid size-10 place-items-center rounded-full border border-ink/10 bg-white/80 text-ink shadow-[0_8px_20px_-6px_rgb(18_20_22/.12)] backdrop-blur-xl transition-all duration-300 hover:border-brand hover:text-brand hover:scale-110 hover:bg-white active:scale-95"
             >
-              <Icon name="arrow" className="size-3.5 rotate-180" />
+              <Icon name="arrow" className="size-3.5 rotate-180 transition-transform duration-200 group-hover:-translate-x-0.5" />
             </button>
 
             <div
               key={`info-${cur}`}
-              className="relative flex items-center gap-3.5 overflow-hidden rounded-full border border-white/80 bg-white/85 px-4 py-2 shadow-[0_16px_36px_-10px_rgb(18_20_22/.14),0_0_0_1px_rgb(18_20_22/.05),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in motion-reduce:animate-none"
+              className="relative flex items-center gap-3.5 overflow-hidden rounded-full border border-white/85 bg-white/85 px-4 py-2 shadow-[0_16px_36px_-10px_rgb(18_20_22/.16),0_0_0_1px_rgb(18_20_22/.05),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in motion-reduce:animate-none"
               aria-live="polite"
             >
               <div className="flex flex-col text-left">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] font-bold tracking-[0.16em] text-muted uppercase">0{cur + 1}/0{spots.length}</span>
                   <span className="size-1 rounded-full bg-ink/20" />
-                  <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase">{s.p.name}</span>
+                  <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase animate-rise-in">{s.p.name}</span>
                 </div>
                 <span className="text-[11.5px] text-muted whitespace-nowrap">
                   {LINE_LABEL[s.p.line]} · {categoryOf(s.p)} · <strong className="font-semibold text-ink-2">{MOQ_PAIRS} prs</strong>
                 </span>
               </div>
 
-              {/* 5-Indicator Progress Track */}
+              {/* 5-Indicator Progress Track with glowing active pill */}
               <div className="flex items-center gap-1.5 px-0.5" aria-hidden="true">
                 {spots.map((_, i) => (
                   <button
@@ -328,8 +388,10 @@ export function HeroSpotlight() {
                     type="button"
                     onClick={() => go(i)}
                     aria-label={`Jump to style ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      i === cur ? "w-5 bg-brand" : "w-1.5 bg-ink/20 hover:bg-ink/40"
+                    className={`h-1.5 rounded-full transition-all duration-400 ${
+                      i === cur
+                        ? "w-6 bg-brand shadow-[0_0_8px_rgb(152_64_128/.6)]"
+                        : "w-1.5 bg-ink/20 hover:bg-ink/40 hover:scale-125"
                     }`}
                   />
                 ))}
@@ -338,10 +400,16 @@ export function HeroSpotlight() {
               <button
                 type="button"
                 onClick={() => openQuickView(s.p.id)}
-                className="pointer-events-auto inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[11px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
+                className="group/btn pointer-events-auto relative overflow-hidden inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[11px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
               >
-                <span>View</span>
-                <Icon name="arrow" className="size-2.5" />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[button-sheen_4s_ease-in-out_infinite] motion-reduce:hidden"
+                />
+                <span className="relative z-[1] flex items-center gap-1">
+                  <span>View</span>
+                  <Icon name="arrow" className="size-2.5 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
+                </span>
               </button>
             </div>
 
@@ -349,9 +417,9 @@ export function HeroSpotlight() {
               type="button"
               onClick={() => go(cur + 1)}
               aria-label="Next style"
-              className="grid size-10 place-items-center rounded-full bg-ink text-white shadow-[0_8px_20px_-6px_rgb(18_20_22/.25)] transition-all duration-300 hover:bg-accent-hover hover:scale-108 active:scale-95"
+              className="group grid size-10 place-items-center rounded-full bg-ink text-white shadow-[0_8px_20px_-6px_rgb(18_20_22/.25)] transition-all duration-300 hover:bg-accent-hover hover:scale-110 active:scale-95"
             >
-              <Icon name="arrow" className="size-3.5" />
+              <Icon name="arrow" className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </button>
           </div>
         </div>
@@ -364,37 +432,46 @@ export function HeroSpotlight() {
         ))}
       </div>
 
-      {/* the three ways in with 3D depth */}
+      {/* the three ways in with 3D depth and micro-interactions */}
       <nav aria-label="Shop by line" className="wrap relative z-[2] px-(--shell-pad) pt-8 pb-[clamp(20px,4vh,40px)] lg:pl-[clamp(48px,6vw,104px)]">
         <ul className="scrollbar-none flex snap-x gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6">
-          {CARDS.map((c) => {
+          {CARDS.map((c, idx) => {
             const p = getProduct(c.slug) as Product;
             return (
-              <li key={c.line} className="w-[min(82vw,340px)] shrink-0 snap-start lg:w-auto">
+              <li
+                key={c.line}
+                className="w-[min(82vw,340px)] shrink-0 snap-start lg:w-auto animate-rise-in motion-reduce:animate-none"
+                style={{ animationDelay: `${320 + idx * 70}ms` }}
+              >
                 <Link
                   href={`/catalog?line=${c.line}`}
-                  className="group flex h-[116px] overflow-hidden rounded-2xl border border-ink/[0.04] bg-tile text-ink shadow-[0_12px_32px_-20px_rgb(18_20_22/.25)] transition-all duration-400 ease-soft hover:-translate-y-1.5 hover:shadow-[0_22px_44px_-16px_rgb(18_20_22/.3)]"
+                  className="group relative flex h-[116px] overflow-hidden rounded-2xl border border-ink/[0.05] bg-tile text-ink shadow-[0_12px_32px_-20px_rgb(18_20_22/.25)] transition-all duration-400 ease-soft hover:-translate-y-2 hover:shadow-[0_24px_48px_-16px_rgb(18_20_22/.32),0_0_0_1px_rgb(152_64_128/.15)] hover:border-brand/25"
                 >
                   <span className="relative block w-[42%] shrink-0 overflow-hidden" style={{ background: c.block }}>
-                    <span className="absolute inset-[10%_6%] block transition-transform duration-500 ease-soft group-hover:scale-112 group-hover:-rotate-3">
+                    {/* Subtle light sheen on hover */}
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-white/25 opacity-0 transition-opacity duration-400 group-hover:opacity-100"
+                    />
+                    <span className="absolute inset-[10%_6%] block transition-transform duration-500 ease-soft group-hover:scale-115 group-hover:-rotate-4 group-hover:-translate-y-1">
                       <Image
                         src={p.outer.src}
                         alt=""
                         fill
                         sizes="160px"
-                        className="object-contain drop-shadow-[0_8px_10px_rgb(0_0_0/.25)] transition-all duration-500 group-hover:drop-shadow-[0_14px_16px_rgb(0_0_0/.35)]"
+                        className="object-contain drop-shadow-[0_8px_10px_rgb(0_0_0/.25)] transition-all duration-500 group-hover:drop-shadow-[0_16px_22px_rgb(0_0_0/.38)]"
                       />
                     </span>
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center px-4">
-                    <span className="text-[17px] font-bold tracking-[0.04em] uppercase">{LINE_LABEL[c.line]}</span>
+                    <span className="text-[17px] font-bold tracking-[0.04em] uppercase transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
                     <span className="mt-0.5 truncate text-[12.5px] text-muted">{c.kinds}</span>
                     <span className="mt-2 flex items-center justify-between text-[12.5px] font-semibold">
                       <span>
                         {inLine(c.line).length} styles · {PACK}/case
                       </span>
                       <span className="inline-flex items-center gap-1 text-brand">
-                        Shop <Icon name="arrow" className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1" />
+                        Shop <Icon name="arrow" className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1.5" />
                       </span>
                     </span>
                   </span>
@@ -435,26 +512,29 @@ function Pair({
 }) {
   return (
     <span className={`absolute inset-0 block origin-[52%_58%] ${className ?? ""}`}>
-      {/* soft floor shadow with dynamic levitation reaction */}
+      {/* soft floor shadow with synchronized levitation breathing and mouse offset */}
       <span
         aria-hidden="true"
-        className="absolute right-[14%] bottom-[6%] left-[10%] h-[9%] rounded-[50%] bg-black/20 blur-[18px] transition-transform duration-200 ease-out"
+        className="absolute right-[14%] bottom-[6%] left-[10%] h-[9%] transition-transform duration-200 ease-out"
         style={
           shadowOffset
             ? {
-                transform: `translate(${(-shadowOffset.x * 12).toFixed(1)}px, ${(-shadowOffset.y * 6).toFixed(1)}px) scale(${1 - Math.abs(shadowOffset.y) * 0.08})`,
+                transform: `translate(${(-shadowOffset.x * 14).toFixed(1)}px, ${(-shadowOffset.y * 8).toFixed(1)}px)`,
               }
             : undefined
         }
-      />
+      >
+        <span className="block size-full rounded-[50%] bg-black/22 blur-[18px] animate-[hero-shadow-breathe_5.5s_ease-in-out_infinite] motion-reduce:animate-none" />
+      </span>
       <Image
         src={p.outer.src}
         alt={`Chime Long ${p.name}: ${p.desc}`}
         fill
         preload={preload}
         sizes="(min-width: 64rem) 50vw, 90vw"
-        className="-scale-x-100 object-contain drop-shadow-[0_26px_26px_rgb(18_20_22/.22)]"
+        className="-scale-x-100 object-contain drop-shadow-[0_26px_26px_rgb(18_20_22/.22)] will-change-transform"
       />
     </span>
   );
 }
+

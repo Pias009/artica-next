@@ -1,6 +1,7 @@
 import { BestSellers } from "@/components/home/BestSellers";
 import { BuyerTypes } from "@/components/home/BuyerTypes";
 import { ColdTest } from "@/components/home/ColdTest";
+import { FactoryWorkshop } from "@/components/home/FactoryWorkshop";
 import { HeroSpotlight } from "@/components/home/HeroSpotlight";
 import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
@@ -21,6 +22,7 @@ export default function Home() {
     <>
       <HeroSpotlight />
       <NewArrivals />
+      <FactoryWorkshop />
       <BestSellers />
       <Showroom />
       <BuyerTypes />
