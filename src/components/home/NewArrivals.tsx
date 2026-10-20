@@ -26,11 +26,11 @@ const NEW_ARRIVAL_SLUGS = [
   "bluebell",
 ];
 
-const AUTOPLAY_MS = 4500;
+const AUTOPLAY_MS = 5000;
 
 type CategoryFilter = "all" | ProductLine;
 
-/** Category display configuration tailored for wholesale buyers */
+/** Category display configuration tailored for professional wholesale presentation */
 export const CATEGORY_CONFIG: Record<
   ProductLine,
   {
@@ -38,7 +38,7 @@ export const CATEGORY_CONFIG: Record<
     fullName: string;
     badgeClass: string;
     dotClass: string;
-    tagClass: string;
+    borderAccent: string;
   }
 > = {
   men: {
@@ -46,21 +46,21 @@ export const CATEGORY_CONFIG: Record<
     fullName: "Men's Collection",
     badgeClass: "bg-slate-900 text-white border-slate-700",
     dotClass: "bg-sky-400",
-    tagClass: "bg-slate-100 text-slate-800 border-slate-200",
+    borderAccent: "hover:border-slate-800",
   },
   women: {
     name: "Women",
     fullName: "Women's Collection",
     badgeClass: "bg-[#7c2d58] text-white border-[#672248]",
     dotClass: "bg-pink-300",
-    tagClass: "bg-pink-50 text-[#7c2d58] border-pink-200",
+    borderAccent: "hover:border-[#7c2d58]",
   },
   kids: {
     name: "Children",
     fullName: "Children's Collection",
     badgeClass: "bg-[#b45309] text-white border-[#92400e]",
     dotClass: "bg-amber-300",
-    tagClass: "bg-amber-50 text-[#92400e] border-amber-200",
+    borderAccent: "hover:border-[#b45309]",
   },
 };
 
@@ -86,7 +86,7 @@ export function NewArrivals() {
   const toggleInquiry = useInquiry((s) => s.toggle);
   const autoPlayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
-  const railContainerRef = useRef<HTMLDivElement | null>(null);
+  const filmstripRef = useRef<HTMLDivElement | null>(null);
 
   // Filter items by category
   const visibleItems =
@@ -129,10 +129,10 @@ export function NewArrivals() {
     };
   }, [isPaused, advanceShoe]);
 
-  // Smooth scroll active item into view in bottom rail
+  // Smooth scroll active item into view in filmstrip
   useEffect(() => {
-    if (!railContainerRef.current) return;
-    const activeEl = railContainerRef.current.querySelector(
+    if (!filmstripRef.current) return;
+    const activeEl = filmstripRef.current.querySelector(
       `[data-shoe-id="${activeId}"]`,
     ) as HTMLElement | null;
     if (activeEl) {
@@ -187,29 +187,33 @@ export function NewArrivals() {
       aria-labelledby="h-new"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="my-[clamp(60px,8vw,110px)] scroll-mt-20 select-none relative overflow-x-clip"
+      className="my-[clamp(56px,7vw,96px)] scroll-mt-20 select-none relative overflow-x-clip"
     >
-      {/* CENTERED HEADER: Grand Headline + Category Filter Pills */}
-      <div className="flex flex-col items-center text-center pb-6 sm:pb-9">
-        <div className="inline-flex items-center gap-2.5">
-          <h2
-            id="h-new"
-            className="font-headline text-[30px] sm:text-[40px] lg:text-[48px] font-semibold tracking-[-0.03em] text-ink"
-          >
-            New Arrival Silhouettes
-          </h2>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold text-brand uppercase tracking-wider">
-            <span className="size-1.5 rounded-full bg-brand animate-pulse" />
-            {visibleItems.length} Styles
+      {/* PROFESSIONAL HEADER: Clean Editorial Hierarchy */}
+      <div className="flex flex-col items-center text-center pb-6 sm:pb-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3.5 py-1 text-[11px] font-bold tracking-[0.14em] text-brand uppercase backdrop-blur-sm">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
+            <span className="relative inline-flex size-2 rounded-full bg-brand" />
           </span>
+          <span>Wholesale Showcase 2026</span>
+          <span className="text-brand/40">·</span>
+          <span>{visibleItems.length} Silhouettes</span>
         </div>
 
-        {/* Centered Category Filter Pills: All Styles · Men · Women · Children (Kids) */}
+        <h2
+          id="h-new"
+          className="mt-3 font-headline text-[32px] sm:text-[42px] lg:text-[46px] font-semibold tracking-[-0.03em] text-ink"
+        >
+          New Arrival Silhouettes
+        </h2>
+
+        {/* Category Filter Pills: All Styles · Men · Women · Children (Kids) */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           <div
             role="tablist"
             aria-label="Filter new arrivals by category"
-            className="inline-flex items-center rounded-full border border-ink/10 bg-white/95 p-1.5 shadow-2xs backdrop-blur-md"
+            className="inline-flex items-center rounded-full border border-ink/10 bg-white/95 p-1 shadow-2xs backdrop-blur-md"
           >
             {(
               [
@@ -231,13 +235,13 @@ export function NewArrivals() {
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => handleFilterChange(cat.id)}
-                  className={`rounded-full px-4 sm:px-5 py-2 text-[13px] font-semibold transition-all duration-200 ${
+                  className={`rounded-full px-4 sm:px-5 py-2 text-[12.5px] sm:text-[13px] font-semibold transition-all duration-200 cursor-pointer ${
                     isSelected
                       ? "bg-ink text-white shadow-xs"
                       : "text-ink-2 hover:bg-tile hover:text-ink"
                   }`}
                 >
-                  {cat.label} ({count})
+                  {cat.label} <span className="opacity-60 text-[11px]">({count})</span>
                 </button>
               );
             })}
@@ -245,7 +249,7 @@ export function NewArrivals() {
 
           <Link
             href="/catalog"
-            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-ink/15 bg-white px-5 text-[13px] font-semibold text-ink transition-colors hover:border-ink hover:bg-tile shadow-2xs"
+            className="inline-flex h-9.5 items-center gap-1.5 rounded-full border border-ink/15 bg-white px-4.5 text-[12.5px] font-semibold text-ink transition-all hover:border-ink hover:bg-tile shadow-2xs"
           >
             <span>Explore Catalog</span>
             <Icon name="arrow" className="size-3" />
@@ -253,56 +257,82 @@ export function NewArrivals() {
         </div>
       </div>
 
-      {/* TALL & GRAND GROUNDED 3D STUDIO STAGE */}
+      {/* MASTER STUDIO RUNWAY STAGE */}
       <div
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="relative mt-2 h-[560px] sm:h-[640px] md:h-[700px] lg:h-[760px] xl:h-[800px] w-full rounded-3xl border border-ink/8 bg-gradient-to-b from-[#fefefe] via-[#f7f8f4] to-[#edf0e7] shadow-[0_24px_70px_-25px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.9)] [perspective:1300px] overflow-hidden flex items-end justify-center select-none"
+        className="relative h-[500px] sm:h-[560px] lg:h-[600px] w-full rounded-3xl border border-ink/10 bg-gradient-to-b from-[#fafbfa] via-[#f4f5f1] to-[#eaede3] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] [perspective:1200px] overflow-hidden flex items-end justify-center select-none"
       >
-        {/* Studio Floor Horizon Gradient */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[200px] bg-gradient-to-t from-black/[0.06] via-black/[0.02] to-transparent" />
+        {/* Soft Ambient Rim Light & Vignette */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.85),transparent_70%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_75%,rgba(152,64,128,0.08),transparent_65%)]" />
 
-        {/* Ambient Center Spotlight Radial Glow */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_72%,rgba(152,64,128,0.10),transparent_68%)]" />
+        {/* Physical Studio Floor Pedestal Ellipse */}
+        <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 w-[80%] max-w-[760px] h-32 rounded-[100%] bg-gradient-to-t from-black/[0.04] to-transparent blur-md" />
 
-        {/* Top Soft Studio Rim Light */}
-        <div className="pointer-events-none absolute top-0 inset-x-0 h-40 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.8),transparent_70%)]" />
+        {/* Top-Right Angle Toggle Pill (Outer / Inner Zip) */}
+        {activeShoe.zip && (
+          <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-40 inline-flex items-center rounded-full border border-ink/10 bg-white/90 p-0.5 text-[11px] font-semibold shadow-2xs backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => setViewAngle("outer")}
+              className={`rounded-full px-3 py-1 transition-all cursor-pointer ${
+                viewAngle === "outer"
+                  ? "bg-ink text-white font-semibold shadow-xs"
+                  : "text-muted hover:text-ink"
+              }`}
+            >
+              Outer View
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewAngle("zip")}
+              className={`rounded-full px-3 py-1 transition-all cursor-pointer ${
+                viewAngle === "zip"
+                  ? "bg-ink text-white font-semibold shadow-xs"
+                  : "text-muted hover:text-ink"
+              }`}
+            >
+              Inner Zip
+            </button>
+          </div>
+        )}
 
-        {/* Previous Flanking Arrow */}
+        {/* Navigation Arrow: Previous */}
         <button
           type="button"
           onClick={() => advanceShoe(-1)}
           aria-label="Previous style"
-          className="absolute left-4 sm:left-7 top-1/2 -translate-y-1/2 z-40 grid size-12 place-items-center rounded-full border border-ink/10 bg-white/95 text-ink shadow-soft backdrop-blur-md transition-all hover:bg-white hover:scale-110 active:scale-95"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-40 grid size-11 place-items-center rounded-full border border-ink/10 bg-white/95 text-ink shadow-soft backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 cursor-pointer"
         >
           <Icon name="arrow" className="size-4 rotate-180" />
         </button>
 
-        {/* Next Flanking Arrow */}
+        {/* Navigation Arrow: Next */}
         <button
           type="button"
           onClick={() => advanceShoe(1)}
           aria-label="Next style"
-          className="absolute right-4 sm:right-7 top-1/2 -translate-y-1/2 z-40 grid size-12 place-items-center rounded-full border border-ink/10 bg-white/95 text-ink shadow-soft backdrop-blur-md transition-all hover:bg-white hover:scale-110 active:scale-95"
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-40 grid size-11 place-items-center rounded-full border border-ink/10 bg-white/95 text-ink shadow-soft backdrop-blur-md transition-all hover:bg-white hover:scale-105 active:scale-95 cursor-pointer"
         >
           <Icon name="arrow" className="size-4" />
         </button>
 
-        {/* 3D GROUNDED RUNWAY: All shoe soles aligned to the same baseline floor */}
+        {/* 3D GROUNDED RUNWAY: Calibrated Footwear Proportions */}
         <div className="relative size-full [transform-style:preserve-3d]">
           {visibleItems.map((shoe, idx) => {
             const offset = getCircularOffset(idx, currentIndex, visibleItems.length);
             const isCenter = offset === 0;
             const absOffset = Math.abs(offset);
 
-            // Hide items further than 3 positions away
-            if (absOffset > 3) return null;
+            // Hide distant items beyond 2 positions to prevent visual collision
+            if (absOffset > 2) return null;
 
             const sign = Math.sign(offset);
 
-            // Responsive 3D transform metrics grounded on floor (bottom-aligned)
+            // Calibrated 3D Transform metrics with spacious clearance
             let tx = "0px";
-            let tz = 60;
+            let tz = 50;
             let ry = 0;
             let scale = 1;
             let opacity = 1;
@@ -310,32 +340,25 @@ export function NewArrivals() {
 
             if (isCenter) {
               tx = "0px";
-              tz = 60;
+              tz = 50;
               ry = 0;
               scale = 1;
               opacity = 1;
               zIndex = 30;
             } else if (absOffset === 1) {
-              tx = `${sign} * clamp(230px, 30vw, 400px)`;
-              tz = -50;
-              ry = -sign * 22;
-              scale = 0.8;
-              opacity = 0.75;
+              tx = `${sign} * clamp(290px, 35vw, 440px)`;
+              tz = -70;
+              ry = -sign * 24;
+              scale = 0.72;
+              opacity = 0.52;
               zIndex = 20;
             } else if (absOffset === 2) {
-              tx = `${sign} * clamp(420px, 52vw, 710px)`;
-              tz = -150;
-              ry = -sign * 34;
-              scale = 0.58;
-              opacity = 0.42;
+              tx = `${sign} * clamp(520px, 62vw, 760px)`;
+              tz = -170;
+              ry = -sign * 36;
+              scale = 0.48;
+              opacity = 0.18;
               zIndex = 10;
-            } else if (absOffset === 3) {
-              tx = `${sign} * clamp(580px, 72vw, 960px)`;
-              tz = -250;
-              ry = -sign * 44;
-              scale = 0.4;
-              opacity = 0.16;
-              zIndex = 5;
             }
 
             const currentImageSrc =
@@ -355,8 +378,8 @@ export function NewArrivals() {
                 aria-current={isCenter ? "true" : undefined}
                 style={{
                   left: "50%",
-                  bottom: "96px",
-                  transformOrigin: "50% 100%", // Scale from the sole up so all shoes remain planted on floor!
+                  bottom: "90px",
+                  transformOrigin: "50% 100%", // Scale from sole so ground contact remains anchored
                   transform: `translate3d(calc(-50% + ${tx}), 0, ${tz}px) rotateY(${ry}deg) scale(${scale})`,
                   opacity,
                   zIndex,
@@ -364,40 +387,46 @@ export function NewArrivals() {
                     "transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s ease, filter 0.65s ease",
                 }}
                 className={`absolute cursor-pointer flex flex-col items-center justify-end will-change-transform ${
-                  isCenter ? "pointer-events-auto" : "pointer-events-auto hover:opacity-95"
+                  isCenter ? "pointer-events-auto" : "pointer-events-auto hover:opacity-90"
                 }`}
               >
-                {/* Ground Contact Floor Shadow (scales naturally with shoe) */}
+                {/* Dual Contact Ground Shadow (Crisp occlusion + soft ambient spread) */}
                 <div
                   aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-[50%] bg-ink/25 blur-[14px] transition-all duration-500 ${
-                    isCenter ? "h-6 w-[88%] opacity-100" : "h-4 w-[70%] opacity-45"
+                  className={`pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-[50%] bg-black/40 blur-[5px] transition-all duration-500 ${
+                    isCenter ? "h-2.5 w-[75%] opacity-100" : "h-2 w-[60%] opacity-40"
+                  }`}
+                />
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -bottom-2.5 left-1/2 -translate-x-1/2 rounded-[50%] bg-black/15 blur-[14px] transition-all duration-500 ${
+                    isCenter ? "h-5 w-[90%] opacity-100" : "h-3.5 w-[70%] opacity-30"
                   }`}
                 />
 
-                {/* Studio Floor Mirror Reflection */}
+                {/* Subtle Studio Floor Reflection */}
                 <div
                   aria-hidden="true"
-                  className={`pointer-events-none absolute -bottom-[105px] sm:-bottom-[125px] left-1/2 -translate-x-1/2 w-full h-[105px] sm:h-[125px] overflow-hidden -scale-y-100 blur-[0.6px] transition-opacity duration-300 ${
-                    isCenter ? "opacity-20" : "opacity-7"
+                  className={`pointer-events-none absolute -bottom-[75px] sm:-bottom-[90px] left-1/2 -translate-x-1/2 w-full h-[75px] sm:h-[90px] overflow-hidden -scale-y-100 blur-[0.6px] transition-opacity duration-300 ${
+                    isCenter ? "opacity-15" : "opacity-5"
                   }`}
                   style={{
-                    maskImage: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 85%)",
-                    WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 85%)",
+                    maskImage: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 80%)",
+                    WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 80%)",
                   }}
                 >
                   <Image
                     src={currentImageSrc}
                     alt=""
                     fill
-                    sizes="(max-width: 640px) 90vw, 700px"
+                    sizes="(max-width: 640px) 380px, 500px"
                     className="object-contain object-bottom"
                   />
                 </div>
 
-                {/* Grounded Shoe Container (tall, prominent, high presence) */}
+                {/* Grounded Shoe Container: Calibrated, Crisp Professional Scale */}
                 <div
-                  className={`relative h-[310px] sm:h-[380px] md:h-[430px] lg:h-[480px] xl:h-[510px] aspect-[1.38] flex items-end justify-center transition-transform duration-300 ${
+                  className={`relative w-[320px] sm:w-[390px] lg:w-[440px] h-[210px] sm:h-[260px] lg:h-[290px] flex items-end justify-center transition-transform duration-300 ${
                     isCenter
                       ? "animate-[hero-float-soft_5s_ease-in-out_infinite]"
                       : "hover:scale-104"
@@ -408,148 +437,117 @@ export function NewArrivals() {
                     alt={`Chime Long ${shoe.name}`}
                     fill
                     priority={isCenter}
-                    sizes="(max-width: 640px) 90vw, 700px"
-                    className="object-contain object-bottom drop-shadow-[0_20px_35px_rgba(18,20,22,0.22)] transition-all duration-300"
+                    sizes="(max-width: 640px) 380px, 500px"
+                    className="object-contain object-bottom drop-shadow-[0_16px_25px_rgba(18,20,22,0.18)] transition-all duration-300"
                   />
                 </div>
 
-                {/* PROMINENT SHOE NAME + CATEGORY (Men, Women, Children) BADGE */}
-                {!isCenter && absOffset <= 2 ? (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/95 border border-ink/10 px-3.5 py-1.5 shadow-xs backdrop-blur-md transition-all duration-200 hover:scale-105 hover:border-brand/40 hover:shadow-sm">
+                {/* Prominent Shoe Name + Category Badge */}
+                {!isCenter ? (
+                  <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/90 px-3 py-1 text-[11px] font-medium shadow-2xs backdrop-blur-md">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
+                      className={`rounded-full px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
                     >
                       {catConfig.name}
                     </span>
-                    <span className="font-bold text-ink text-[12px]">{shoe.name}</span>
-                    <span className="text-muted text-[11px] hidden sm:inline">
-                      · {categoryOf(shoe)}
-                    </span>
+                    <span className="font-semibold text-ink">{shoe.name}</span>
                   </div>
-                ) : isCenter ? (
-                  <div className="mt-3 inline-flex items-center gap-2.5 rounded-full bg-white/95 border border-ink/15 px-4 py-1.5 text-[12px] shadow-sm backdrop-blur-md">
+                ) : (
+                  <div className="mt-3.5 inline-flex items-center gap-2.5 rounded-full border border-ink/12 bg-white/95 px-4 py-1.5 shadow-xs backdrop-blur-md">
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
                     >
                       <span className={`size-1.5 rounded-full ${catConfig.dotClass} animate-pulse`} />
-                      {catConfig.fullName}
+                      {catConfig.name}
                     </span>
                     <span className="font-bold text-ink text-[14px] tracking-tight">
                       {shoe.name}
                     </span>
-                    <span className="text-muted text-[12px]">· {categoryOf(shoe)}</span>
+                    <span className="text-muted text-[11.5px]">· {categoryOf(shoe)}</span>
                   </div>
-                ) : null}
+                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* ACTIVE PRODUCT INFO & ACTIONS */}
-      <div className="mt-5 sm:mt-7 flex flex-col items-center gap-3.5">
-        {/* Active Shoe Detailed Spec Capsule */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 text-[13px]">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 rounded-2xl sm:rounded-full border border-ink/10 bg-white/95 px-5 py-2 shadow-2xs backdrop-blur-md">
-            {/* Category tag: Men, Women, Children */}
+      {/* UNIFIED WHOLESALE CONSOLE: Specifications & Inquiries */}
+      <div className="mt-5 rounded-2xl border border-ink/10 bg-white/95 p-4 sm:p-5 shadow-2xs backdrop-blur-md">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          {/* Active Style Identifiers */}
+          <div className="flex flex-wrap items-center gap-3 max-lg:text-center max-lg:justify-center">
             <span
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${CATEGORY_CONFIG[activeShoe.line].badgeClass}`}
+              className={`rounded-full px-3 py-1 text-[10.5px] font-bold uppercase tracking-wider ${CATEGORY_CONFIG[activeShoe.line].badgeClass}`}
             >
-              Category: {CATEGORY_CONFIG[activeShoe.line].name}
+              {CATEGORY_CONFIG[activeShoe.line].fullName}
             </span>
-            <span className="size-1 rounded-full bg-ink/20 hidden sm:inline" />
-            <span className="text-[16px] sm:text-[17px] font-bold tracking-tight text-ink">
+
+            <h3 className="text-[20px] sm:text-[22px] font-bold tracking-tight text-ink">
               {activeShoe.name}
-            </span>
-            <span className="text-muted hidden sm:inline">
+            </h3>
+
+            <span className="text-[14px] text-muted">
               · {categoryOf(activeShoe)}
             </span>
-            <span className="size-1 rounded-full bg-ink/20 hidden sm:inline" />
-            <span className="flex items-center gap-1.5 font-medium text-ink">
+
+            <span className="hidden sm:inline-block size-1 rounded-full bg-ink/20" />
+
+            {/* Color Swatch */}
+            <div className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink">
               <span
                 className="size-3.5 rounded-full ring-1 ring-ink/15 shadow-2xs"
                 style={{ background: activeShoe.color.hex }}
               />
               <span>{activeShoe.color.name}</span>
+            </div>
+
+            <span className="hidden sm:inline-block size-1 rounded-full bg-ink/20" />
+
+            {/* Wholesale Terms */}
+            <span className="text-[13px] font-medium text-ink-2">
+              {MOQ_PAIRS} prs MOQ
             </span>
-            <span className="text-muted">· {MOQ_PAIRS} pairs MOQ</span>
-            <span className="text-muted hidden md:inline">· {activeShoe.spec}</span>
+            <span className="text-[13px] text-muted hidden md:inline">
+              · {activeShoe.sizes}
+            </span>
+            <span className="text-[13px] text-muted hidden lg:inline">
+              · {activeShoe.spec}
+            </span>
           </div>
 
-          {activeShoe.zip && (
-            <div className="inline-flex items-center rounded-full border border-ink/10 bg-white/90 p-0.5 text-[11.5px] font-medium shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setViewAngle("outer")}
-                className={`rounded-full px-3 py-1 transition-all ${
-                  viewAngle === "outer"
-                    ? "bg-ink text-white font-semibold"
-                    : "text-muted hover:text-ink"
-                }`}
-              >
-                Outer
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewAngle("zip")}
-                className={`rounded-full px-3 py-1 transition-all ${
-                  viewAngle === "zip"
-                    ? "bg-ink text-white font-semibold"
-                    : "text-muted hover:text-ink"
-                }`}
-              >
-                Inner Zip
-              </button>
-            </div>
-          )}
-        </div>
+          {/* Action CTAs */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => toggleInquiry(activeShoe.id)}
+              className={`inline-flex h-10 items-center gap-2 rounded-full px-5 text-[13px] font-semibold transition-all shadow-xs active:scale-95 cursor-pointer ${
+                inCart
+                  ? "bg-brand text-white hover:bg-brand-deep"
+                  : "bg-ink text-white hover:bg-ink-2"
+              }`}
+            >
+              <Icon name={inCart ? "check" : "plus"} className="size-3.5" />
+              <span>{inCart ? "In Inquiry List" : "Add to Inquiry"}</span>
+            </button>
 
-        {/* Primary Action Buttons */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => toggleInquiry(activeShoe.id)}
-            className={`inline-flex h-10 items-center gap-2 rounded-full px-5 text-[13px] font-semibold transition-all shadow-xs active:scale-95 ${
-              inCart
-                ? "bg-brand text-white hover:bg-brand-deep"
-                : "bg-ink text-white hover:bg-ink-2"
-            }`}
-          >
-            <Icon name={inCart ? "check" : "plus"} className="size-3.5" />
-            <span>{inCart ? "In Inquiry List" : "Add to Inquiry"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => openQuickView(activeShoe.id)}
-            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-ink/15 bg-white px-4.5 text-[13px] font-semibold text-ink shadow-2xs transition-all hover:border-ink hover:bg-tile active:scale-95"
-          >
-            <span>Quick View</span>
-            <Icon name="arrow" className="size-3" />
-          </button>
+            <button
+              type="button"
+              onClick={() => openQuickView(activeShoe.id)}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full border border-ink/15 bg-white px-4.5 text-[13px] font-semibold text-ink shadow-2xs transition-all hover:border-ink hover:bg-tile active:scale-95 cursor-pointer"
+            >
+              <span>Quick View</span>
+              <Icon name="arrow" className="size-3" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ALL SILHOUETTES QUICK SELECTOR DOCK: Displays Shoe Name & Category (Men, Women, Children) for all styles */}
-      <div className="mt-7 w-full">
-        <div className="flex items-center justify-between pb-2.5 px-1 text-[12px]">
-          <div className="flex items-center gap-2 font-bold text-ink">
-            <span className="text-brand font-mono text-[11px] tracking-wider uppercase">
-              Silhouette Selector
-            </span>
-            <span className="text-black/15">·</span>
-            <span className="text-muted font-normal text-[11.5px]">
-              Click any style to bring to 3D center stage
-            </span>
-          </div>
-          <span className="text-[11px] text-muted font-medium">
-            {visibleItems.length} {visibleItems.length === 1 ? "Style" : "Styles"}
-          </span>
-        </div>
-
+      {/* INTERACTIVE SILHOUETTES FILMSTRIP */}
+      <div className="mt-4 w-full">
         <div
-          ref={railContainerRef}
-          className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 px-1 scrollbar-none snap-x snap-mandatory"
+          ref={filmstripRef}
+          className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x snap-mandatory"
         >
           {visibleItems.map((shoe) => {
             const isActive = shoe.id === activeShoe.id;
@@ -562,28 +560,28 @@ export function NewArrivals() {
                 data-shoe-id={shoe.id}
                 onClick={() => handleSelectShoe(shoe.id)}
                 aria-label={`Select ${shoe.name}, Category: ${catConfig.name}`}
-                className={`group flex-shrink-0 snap-start flex items-center gap-3 rounded-2xl border p-2 sm:p-2.5 transition-all duration-300 text-left cursor-pointer ${
+                className={`group flex-shrink-0 snap-start flex items-center gap-2.5 rounded-xl border p-2 transition-all duration-200 text-left cursor-pointer ${
                   isActive
                     ? "border-brand bg-white shadow-soft ring-2 ring-brand/20 -translate-y-0.5"
-                    : "border-ink/10 bg-white/80 hover:bg-white hover:border-ink/30 shadow-2xs hover:shadow-xs"
+                    : "border-ink/10 bg-white/75 hover:bg-white hover:border-ink/25 shadow-2xs"
                 }`}
               >
-                {/* Thumbnail */}
-                <div className="relative size-13 sm:size-15 rounded-xl bg-[#f4f5f1] overflow-hidden flex-shrink-0">
+                {/* Footwear Thumbnail */}
+                <div className="relative size-12 rounded-lg bg-[#f4f5f1] overflow-hidden flex-shrink-0">
                   <Image
                     src={shoe.outer.src}
                     alt={shoe.name}
                     fill
-                    sizes="60px"
-                    className="object-contain p-1"
+                    sizes="48px"
+                    className="object-contain p-0.5"
                   />
                 </div>
 
-                {/* Info: Category (Men, Women, Children) & Shoe Name */}
-                <div className="min-w-[125px] sm:min-w-[145px] pr-2">
-                  <div className="flex items-center gap-1.5">
+                {/* Footwear Identity */}
+                <div className="min-w-[105px] pr-1.5">
+                  <div className="flex items-center gap-1">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
+                      className={`rounded px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-wider ${catConfig.badgeClass}`}
                     >
                       {catConfig.name}
                     </span>
@@ -591,11 +589,8 @@ export function NewArrivals() {
                       <span className="size-1.5 rounded-full bg-brand animate-pulse" />
                     )}
                   </div>
-                  <div className="mt-1 font-bold text-ink text-[13px] sm:text-[14px] group-hover:text-brand transition-colors">
+                  <div className="mt-0.5 font-bold text-ink text-[12.5px] group-hover:text-brand transition-colors">
                     {shoe.name}
-                  </div>
-                  <div className="text-muted text-[11px] truncate">
-                    {categoryOf(shoe)}
                   </div>
                 </div>
               </button>
@@ -604,64 +599,41 @@ export function NewArrivals() {
         </div>
       </div>
 
-      {/* SLEEK STUDIO PAGINATION & AUTO-SLIDE BAR */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink/8 pt-3">
-        {/* Active Shoe Name & Counter */}
-        <div className="flex items-center gap-2 text-[12px] font-bold text-ink">
+      {/* STUDIO STATUS & AUTO-SLIDE BAR */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-ink/8 pt-3 text-[12px]">
+        {/* Active Index & Label */}
+        <div className="flex items-center gap-2 font-bold text-ink">
           <span className="tabular-nums text-brand font-mono">0{currentIndex + 1}</span>
           <span className="text-muted font-normal">/</span>
           <span className="tabular-nums text-muted font-mono">0{visibleItems.length}</span>
           <span className="text-black/15">·</span>
           <span className="tracking-tight">{activeShoe.name}</span>
-          <span className="text-muted font-normal text-[11px] hidden sm:inline">
+          <span className="text-muted font-normal text-[11.5px] hidden sm:inline">
             ({CATEGORY_CONFIG[activeShoe.line].fullName})
           </span>
         </div>
 
-        {/* Interactive Pagination Indicators with Auto-slide Progress */}
-        <div className="flex items-center gap-1.5" role="tablist" aria-label="Product navigation">
-          {visibleItems.map((shoe, idx) => {
-            const isActive = idx === currentIndex;
-            return (
-              <button
-                key={shoe.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-label={`Go to ${shoe.name}`}
-                onClick={() => handleSelectShoe(shoe.id)}
-                className={`group relative h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer ${
-                  isActive ? "w-8 bg-brand/20" : "w-2 bg-ink/15 hover:bg-ink/35"
-                }`}
-              >
-                {isActive && (
-                  <span
-                    className="absolute inset-0 rounded-full bg-brand origin-left"
-                    style={{
-                      animation: isPaused ? "none" : `spot-progress ${AUTOPLAY_MS}ms linear both`,
-                      width: isPaused ? "100%" : undefined,
-                    }}
-                  />
-                )}
-                {/* Tooltip on hover */}
-                <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink/90 px-2 py-0.5 text-[10px] font-semibold text-white opacity-0 shadow-xs transition-opacity group-hover:opacity-100">
-                  {shoe.name} · {CATEGORY_CONFIG[shoe.line].name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Auto-slide Progress & Toggle */}
+        <div className="flex items-center gap-3">
+          <div className="relative w-28 sm:w-36 h-1 rounded-full bg-ink/10 overflow-hidden">
+            <div
+              key={activeShoe.id}
+              className="absolute inset-y-0 left-0 bg-brand rounded-full"
+              style={{
+                animation: isPaused ? "none" : `spot-progress ${AUTOPLAY_MS}ms linear both`,
+                width: isPaused ? "100%" : undefined,
+              }}
+            />
+          </div>
 
-        {/* Auto-slide Toggle */}
-        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setIsPaused((v) => !v)}
             aria-label={isPaused ? "Resume auto-slide" : "Pause auto-slide"}
-            className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white/90 px-3.5 py-1 text-[11px] font-semibold text-ink shadow-2xs hover:bg-white hover:border-ink/25 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink shadow-2xs hover:bg-white hover:border-ink/25 transition-all cursor-pointer"
           >
             <Icon name={isPaused ? "play" : "pause"} className="size-2.5" />
-            <span>{isPaused ? "Resume Auto-slide" : "Auto-sliding"}</span>
+            <span>{isPaused ? "Resume" : "Auto-sliding"}</span>
           </button>
         </div>
       </div>
