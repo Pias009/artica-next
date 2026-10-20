@@ -32,7 +32,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: { default: "Guangzhou Chime Long Trading Co., Ltd", template: "%s · Chime Long" },
-  description: "Wholesale winter boots for retailers, distributors and private-label brands worldwide.",
+  description: "Wholesale footwear for retailers, distributors and private-label brands worldwide.",
 };
 
 export const viewport: Viewport = {

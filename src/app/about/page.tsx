@@ -28,7 +28,7 @@ const PILLARS = [
   {
     title: "Thermal Foil Strobel",
     subtitle: "Ground Cold Decoupling",
-    desc: "Over 70% of winter heat loss occurs directly through the frozen pavement. Our soles integrate an aluminum thermal foil strobel board that radiates body heat back into the footbed.",
+    desc: "Over 70% of conductive heat loss occurs directly through cold pavement. Our soles integrate an aluminum thermal foil strobel board that radiates warmth back into the footbed.",
   },
 ];
 
@@ -44,9 +44,9 @@ export default function AboutPage() {
     <>
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "About Chime Long" }]}
-        eyebrow="Specialist Cold-Weather Footwear Engineering"
+        eyebrow="Specialist Footwear Engineering"
         title="Engineered for harsh retail realities."
-        text="Chime Long was founded to eliminate the high return rates and poor cold-weather durability of conventional fashion winter boots. We build boots that keep trade buyers and end consumers loyal season after season."
+        text="Chime Long was founded to eliminate the high return rates and poor durability of conventional fashion footwear. We build footwear that keeps trade buyers and end consumers loyal year after year."
       />
 
       {/* Story & Philosophy */}
@@ -65,7 +65,7 @@ export default function AboutPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/catalog" className="btn btn-dark">
-                View current FW26 collection <Icon name="arrow" />
+                View current collection <Icon name="arrow" />
               </Link>
               <OpenInquiryButton className="btn btn-line">
                 Book a showroom visit
@@ -156,8 +156,8 @@ export default function AboutPage() {
       <section className="mt-sec mb-4 flex flex-col items-center justify-between gap-4 rounded-shell border border-line/60 bg-accent p-8 text-center text-on-accent md:flex-row md:text-left">
         <div>
           <span className="mono-label text-kraft text-[10px]">PARTNER WITH CHIME LONG</span>
-          <h2 className="text-2xl font-extrabold uppercase mt-1">Request seasonal line sheet & samples</h2>
-          <p className="mt-1 text-xs text-white/80">Experience the leather hand-feel and sub-zero grip firsthand.</p>
+          <h2 className="text-2xl font-extrabold uppercase mt-1">Request wholesale line sheet & samples</h2>
+          <p className="mt-1 text-xs text-white/80">Experience the leather hand-feel and durable construction firsthand.</p>
         </div>
         <OpenInquiryButton className="btn bg-surface text-ink hover:bg-white shadow-soft">
           Request Line Sheet <Icon name="arrow" />

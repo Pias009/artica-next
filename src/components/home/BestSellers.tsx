@@ -50,7 +50,7 @@ export function BestSellers() {
     <section ref={ref} id="styles" aria-labelledby="h-styles" className="mt-sec scroll-mt-24">
       <SectionHead
         id="h-styles"
-        title="The FW26 range, by line"
+        title="The wholesale range, by line"
         sub="Every style, line by line. Slide a row, or open the whole line."
         right={
           <div className="flex items-center gap-5">

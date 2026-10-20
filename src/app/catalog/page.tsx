@@ -5,7 +5,7 @@ import { FILTERS, isFilter } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Catalog",
-  description: "Wholesale winter boots for men, women and kids. MOQ 300 pairs, 12 pairs per case.",
+  description: "Wholesale footwear for men, women and kids. MOQ 300 pairs, 12 pairs per case.",
 };
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ line?: string; q?: string }> }) {
@@ -17,7 +17,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     <>
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Catalog" }]}
-        eyebrow="Fall/Winter 26 line sheet"
+        eyebrow="Wholesale catalog line sheet"
         title={filter === "all" ? "All products" : `${label} styles`}
         text="Every style ships from 300 pairs, packed 12 per case with mixed size runs."
       />

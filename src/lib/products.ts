@@ -103,7 +103,7 @@ export const products: Product[] = [
     id: "p04",
     slug: "nord",
     name: "Nord",
-    type: "Winter leather lace-up",
+    type: "Leather lace-up boot",
     line: "men",
     badge: "Top reorder",
     sizes: "US 7–13",

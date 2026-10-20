@@ -7,7 +7,7 @@ import { PRIVATE_LABEL_MIN } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Private Label & OEM Manufacturing",
-  description: "Bespoke winter boot development for private-label retailers and brands. MOQ from 600 pairs, custom outsoles, leathers, hardware and packaging.",
+  description: "Bespoke footwear development for private-label retailers and brands. MOQ from 600 pairs, custom outsoles, leathers, hardware and packaging.",
 };
 
 const CAPABILITIES: {
@@ -144,8 +144,8 @@ export default function PrivateLabelPage() {
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Private label" }]}
         eyebrow="OEM & Custom Footwear Atelier"
-        title="Your brand. Our sub-zero engineering."
-        text="Turnkey private-label and OEM winter boot manufacturing for retailers, apparel brands, and department store programs worldwide."
+        title="Your brand. Our precision footwear engineering."
+        text="Turnkey private-label and OEM footwear manufacturing for retailers, apparel brands, and department store programs worldwide."
       />
 
       {/* Hero Overview Banner */}

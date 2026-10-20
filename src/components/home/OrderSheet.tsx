@@ -78,7 +78,7 @@ export function OrderSheet() {
               <Logo />
               <p className="mt-2 text-[13px] font-semibold text-brand">Guangzhou Chime Long Trading Co., Ltd</p>
               <p className="mt-4 text-[clamp(26px,3vw,36px)] leading-none font-semibold tracking-[-0.03em]">Order sheet</p>
-              <p className="mt-1 text-[14px] text-muted">Fall/Winter 26 · Trade buyers only</p>
+              <p className="mt-1 text-[14px] text-muted">Wholesale · Trade buyers only</p>
             </div>
             <dl className="grid grid-cols-[auto_minmax(140px,1fr)] gap-x-4 gap-y-1.5 text-[13px]">
               {[

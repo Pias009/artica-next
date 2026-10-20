@@ -28,7 +28,7 @@ export function LinePeek({ line }: { line: ProductLine }) {
   return (
     <div className="grid gap-8 p-6 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:p-7">
       <div className="flex flex-col">
-        <p className="text-[13px] font-semibold tracking-[0.08em] text-brand uppercase">FW26 · {label}</p>
+        <p className="text-[13px] font-semibold tracking-[0.08em] text-brand uppercase">Wholesale · {label}</p>
         <p className="mt-2 text-[34px] leading-none font-semibold tracking-[-0.035em] tabular-nums">
           {shoes.length} <span className="text-ink-2">{shoes.length === 1 ? "style" : "styles"}</span>
         </p>

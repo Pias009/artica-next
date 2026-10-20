@@ -21,7 +21,7 @@ const SHOWROOMS: {
     city: "New York Showroom",
     type: "COMMERCIAL SALES & SAMPLES",
     address: "530 7th Avenue, 14th Floor, New York, NY 10018",
-    notes: "Full seasonal collection on display. Physical size runs 7–13 available for buyer fitting.",
+    notes: "Full footwear collection on display. Physical size runs available for buyer fitting.",
     hours: "Mon–Fri: 9:00 AM – 5:30 PM EST (By Appointment)",
     icon: "pin",
   },
@@ -144,7 +144,7 @@ export default function ContactPage() {
               Book a 1-on-1 virtual walkthrough
             </h2>
             <p className="mt-2 text-xs leading-relaxed text-ink-2">
-              Unable to visit our New York or Montreal locations in person? Our accounts team can host a 20-minute private video walkthrough to present FW26 physical boots, leather swatches, and case pack curves.
+              Unable to visit our New York or Montreal locations in person? Our accounts team can host a 20-minute private video walkthrough to present physical footwear samples, leather swatches, and case pack curves.
             </p>
           </div>
           <div className="flex flex-col gap-3 lg:items-end">

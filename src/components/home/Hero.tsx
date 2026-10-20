@@ -250,7 +250,7 @@ export function Hero() {
         <div ref={column} className="mx-auto flex w-full max-w-[560px] flex-col items-center text-center md:w-fit md:max-w-none">
           <p className="inline-flex animate-rise-in items-center gap-2 rounded-full bg-white/85 py-1.5 pr-3.5 pl-2.5 text-[13px] font-semibold text-ink-2 shadow-soft ring-1 ring-ink/5 motion-reduce:animate-none">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
-            FW26 wholesale range · {STYLE_COUNT} styles
+            Wholesale range · {STYLE_COUNT} styles
           </p>
           {/* grotesk display in ink; the last word picks up a serif italic in the logo's purple */}
           <h1
@@ -264,7 +264,7 @@ export function Hero() {
             </span>
           </h1>
           <p className="mt-4 max-w-[30rem] animate-rise-in text-[15px] leading-[1.55] text-pretty text-ink-2 [animation-delay:160ms] motion-reduce:animate-none md:mt-5 md:text-[17px]">
-            Winter boots, sneakers and sandals for retailers, distributors and private-label brands worldwide.
+            Boots, sneakers and sandals for retailers, distributors and private-label brands worldwide.
           </p>
           <div className="mt-6 flex animate-rise-in flex-wrap justify-center gap-3 [animation-delay:240ms] motion-reduce:animate-none md:mt-7">
             <OpenInquiryButton className="btn btn-dark shadow-[0_10px_24px_-12px_rgb(18_20_22/.6)]">

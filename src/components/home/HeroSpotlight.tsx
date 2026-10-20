@@ -20,7 +20,7 @@ const SPOT: { slug: string; tint: string }[] = [
 /** The three ways in, along the bottom. */
 const CARDS: { line: ProductLine; slug: string; block: string; kinds: string }[] = [
   { line: "women", slug: "maple", block: "#f0c7cc", kinds: "Ankle, chelsea and tall boots" },
-  { line: "men", slug: "nord", block: "#9fb7cf", kinds: "Leather winter lace-ups" },
+  { line: "men", slug: "nord", block: "#9fb7cf", kinds: "Leather lace-up boots" },
   { line: "kids", slug: "blossom", block: "#b9d9a9", kinds: "Snow boots and hikers" },
 ];
 
@@ -151,11 +151,11 @@ export function HeroSpotlight() {
               <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
               <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
             </span>
-            FW26 Wholesale Collection · North America
+            Wholesale Footwear Collection · North America
           </span>
           <h1 id="hero-title" className="mt-3.5 animate-rise-in [animation-delay:70ms] motion-reduce:animate-none lg:mt-5">
             <span className="block text-[clamp(40px,6vw,90px)] leading-[0.9] font-black tracking-[-0.04em] text-ink drop-shadow-[0_2px_12px_rgb(0_0_0/.04)]">
-              WINTER
+              FOOTWEAR
             </span>
             <span className="mt-1 block text-[clamp(24px,3.6vw,54px)] leading-[1.05] font-light tracking-[-0.02em] whitespace-nowrap bg-gradient-to-r from-brand via-brand-deep to-brand bg-[length:200%_auto] bg-clip-text text-transparent animate-[text-gradient-shimmer_6s_ease-in-out_infinite] motion-reduce:animate-none">
               STOCK, SORTED.
@@ -220,7 +220,7 @@ export function HeroSpotlight() {
                 <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
               </span>
               <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">
-                FW26 Production · 10d Samples
+                Factory Production · 10d Samples
               </span>
             </div>
           </div>

@@ -81,7 +81,7 @@ export function UpClose() {
               </div>
             </div>
             <span className="absolute bottom-5 left-5 rounded-full bg-white px-3.5 py-2 text-[13px] font-semibold">
-              Chime Long Nord · Winter leather lace-up
+              Chime Long Nord · Leather lace-up boot
             </span>
           </div>
 

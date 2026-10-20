@@ -92,13 +92,13 @@ export function LineSheetCta() {
         <div data-sheet-copy className="max-lg:text-center">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[13px] font-semibold text-brand">
             <span className="size-1.5 animate-pulse-glow rounded-full bg-brand" />{" "}
-            FW26 · {products.length} styles · {PAGES} pages
+            Wholesale · {products.length} styles · {PAGES} pages
           </p>
           <h2
             id="h-sheet"
             className="type-section mt-5 max-w-[16ch] max-lg:mx-auto"
           >
-            Get the full FW26 line sheet.
+            Get the full wholesale line sheet.
           </h2>
           <p className="mt-4 max-w-[46ch] text-[17px] text-ink-2 max-lg:mx-auto">
             Every style, size run and case-pack ratio, with tier pricing for
@@ -180,7 +180,7 @@ export function LineSheetCta() {
                     CHIME LONG
                   </p>
                   <p className="mt-1 text-[20px] leading-none font-semibold tracking-[-0.02em]">
-                    FW26 Line sheet
+                    Wholesale Line sheet
                   </p>
                 </div>
                 <p className="text-right text-[11px] leading-snug text-muted tabular-nums">
