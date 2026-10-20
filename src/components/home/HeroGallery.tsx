@@ -71,7 +71,7 @@ export function HeroGallery() {
             </Link>
           </div>
           <p className="mt-4 animate-rise-in text-[12.5px] text-[#6b5f63] [animation-delay:210ms] motion-reduce:animate-none md:mt-[1.35cqw] md:text-[max(12px,0.94cqw)]">
-            From 300 pairs per style · Samples in 10 days · Door-to-door US &amp; Canada
+            From 300 pairs per style · Samples in 10 days · Shipping worldwide
           </p>
         </div>
 

@@ -10,7 +10,7 @@ const STEPS = [
   { time: "24 hours", title: "Quote and line sheet", text: "Send your list; tier pricing comes back within a day." },
   { time: "10 days", title: "Samples", text: "Approve fit and finish before you commit to bulk." },
   { time: "45 days", title: "Production", text: "Every batch inspected, with a photo report." },
-  { time: "20 days", title: "Door delivery", text: "DDP, FOB or EXW to the US and Canada." },
+  { time: "20 days", title: "Door delivery", text: "DDP, FOB or EXW, shipped worldwide." },
 ];
 
 const WALKER = byId.p03;

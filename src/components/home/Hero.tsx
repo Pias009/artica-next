@@ -259,12 +259,12 @@ export function Hero() {
           >
             <span className="md:block md:whitespace-nowrap">Factory-direct footwear </span>
             <span className="md:block md:whitespace-nowrap">
-              for North American{" "}
+              for retail{" "}
               <em className="pr-[0.04em] font-display font-normal tracking-[-0.025em] text-brand">shelves.</em>
             </span>
           </h1>
           <p className="mt-4 max-w-[30rem] animate-rise-in text-[15px] leading-[1.55] text-pretty text-ink-2 [animation-delay:160ms] motion-reduce:animate-none md:mt-5 md:text-[17px]">
-            Winter boots, sneakers and sandals for retailers, distributors and private-label brands across the US and Canada.
+            Winter boots, sneakers and sandals for retailers, distributors and private-label brands worldwide.
           </p>
           <div className="mt-6 flex animate-rise-in flex-wrap justify-center gap-3 [animation-delay:240ms] motion-reduce:animate-none md:mt-7">
             <OpenInquiryButton className="btn btn-dark shadow-[0_10px_24px_-12px_rgb(18_20_22/.6)]">

@@ -4,6 +4,7 @@ import { ColdTest } from "@/components/home/ColdTest";
 import { HeroSpotlight } from "@/components/home/HeroSpotlight";
 import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
+import { NewArrivals } from "@/components/home/NewArrivals";
 import { OrderJourney } from "@/components/home/OrderJourney";
 import { OrderSheet } from "@/components/home/OrderSheet";
 import { PrivateLabel } from "@/components/home/PrivateLabel";
@@ -19,6 +20,7 @@ export default function Home() {
   return (
     <>
       <HeroSpotlight />
+      <NewArrivals />
       <BestSellers />
       <Showroom />
       <BuyerTypes />

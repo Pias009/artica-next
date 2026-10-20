@@ -54,7 +54,7 @@ export function Footer() {
           <div>
             <Logo className="h-14 sm:h-16" />
             <p className="mt-5 max-w-[34ch] text-[15px] text-ink-2">
-              Guangzhou Chime Long Trading Co., Ltd. Winter boots for retailers, distributors and private-label brands across North America.
+              Guangzhou Chime Long Trading Co., Ltd. Winter boots for retailers, distributors and private-label brands worldwide.
             </p>
             <div className="mt-6 flex gap-2">
               {SOCIAL.map(([icon, label]) => (

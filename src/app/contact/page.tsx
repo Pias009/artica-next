@@ -60,7 +60,7 @@ const DEPARTMENTS = [
     role: "Freight, Customs & DDP Tracking",
     email: "logistics@articafootwear.com",
     phone: "+1 (800) 412-8820 ext. 3",
-    desc: "Container manifests, Bill of Lading releases, US CBP/Canada CBSA entry numbers, and dock scheduling.",
+    desc: "Container manifests, Bill of Lading releases, import customs entry numbers in your country, and dock scheduling.",
   },
 ];
 

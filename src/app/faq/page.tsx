@@ -32,7 +32,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: `How long do physical samples take to arrive?`,
-        a: `In-stock archive samples dispatch via DHL/FedEx Express within 24–48 hours and arrive in North America within 4–6 business days. Custom prototype lasts or bespoke colorway swatches take approximately 10–14 business days.`,
+        a: `In-stock archive samples dispatch via DHL/FedEx Express within 24–48 hours and arrive in most countries within 4–7 business days. Custom prototype lasts or bespoke colorway swatches take approximately 10–14 business days.`,
       },
       {
         q: `Is sample cost deductible against bulk production?`,
@@ -53,11 +53,11 @@ const CATEGORIES = [
       },
       {
         q: `Do you offer Net 30 or Net 60 trade terms?`,
-        a: `Yes. For established North American retailers, department store accounts, and multi-season partners, we offer Net 30 or Net 60 credit terms subject to approval through our credit factoring underwriters (CIT / Euler Hermes).`,
+        a: `Yes. For established retailers, department store accounts, and multi-season partners, we offer Net 30 or Net 60 credit terms subject to approval through our credit factoring underwriters (CIT / Euler Hermes).`,
       },
       {
         q: `Do you accept Letters of Credit (LC)?`,
-        a: `Yes. Irrevocable Letters of Credit (LC at sight) issued by major North American or European prime commercial banks are accepted for orders exceeding $50,000 USD.`,
+        a: `Yes. Irrevocable Letters of Credit (LC at sight) issued by major international prime commercial banks are accepted for orders exceeding $50,000 USD.`,
       },
     ],
   },
@@ -66,7 +66,7 @@ const CATEGORIES = [
     faqs: [
       {
         q: `What does DDP (Delivered Duty Paid) mean for our store?`,
-        a: `DDP means zero customs headaches for you. Chime Long acts as the importer of record, handles all US Customs (CBP) or Canada (CBSA) clearances, pays all import duties and harbor fees, and delivers directly to your loading dock. The price on your invoice is your final landed cost.`,
+        a: `DDP means zero customs headaches for you. Where DDP is available for your country, Chime Long acts as the importer of record, handles import customs clearance at your destination, pays all import duties and harbor fees, and delivers directly to your loading dock. The price on your invoice is your final landed cost.`,
       },
       {
         q: `Can we use our own freight forwarder (FOB terms)?`,
@@ -121,7 +121,7 @@ export default function FaqPage() {
             <span className="mono-label text-accent font-bold">TRADE DESK</span>
             <h3 className="text-lg font-extrabold uppercase text-ink mt-1">Have an unlisted question?</h3>
             <p className="mt-2 text-xs text-ink-2 leading-relaxed">
-              Our North American wholesale accounts team responds to commercial inquiries within 24 hours.
+              Our international wholesale accounts team responds to commercial inquiries within 24 hours.
             </p>
             <div className="mt-4 pt-4 border-t border-line/60 space-y-2 text-xs text-ink">
               <div className="flex items-center gap-2">

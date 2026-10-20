@@ -203,7 +203,7 @@ export function Header() {
   return (
     <>
       <p className="bg-ink px-(--shell-pad) py-2.5 text-center text-[13px] font-medium text-white">
-        Samples in 10 days <span className="mx-2 text-white/40">·</span> Door-to-door to the US and Canada
+        Samples in 10 days <span className="mx-2 text-white/40">·</span> Door-to-door worldwide
         <span className="max-sm:hidden">
           <span className="mx-2 text-white/40">·</span> From 300 pairs per style
         </span>

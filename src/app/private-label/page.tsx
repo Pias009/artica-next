@@ -134,7 +134,7 @@ const STEPS = [
     step: "04",
     title: "DDP Customs & Delivery",
     time: "Day 56–75",
-    desc: "Container or LCL freight cleared through customs and delivered directly to your North American 3PL or retail distribution center.",
+    desc: "Container or LCL freight cleared through customs and delivered directly to your 3PL or retail distribution center, wherever it is.",
   },
 ];
 
@@ -145,7 +145,7 @@ export default function PrivateLabelPage() {
         crumbs={[{ href: "/", label: "Home" }, { label: "Private label" }]}
         eyebrow="OEM & Custom Footwear Atelier"
         title="Your brand. Our sub-zero engineering."
-        text="Turnkey private-label and OEM winter boot manufacturing for North American retailers, apparel brands, and department store programs."
+        text="Turnkey private-label and OEM winter boot manufacturing for retailers, apparel brands, and department store programs worldwide."
       />
 
       {/* Hero Overview Banner */}
@@ -179,7 +179,7 @@ export default function PrivateLabelPage() {
               ["600 pr", "Starting custom MOQ"],
               ["14 days", "Prototyping turnaround"],
               ["0.4%", "Defect tolerance rate"],
-              ["DDP", "All US & CA customs handled"],
+              ["DDP", "Import customs handled for you"],
             ].map(([val, label]) => (
               <div key={label} className="glass-card flex flex-col justify-between rounded-card p-4 shadow-xs">
                 <span className="text-2xl font-extrabold tracking-tight text-ink tabular-nums">{val}</span>

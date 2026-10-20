@@ -7,6 +7,30 @@ import { InquiryLines } from "./InquiryLines";
 import { submitInquiry, type InquiryResult } from "@/app/actions";
 import { useInquiry, useUI, type BuyerType } from "@/lib/store";
 
+/** Where the order ships: the main markets first, then "Other" for anywhere else. */
+const SHIP_TO = [
+  "United States",
+  "Canada",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "Netherlands",
+  "Italy",
+  "Spain",
+  "Poland",
+  "Australia",
+  "New Zealand",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "Japan",
+  "South Korea",
+  "Mexico",
+  "Brazil",
+  "Chile",
+  "South Africa",
+  "Other",
+];
+
 const BUYER_TYPES: [BuyerType, string][] = [
   ["Retailer", "Retailer"],
   ["Distributor", "Distributor"],
@@ -125,9 +149,9 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         </Field>
         <Field id={`${uid}-country`} label="Ship to">
           <select id={`${uid}-country`} name="country" autoComplete="country-name" className="field">
-            <option>United States</option>
-            <option>Canada</option>
-            <option>Mexico</option>
+            {SHIP_TO.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
           </select>
         </Field>
       </div>

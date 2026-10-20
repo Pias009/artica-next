@@ -43,8 +43,10 @@ export type ShowroomApi = {
   /** Where the scroll tour wants the camera; it eases there. */
   setTourPose: (p: Pose) => void;
   setMode: (m: Mode) => void;
-  /** Free view: glide to a pose (the area chips). */
-  flyTo: (p: Pose) => void;
+  /** Free view: glide to a pose (the area chips); `dur` in seconds, 1.4 by default. */
+  flyTo: (p: Pose, dur?: number) => void;
+  /** Put the camera straight at a pose, no easing (the doorway, before walking in). */
+  jumpTo: (p: Pose) => void;
   /** Render only while the section is on screen. */
   setActive: (on: boolean) => void;
   dispose: () => void;
@@ -746,8 +748,14 @@ export function createShowroom(canvas: HTMLCanvasElement, opts: ShowroomOptions)
         canvas.style.cursor = "grab";
       } else canvas.style.cursor = "";
     },
-    flyTo(p) {
-      glide(p, 1.4);
+    flyTo(p, dur = 1.4) {
+      glide(p, dur);
+    },
+    jumpTo(p) {
+      tween = null;
+      Object.assign(cam, p);
+      Object.assign(tourTarget, p);
+      look.yaw = look.pitch = 0;
     },
     setActive,
     dispose() {

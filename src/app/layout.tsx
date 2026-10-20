@@ -26,12 +26,13 @@ const fraunces = Fraunces({
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: { default: "Guangzhou Chime Long Trading Co., Ltd", template: "%s · Chime Long" },
-  description: "Wholesale winter boots for North American retailers, distributors and private-label brands.",
+  description: "Wholesale winter boots for retailers, distributors and private-label brands worldwide.",
 };
 
 export const viewport: Viewport = {

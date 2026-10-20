@@ -12,7 +12,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function submitInquiry(_prev: InquiryResult, formData: FormData): Promise<InquiryResult> {
   const company = String(formData.get("company") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
-  const country = String(formData.get("country") ?? "United States");
+  const country = String(formData.get("country") ?? "Not given");
   const buyerType = String(formData.get("type") ?? "Retailer");
   const note = String(formData.get("note") ?? "").trim();
 

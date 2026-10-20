@@ -65,7 +65,7 @@ export function HeroEditorial() {
               id="hero-title"
               className="mt-5 animate-rise-in text-[clamp(38px,9.6vw,52px)] leading-[1] font-semibold tracking-[-0.045em] text-balance text-ink [animation-delay:70ms] motion-reduce:animate-none lg:text-[clamp(48px,4.3vw,68px)]"
             >
-              Factory-direct footwear for North American retail.
+              Factory-direct footwear for retail worldwide.
             </h1>
             <p className="mx-auto mt-6 max-w-[26rem] animate-rise-in text-[17px] leading-[1.55] text-pretty text-ink-2 [animation-delay:140ms] motion-reduce:animate-none lg:mx-0">
               Winter boots, sneakers and sandals for retailers, distributors and private-label brands.

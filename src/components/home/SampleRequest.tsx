@@ -140,7 +140,7 @@ export function SampleRequest() {
               <Icon name="sample" className="size-[18px] text-glacier" /> Mid-run size by default; tell us any size in the notes
             </li>
             <li className="flex items-center gap-2.5">
-              <Icon name="truck" className="size-[18px] text-glacier" /> Shipped to your office in the US or Canada
+              <Icon name="truck" className="size-[18px] text-glacier" /> Shipped to your office, worldwide
             </li>
             <li className="flex items-center gap-2.5">
               <Icon name="chat" className="size-[18px] text-glacier" /> Sample cost and shipping confirmed with your quote

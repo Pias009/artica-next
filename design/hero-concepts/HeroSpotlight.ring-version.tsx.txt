@@ -1,0 +1,564 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
+import { Icon } from "../Icon";
+import { OpenInquiryButton } from "../OpenInquiryButton";
+import { LANES, ORIGIN, WorldRoutes } from "./WorldRoutes";
+import {
+  categoryOf,
+  getProduct,
+  inLine,
+  LINE_LABEL,
+  MOQ_PAIRS,
+  PACK,
+  type Product,
+  type ProductLine,
+} from "@/lib/products";
+import { useUI } from "@/lib/store";
+
+/** The styles that take turns in the spotlight, each with the tint of its glow and its swatch on the ring. */
+const SPOT: { slug: string; tint: string; word: string }[] = [
+  { slug: "toffee", tint: "#c98b52", word: "chelsea boots" },
+  { slug: "lynx", tint: "#b9a38c", word: "fur-cuff boots" },
+  { slug: "nord", tint: "#8a7a6c", word: "work boots" },
+  { slug: "frost", tint: "#d9d1c4", word: "knit-cuff boots" },
+  { slug: "lilac", tint: "#c3a6d6", word: "kids’ hikers" },
+];
+
+/** The three ways in, along the bottom. */
+const CARDS: {
+  line: ProductLine;
+  slug: string;
+  block: string;
+  kinds: string;
+}[] = [
+  {
+    line: "women",
+    slug: "maple",
+    block: "#f6e4e6",
+    kinds: "Ankle, chelsea and tall boots",
+  },
+  {
+    line: "men",
+    slug: "nord",
+    block: "#e2eaf2",
+    kinds: "Leather winter lace-ups",
+  },
+  {
+    line: "kids",
+    slug: "blossom",
+    block: "#e5efdd",
+    kinds: "Snow boots and hikers",
+  },
+];
+
+const LINKS = [
+  { href: "/shipping", label: "Shipping" },
+  { href: "/private-label", label: "Private label" },
+  { href: "/faq", label: "FAQ" },
+];
+
+const AUTOPLAY_MS = 5000;
+const OUT_MS = 650;
+
+/** Swatch positions on the ring's left arc, in degrees from 3 o'clock (negative is up), so the circle picker sits on the left. */
+const ANGLES = SPOT.map((_, i) => -110 - (100 / (SPOT.length - 1)) * i);
+const onRing = (deg: number): CSSProperties => {
+  const r = (deg * Math.PI) / 180;
+  // rounded here, so the server and the browser print the same string (no hydration mismatch)
+  return {
+    left: `${(50 + 50 * Math.cos(r)).toFixed(3)}%`,
+    top: `${(50 + 50 * Math.sin(r)).toFixed(3)}%`,
+  };
+};
+
+/**
+ * First view, a spotlight on the site's white canvas: the promise on the left, one real pair large and tilted in front of a ring on the
+ * right. Swatches on the ring pick the pair; each new pair renders out of a small circle while the old one slides
+ * away. Loops on its own (a button pauses it); still under reduced motion.
+ * Below, the three lines as the ways in.
+ */
+export function HeroSpotlight() {
+  const openQuickView = useUI((s) => s.openQuickView);
+  const spots = SPOT.map((s) => ({
+    ...s,
+    p: getProduct(s.slug) as Product,
+  })).filter((s) => s.p);
+  const [cur, setCur] = useState(0);
+  const [prev, setPrev] = useState<number | null>(null);
+  const [paused, setPaused] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const reduced = useReducedMotion();
+  const outTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const curRef = useRef(0);
+  const go = useCallback(
+    (next: number) => {
+      const n = (next + spots.length) % spots.length;
+      if (n === curRef.current) return;
+      setPrev(curRef.current);
+      curRef.current = n;
+      setCur(n);
+      clearTimeout(outTimer.current);
+      outTimer.current = setTimeout(() => setPrev(null), OUT_MS);
+    },
+    [spots.length],
+  );
+
+  useEffect(() => {
+    if (paused || reduced) return;
+    const t = setInterval(() => {
+      if (!document.hidden) go(cur + 1);
+    }, AUTOPLAY_MS);
+    return () => clearInterval(t);
+  }, [cur, paused, reduced, go]);
+
+  useEffect(() => () => clearTimeout(outTimer.current), []);
+
+  const s = spots[cur];
+
+  const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (reduced) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: nx, y: ny });
+  };
+
+  const handleStagePointerLeave = () => setTilt({ x: 0, y: 0 });
+
+  return (
+    <section
+      id="hero"
+      aria-labelledby="hero-title"
+      className="bleed relative isolate overflow-hidden text-ink"
+      style={{
+        background:
+          "radial-gradient(130% 85% at 90% 20%, rgb(245 235 245 / 0.6) 0%, transparent 60%), radial-gradient(100% 70% at 10% 15%, rgb(254 248 240 / 0.9) 0%, transparent 65%), radial-gradient(85% 65% at 50% 95%, rgb(238 243 248 / 0.7) 0%, transparent 70%), linear-gradient(180deg, #ffffff 0%, #fbf9f6 40%, #f5f0ea 82%, #ffffff 100%)",
+      }}
+    >
+      {/* side links, set vertically like a magazine spine */}
+      <nav
+        aria-label="Buying information"
+        className="absolute top-1/2 left-[max(clamp(10px,1.6vw,28px),calc((100%-1440px)/2+8px))] z-[3] -translate-y-1/2 max-lg:hidden"
+      >
+        <ul className="flex flex-col items-center gap-7">
+          {LINKS.map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                className="block py-2 text-[12px] font-semibold tracking-[0.16em] text-muted uppercase transition-colors [writing-mode:vertical-rl] rotate-180 hover:text-ink"
+              >
+                {l.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* the heading is for search and screen readers; the visible promise is the one line beside the stage */}
+      <h1 id="hero-title" className="sr-only">
+        Chime Long: factory-direct wholesale winter footwear for retailers
+        worldwide
+      </h1>
+
+      <div className="wrap relative grid grid-cols-[minmax(0,1fr)] items-center gap-x-[clamp(48px,6vw,112px)] gap-y-8 px-(--shell-pad) pt-[clamp(20px,4vh,48px)] pb-[clamp(28px,5vh,56px)] lg:min-h-[min(calc(100svh-112px-40px),640px)] lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pl-[clamp(48px,6vw,104px)]">
+        {/* the world it ships to: dotted map and trade lanes, sized so the factory lands in the gap between the
+            stage and the three lines; the lane for the pair on show is drawn in plum */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 w-[72%] max-lg:inset-x-0 max-lg:bottom-auto max-lg:h-[46%] max-lg:w-full"
+        >
+          <div className="absolute inset-x-0 top-1/2 aspect-[1000/360] -translate-y-1/2">
+            <WorldRoutes active={cur % LANES.length} reduced={reduced} />
+            <span
+              className="absolute -translate-x-1/2 translate-y-3 text-center text-[10px] leading-tight font-bold tracking-[0.12em] text-brand uppercase max-lg:hidden"
+              style={{
+                left: `${(ORIGIN.x / 10).toFixed(2)}%`,
+                top: `${(((ORIGIN.y - 30) / 360) * 100).toFixed(2)}%`,
+              }}
+            >
+              Guangzhou
+              <span className="block font-medium tracking-normal text-muted normal-case">
+                our factory
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* the stage with spatial mouse tilt */}
+        <div
+          className="relative min-h-[clamp(320px,56vh,620px)] max-lg:min-h-[380px]"
+          onPointerMove={handleStagePointerMove}
+          onPointerLeave={handleStagePointerLeave}
+        >
+          {/* the lane in the spotlight, live: origin, port and transit */}
+          <div
+            className="pointer-events-none absolute top-[1%] right-[3%] z-[3] flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in max-sm:hidden"
+            style={{
+              transform: reduced
+                ? undefined
+                : `translate(${(tilt.x * -8).toFixed(1)}px, ${(tilt.y * -8).toFixed(1)}px)`,
+              transition: "transform 200ms ease-out",
+            }}
+          >
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full rounded-full bg-brand/60 opacity-75 animate-ping" />
+              <span className="relative inline-flex size-2 rounded-full bg-brand" />
+            </span>
+            <span
+              key={`lane-${cur}`}
+              className="animate-rise-in text-[11px] font-bold tracking-[0.06em] whitespace-nowrap text-ink uppercase motion-reduce:animate-none"
+            >
+              Shipping now · {ORIGIN.name} → {LANES[cur % LANES.length].port}
+              <span className="ml-1.5 font-semibold text-muted normal-case">
+                {LANES[cur % LANES.length].days}
+              </span>
+            </span>
+          </div>
+
+          {/* the ring: grand orbit circle showing only the left half arc, with completely transparent/unfilled interior */}
+          <div className="absolute top-[44%] aspect-square w-[min(82%,58vh,520px)] -translate-y-1/2 lg:right-[clamp(16px,2.5vw,52px)] lg:left-auto max-lg:right-1/2 max-lg:w-[min(74%,310px)] max-lg:translate-x-1/2 lg:translate-x-0">
+            {/* SVG half-circle arc: only the left 180° semi-circle framing the swatches, right half is 100% open */}
+            <svg
+              viewBox="0 0 1000 1000"
+              fill="none"
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 size-full text-ink/30"
+            >
+              <defs>
+                <linearGradient
+                  id="halfRingGrad"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1000"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
+                  <stop
+                    offset="10%"
+                    stopColor="currentColor"
+                    stopOpacity="0.85"
+                  />
+                  <stop
+                    offset="90%"
+                    stopColor="currentColor"
+                    stopOpacity="0.85"
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="currentColor"
+                    stopOpacity="0"
+                  />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 500 2 A 498 498 0 0 0 500 998"
+                stroke="url(#halfRingGrad)"
+                strokeWidth="2.2"
+                strokeDasharray="6 8"
+                strokeLinecap="round"
+              />
+            </svg>
+
+            <ul
+              aria-label="Styles in the spotlight"
+              className="absolute inset-0 z-[2]"
+            >
+              {spots.map((x, i) => {
+                const on = i === cur;
+                return (
+                  <li
+                    key={x.slug}
+                    className="absolute -translate-1/2"
+                    style={onRing(ANGLES[i])}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => go(i)}
+                      aria-pressed={on}
+                      aria-label={`Show ${x.p.name}`}
+                      className={`group relative grid size-11 place-items-center rounded-full border-2 transition-all duration-300 lg:size-12 ${
+                        on
+                          ? "scale-115 border-brand shadow-[0_0_0_4px_rgb(152_64_128/.25),0_16px_32px_-4px_rgb(152_64_128/.35)]"
+                          : "border-white shadow-soft hover:scale-110 hover:border-ink/40 hover:shadow-float"
+                      }`}
+                      style={{
+                        background: x.tint,
+                        boxShadow: on
+                          ? `0 0 0 4px ${x.tint}55, 0 14px 28px -4px rgba(0,0,0,0.3)`
+                          : undefined,
+                      }}
+                    >
+                      {on && (
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -inset-2 rounded-full border border-brand/35 animate-ping opacity-60 motion-reduce:hidden"
+                        />
+                      )}
+                      <span className="relative block size-[84%]">
+                        <Image
+                          src={x.p.outer.src}
+                          alt=""
+                          fill
+                          sizes="48px"
+                          className="-scale-x-100 object-contain drop-shadow-[0_2px_4px_rgb(0_0_0/.2)]"
+                        />
+                      </span>
+                      {/* Name tooltip */}
+                      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-ink/90 backdrop-blur-md px-2 py-0.5 text-[10.5px] font-semibold text-white whitespace-nowrap opacity-0 shadow-soft transition-all duration-200 group-hover:opacity-100 group-hover:-translate-y-1">
+                        {x.p.name}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* the pair: 3D levitation with interactive mouse tilt */}
+          <div
+            className="pointer-events-none absolute top-[44%] aspect-[1.35] w-[min(70%,50vh,490px)] -translate-y-1/2 lg:right-[3%] lg:left-auto lg:translate-x-0 max-lg:right-1/2 max-lg:w-[min(66%,310px)] max-lg:translate-x-[68%]"
+            style={{ perspective: "1200px" }}
+          >
+            <div
+              className="size-full transition-transform ease-out"
+              style={{
+                transform: reduced
+                  ? undefined
+                  : `rotateX(${(-tilt.y * 10).toFixed(2)}deg) rotateY(${(tilt.x * 12).toFixed(2)}deg) translateZ(10px)`,
+                transitionDuration:
+                  tilt.x === 0 && tilt.y === 0 ? "600ms" : "150ms",
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {/* a slow float, looping, so the stage is never quite still */}
+              <div className="absolute inset-0 animate-[spot-float_5s_ease-in-out_infinite] motion-reduce:animate-none">
+                {prev !== null && prev !== cur && (
+                  <Pair
+                    key={`out-${prev}`}
+                    p={spots[prev].p}
+                    className="[animation:spot-out_650ms_cubic-bezier(.4,0,.2,1)_both]"
+                  />
+                )}
+                <Pair
+                  key={`in-${cur}`}
+                  p={s.p}
+                  preload={cur === 0}
+                  shadowOffset={tilt}
+                  className={
+                    reduced
+                      ? "rotate-[6deg]"
+                      : "[animation:spot-in_900ms_cubic-bezier(.22,1,.36,1)_both]"
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* what is on show; the ring swatches pick the pair, the button pauses the loop */}
+          <div className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-[3%] max-lg:right-1/2 max-lg:translate-x-1/2 max-sm:gap-1.5">
+            <div
+              key={`info-${cur}`}
+              className="relative flex items-center gap-3.5 overflow-hidden rounded-full max-sm:gap-2.5 max-sm:px-3 border border-white/80 bg-white/85 px-4 py-2 shadow-[0_16px_36px_-10px_rgb(18_20_22/.14),0_0_0_1px_rgb(18_20_22/.05),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in motion-reduce:animate-none"
+              aria-live="polite"
+            >
+              <div className="flex flex-col text-left">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold tracking-[0.16em] text-muted uppercase">
+                    0{cur + 1}/0{spots.length}
+                  </span>
+                  <span className="size-1 rounded-full bg-ink/20" />
+                  <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase">
+                    {s.p.name}
+                  </span>
+                </div>
+                <span className="text-[11.5px] text-muted whitespace-nowrap max-sm:text-[10.5px]">
+                  {LINE_LABEL[s.p.line]} · {categoryOf(s.p)} ·{" "}
+                  <strong className="font-semibold text-ink-2">
+                    {MOQ_PAIRS} pairs
+                  </strong>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openQuickView(s.p.id)}
+                className="pointer-events-auto inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[11px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
+              >
+                <span>View</span>
+                <Icon name="arrow" className="size-2.5" />
+              </button>
+            </div>
+
+            {/* the slideshow loops on its own; this stops it (WCAG 2.2.2) */}
+            {!reduced && (
+              <button
+                type="button"
+                onClick={() => setPaused((v) => !v)}
+                aria-pressed={paused}
+                aria-label={
+                  paused ? "Play the slideshow" : "Pause the slideshow"
+                }
+                className="grid size-10 place-items-center rounded-full border border-ink/10 bg-white/80 text-ink-2 backdrop-blur-xl transition-colors hover:text-ink"
+              >
+                <Icon name={paused ? "play" : "pause"} className="size-3" />
+              </button>
+            )}
+          </div>
+        </div>
+        {/* the three ways in, stacked beside the stage, then the one line and the action */}
+        <div className="relative z-[2]">
+          <nav aria-label="Shop by line">
+            <ul className="grid gap-4 md:max-lg:grid-cols-3">
+              {CARDS.map((c) => {
+                const p = getProduct(c.slug) as Product;
+                return (
+                  <li key={c.line}>
+                    <Link
+                      href={`/catalog?line=${c.line}`}
+                      className="group flex h-[104px] overflow-hidden lg:h-[clamp(104px,13.5vh,128px)] rounded-2xl border border-white/70 bg-white/70 text-ink backdrop-blur-xl shadow-[0_12px_32px_-20px_rgb(18_20_22/.25)] transition-all duration-400 ease-soft hover:-translate-y-1.5 hover:shadow-[0_22px_44px_-16px_rgb(18_20_22/.3)]"
+                    >
+                      <span
+                        className="relative block w-[34%] shrink-0 overflow-hidden"
+                        style={{ background: c.block }}
+                      >
+                        <span className="absolute inset-[10%_6%] block transition-transform duration-500 ease-soft group-hover:scale-112 group-hover:-rotate-3">
+                          <Image
+                            src={p.outer.src}
+                            alt=""
+                            fill
+                            sizes="160px"
+                            className="object-contain drop-shadow-[0_8px_10px_rgb(0_0_0/.25)] transition-all duration-500 group-hover:drop-shadow-[0_14px_16px_rgb(0_0_0/.35)]"
+                          />
+                        </span>
+                      </span>
+                      <span className="flex min-w-0 flex-1 flex-col justify-center px-5">
+                        <span className="text-[17px] font-bold tracking-[0.04em] uppercase">
+                          {LINE_LABEL[c.line]}
+                        </span>
+                        <span className="mt-0.5 truncate text-[12.5px] text-muted md:max-lg:hidden">
+                          {c.kinds}
+                        </span>
+                        <span className="mt-2 flex items-center justify-between text-[12.5px] font-semibold">
+                          <span>
+                            {c.line === "men"
+                              ? "New for FW26"
+                              : `${inLine(c.line).length} styles`}
+                            <span className="md:max-lg:hidden">
+                              {" "}
+                              · {PACK}/case
+                            </span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-brand">
+                            Shop{" "}
+                            <Icon
+                              name="arrow"
+                              className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1"
+                            />
+                          </span>
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* who we are, in one line, and the one thing to do */}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 max-lg:justify-center max-lg:text-center">
+            <p className="max-w-[24ch] text-[15px] leading-snug font-medium text-ink-2">
+              Factory-direct winter footwear,{" "}
+              <span className="text-ink">shipped worldwide.</span>
+            </p>
+            <OpenInquiryButton className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-brand px-6 text-[12.5px] font-bold tracking-[0.1em] text-white uppercase shadow-[0_12px_26px_-10px_rgb(152_64_128/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand-deep">
+              Get wholesale pricing <Icon name="arrow" className="size-3.5" />
+            </OpenInquiryButton>
+          </div>
+        </div>
+      </div>
+
+      {/* every spotlight photo loads up front, so a switch never shows an empty stage */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute size-px overflow-hidden opacity-0"
+      >
+        {spots.map((x) => (
+          <Image
+            key={x.slug}
+            src={x.p.outer.src}
+            alt=""
+            width={8}
+            height={8}
+            sizes="(min-width: 64rem) 50vw, 90vw"
+            loading="eager"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Live prefers-reduced-motion (false on the server, so the first paint is the animated one). */
+const REDUCE = "(prefers-reduced-motion: reduce)";
+function useReducedMotion() {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = matchMedia(REDUCE);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => matchMedia(REDUCE).matches,
+    () => false,
+  );
+}
+
+function Pair({
+  p,
+  className,
+  preload,
+  shadowOffset,
+}: {
+  p: Product;
+  className?: string;
+  preload?: boolean;
+  shadowOffset?: { x: number; y: number };
+}) {
+  return (
+    <span
+      className={`absolute inset-0 block origin-[52%_58%] ${className ?? ""}`}
+    >
+      {/* soft floor shadow with dynamic levitation reaction */}
+      <span
+        aria-hidden="true"
+        className="absolute right-[14%] bottom-[6%] left-[10%] h-[9%] rounded-[50%] bg-black/20 blur-[18px] transition-transform duration-200 ease-out"
+        style={
+          shadowOffset
+            ? {
+                transform: `translate(${(-shadowOffset.x * 12).toFixed(1)}px, ${(-shadowOffset.y * 6).toFixed(1)}px) scale(${1 - Math.abs(shadowOffset.y) * 0.08})`,
+              }
+            : undefined
+        }
+      />
+      <Image
+        src={p.outer.src}
+        alt={`Chime Long ${p.name}: ${p.desc}`}
+        fill
+        preload={preload}
+        sizes="(min-width: 64rem) 50vw, 90vw"
+        className="-scale-x-100 object-contain drop-shadow-[0_26px_26px_rgb(18_20_22/.22)]"
+      />
+    </span>
+  );
+}

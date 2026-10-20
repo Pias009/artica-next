@@ -120,7 +120,7 @@ const STEPS = [
     scene: Pallet,
     tone: "bg-stone",
   },
-  { id: "truck", n: `${LEAD_DAYS} days`, title: "Door to door", text: "DDP, FOB or EXW to the US and Canada.", scene: Truck, tone: "bg-frost" },
+  { id: "truck", n: `${LEAD_DAYS} days`, title: "Door to door", text: "DDP, FOB or EXW, shipped worldwide.", scene: Truck, tone: "bg-frost" },
 ];
 
 /** How an order is packed: shoebox → case → pallet → truck, each scene building as you scroll. */

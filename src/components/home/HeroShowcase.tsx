@@ -53,7 +53,7 @@ export function HeroShowcase() {
             <span className="block text-[#7b8187]">factory-direct.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-[27rem] animate-rise-in text-[17px] leading-[1.55] text-pretty text-ink-2 [animation-delay:140ms] motion-reduce:animate-none lg:mx-0">
-            Boots, sneakers and sandals for North American retailers, distributors and private-label brands.
+            Boots, sneakers and sandals for retailers, distributors and private-label brands worldwide.
           </p>
           <div className="mt-8 flex animate-rise-in flex-wrap items-center justify-center gap-x-7 gap-y-2 [animation-delay:210ms] motion-reduce:animate-none lg:justify-start">
             <OpenInquiryButton className="btn btn-dark shadow-[0_10px_24px_-12px_rgb(18_20_22/.6)]">

@@ -83,7 +83,7 @@ export function OrderSheet() {
             <dl className="grid grid-cols-[auto_minmax(140px,1fr)] gap-x-4 gap-y-1.5 text-[13px]">
               {[
                 ["Buyer", "Your company"],
-                ["Ship to", "United States / Canada"],
+                ["Ship to", "Worldwide: your port or door"],
                 ["Terms", "DDP · FOB · EXW"],
                 ["Case pack", `${PACK} pairs, mixed sizes`],
               ].map(([k, v]) => (

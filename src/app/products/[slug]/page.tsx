@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const ASSURANCE: [IconName, string, string][] = [
-  ["truck", "Ships to US & Canada", "DDP, FOB or EXW"],
+  ["truck", "Ships worldwide", "DDP, FOB or EXW"],
   ["sample", "Samples in 10 days", "Before your bulk order"],
   ["shield", "Every batch inspected", "Photo report included"],
 ];

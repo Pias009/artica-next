@@ -6,18 +6,18 @@ import { MOQ_CASES, MOQ_PAIRS } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Shipping, Freight & Trade Terms",
-  description: "Wholesale shipping terms for North American buyers. DDP, FOB, and EXW logistics, transit times, pallet dimensions, and customs clearance.",
+  description: "Wholesale shipping terms for buyers worldwide. DDP, FOB, and EXW logistics, transit times, pallet dimensions, and customs clearance.",
 };
 
 const INCOTERMS = [
   {
     code: "DDP",
     title: "Delivered Duty Paid",
-    subtitle: "Recommended for US & Canada",
+    subtitle: "Recommended for most markets",
     desc: "100% turnkey logistics. Chime Long covers ocean freight, customs tariffs, terminal fees, and inland trucking. The price quoted is the exact landed cost to your loading dock.",
     bullets: [
       "No customs broker or import bond required by buyer",
-      "US HTS & Canada CBSA duty tariffs included",
+      "Destination import duties and taxes included",
       "Door delivery to your retail DC or commercial warehouse",
       "Liftgate and delivery appointments scheduled in advance",
     ],
@@ -51,13 +51,15 @@ const INCOTERMS = [
   },
 ];
 
+/** Indicative ocean transit from Ningbo / Shanghai on the main trade lanes (client placeholders; confirmed per quote). */
 const TRANSIT = [
-  { port: "Long Beach / Los Angeles", region: "US West Coast", days: "14–18 days", inland: "+2 days regional DC" },
-  { port: "Vancouver, BC", region: "Western Canada", days: "16–20 days", inland: "+3 days to Calgary / Edmonton" },
-  { port: "Seattle / Tacoma", region: "Pacific Northwest", days: "15–19 days", inland: "+2 days regional DC" },
-  { port: "New York / New Jersey", region: "US East Coast", days: "26–30 days", inland: "+1 day Tri-State area" },
-  { port: "Savannah / Charleston", region: "US Southeast", days: "24–28 days", inland: "+2 days regional DC" },
-  { port: "Montreal / Toronto", region: "Eastern Canada", days: "28–32 days", inland: "Intermodal rail direct" },
+  { port: "Los Angeles / Long Beach", region: "North America, West", days: "14–18 days", inland: "+1–3 days to your DC" },
+  { port: "New York / Savannah", region: "North America, East", days: "26–34 days", inland: "+1–3 days to your DC" },
+  { port: "Rotterdam / Hamburg", region: "Northern Europe", days: "30–36 days", inland: "+2–4 days by road or rail" },
+  { port: "Felixstowe / Southampton", region: "United Kingdom", days: "32–38 days", inland: "+1–2 days to your DC" },
+  { port: "Jebel Ali, Dubai", region: "Middle East", days: "18–22 days", inland: "+1–3 days in the GCC" },
+  { port: "Sydney / Melbourne", region: "Australia & NZ", days: "14–20 days", inland: "+1–3 days to your DC" },
+  { port: "Santos / Valparaíso", region: "South America", days: "35–42 days", inland: "+2–5 days to your DC" },
 ];
 
 const PACKAGING_SPECS = [
@@ -88,7 +90,7 @@ export default function ShippingPage() {
     <>
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Shipping terms" }]}
-        eyebrow="North American Freight Operations"
+        eyebrow="Global Freight Operations"
         title="Predictable landed delivery. Zero tariff risk."
         text="Whether you require turnkey DDP delivery direct to your loading dock or FOB consolidation at vessel, our logistics team coordinates smooth ocean and domestic transit."
       />
@@ -115,7 +117,7 @@ export default function ShippingPage() {
             >
               {t.recommended && (
                 <span className="mono-label absolute -top-3 right-6 rounded-full bg-accent px-3 py-1 text-[9.5px] font-bold text-on-accent shadow-sm">
-                  MOST POPULAR FOR US & CANADA
+                  MOST POPULAR WORLDWIDE
                 </span>
               )}
               <div>
