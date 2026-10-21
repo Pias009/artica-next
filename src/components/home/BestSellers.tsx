@@ -12,8 +12,9 @@ import { QuickViewButton } from "../ui/QuickViewButton";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
 import { MotionToggle } from "../ui/MotionToggle";
 import { collapse, inLine, LINE_LABEL, products, stylesIn, type ProductLine, type Scene } from "@/lib/products";
-import { prefersReducedMotion } from "@/lib/gsap";
+import { gsap, MOTION_OK, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { useInCart, useInquiry } from "@/lib/store";
+import { offTilt, onTilt } from "@/lib/tilt";
 import { useAutoCycle } from "@/lib/useAutoCycle";
 
 const TONE: Record<Scene, string> = { sage: "bg-sage", sand: "bg-sand", blush: "bg-blush", stone: "bg-stone" };
@@ -65,8 +66,8 @@ export function BestSellers() {
 
       {view === "rows" ? (
         <div className="grid gap-12 md:gap-14">
-          {LINES.map((l) => (
-            <LineRow key={l} line={l} />
+          {LINES.map((l, i) => (
+            <LineRow key={l} line={l} from={i % 2 ? "right" : "left"} />
           ))}
         </div>
       ) : (
@@ -226,11 +227,36 @@ function ViewSwitch({ view, onChange }: { view: View; onChange: (v: View) => voi
   );
 }
 
-/** One line's styles in a sliding row, closed by a "View all" tile. */
-function LineRow({ line }: { line: ProductLine }) {
+/**
+ * One line's styles in a sliding row, closed by a "View all" tile. As the row scrolls into view its cards swing open
+ * toward you one after another like doors, hinged on the side they come from (rows alternate left and right), and the
+ * row's title slides in from the same side; the motion follows the scroll. Each card tilts toward the pointer.
+ */
+function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) {
   const styles = stylesIn(line);
   const label = LINE_LABEL[line];
+  const row = useRef<HTMLElement>(null);
   const track = useRef<HTMLUListElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        const s = from === "left" ? -1 : 1;
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: row.current, start: "top 88%", end: "top 38%", scrub: 0.6 },
+        });
+        tl.fromTo("[data-row-head]", { x: s * 70, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: "power3.out", duration: 0.6 }).fromTo(
+          "[data-swing]",
+          { rotateY: s * -68, x: s * 90, z: -120, autoAlpha: 0, transformOrigin: from === "left" ? "0% 50%" : "100% 50%" },
+          { rotateY: 0, x: 0, z: 0, autoAlpha: 1, ease: "power3.out", duration: 0.8, stagger: 0.09 },
+          0.1,
+        );
+      });
+      return () => mm.revert();
+    },
+    { scope: row },
+  );
   const [edges, setEdges] = useState({ start: true, end: true });
 
   useEffect(() => {
@@ -252,8 +278,8 @@ function LineRow({ line }: { line: ProductLine }) {
   };
 
   return (
-    <section aria-labelledby={`row-${line}`}>
-      <div className="mb-5 flex items-end justify-between gap-4">
+    <section ref={row} aria-labelledby={`row-${line}`}>
+      <div data-row-head className="mb-5 flex items-end justify-between gap-4">
         <h3 id={`row-${line}`} className="text-[clamp(24px,2.4vw,32px)] leading-none font-semibold tracking-[-0.03em]">
           {label}
           <span className="ml-2.5 text-[15px] font-normal tracking-normal text-muted">
@@ -285,15 +311,21 @@ function LineRow({ line }: { line: ProductLine }) {
       <ul
         ref={track}
         id={`track-${line}`}
-        className="no-scrollbar @container -mx-(--shell-pad) flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-(--shell-pad) px-(--shell-pad) pb-1 lg:gap-5"
+        className="no-scrollbar @container -mx-(--shell-pad) flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-(--shell-pad) px-(--shell-pad) pb-1 [perspective:1400px] lg:gap-5"
       >
         {styles.map((x) => (
-          <li key={x.id} className="w-[72%] flex-none snap-start sm:w-[44%] md:w-[30%] lg:w-[19%]">
-            <ProductCard p={x} sizes="(max-width: 864px) 72vw, 340px" />
+          <li key={x.id} data-swing className="w-[72%] flex-none snap-start sm:w-[44%] md:w-[30%] lg:w-[19%]">
+            <div
+              onPointerMove={onTilt}
+              onPointerLeave={offTilt}
+              className="transition-transform duration-500 ease-soft [transform:perspective(1000px)_rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] hover:duration-150"
+            >
+              <ProductCard p={x} sizes="(max-width: 864px) 72vw, 340px" />
+            </div>
           </li>
         ))}
         {/* "View all": fills the rest of a short row, shrinks to a card when the row slides */}
-        <li className="min-w-[72%] flex-1 snap-start sm:min-w-[44%] md:min-w-[30%] lg:min-w-[19%]">
+        <li data-swing className="min-w-[72%] flex-1 snap-start sm:min-w-[44%] md:min-w-[30%] lg:min-w-[19%]">
           <Link
             href={`/catalog?line=${line}`}
             className="group relative flex h-[90cqw] flex-col justify-between overflow-hidden rounded-card bg-tile p-6 transition-colors hover:bg-chip-hover sm:h-[55cqw] md:h-[37.5cqw] lg:h-[23.75cqw]"

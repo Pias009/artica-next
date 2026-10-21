@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { AddButton } from "../product/AddButton";
-import { gsap, MOTION_OK, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 import { useUI } from "@/lib/store";
+import { offTilt, onTilt } from "@/lib/tilt";
 
 /**
  * The season's most-reordered styles, best first (client placeholder list: the first three carry the catalogue's own
@@ -190,26 +191,6 @@ function Layer({
       </ul>
     </div>
   );
-}
-
-const TILT_VARS = ["--rx", "--ry", "--px", "--py", "--gx", "--gy"];
-
-/** Tilt toward the pointer: the card turns, the glare follows, the pair shifts the other way for depth. */
-function onTilt(e: PointerEvent<HTMLDivElement>) {
-  if (e.pointerType !== "mouse" || prefersReducedMotion()) return;
-  const el = e.currentTarget;
-  const r = el.getBoundingClientRect();
-  const px = (e.clientX - r.left) / r.width - 0.5;
-  const py = (e.clientY - r.top) / r.height - 0.5;
-  el.style.setProperty("--rx", `${(-py * 12).toFixed(2)}deg`);
-  el.style.setProperty("--ry", `${(px * 14).toFixed(2)}deg`);
-  el.style.setProperty("--px", px.toFixed(3));
-  el.style.setProperty("--py", py.toFixed(3));
-  el.style.setProperty("--gx", `${((px + 0.5) * 100).toFixed(1)}%`);
-  el.style.setProperty("--gy", `${((py + 0.5) * 100).toFixed(1)}%`);
-}
-function offTilt(e: PointerEvent<HTMLDivElement>) {
-  for (const v of TILT_VARS) e.currentTarget.style.removeProperty(v);
 }
 
 function Card({ p, rank, onView }: { p: Product; rank: number; onView: () => void }) {
