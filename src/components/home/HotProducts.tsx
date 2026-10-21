@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState, type PointerEvent } from "react";
 import { Icon } from "../Icon";
 import { AddButton } from "../product/AddButton";
+import { gsap, MOTION_OK, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 import { useUI } from "@/lib/store";
 
@@ -14,51 +15,89 @@ import { useUI } from "@/lib/store";
  */
 const HOT = ["nord", "mira", "mira-tall", "ember", "maple", "cedar", "raven", "sable"];
 const ITEMS = HOT.map(getProduct).filter((p): p is Product => !!p);
+const MID = (ITEMS.length - 1) / 2;
 
-const STEP_MS = 3800;
-const OUT_MS = 600;
+/** Up to eight fit as a still grid; past that the list splits into two layers that drift in opposite directions. */
+const HALF = Math.ceil(ITEMS.length / 2);
+const MOVING = HALF > 4;
+const ROWS = MOVING ? [ITEMS.slice(0, HALF), ITEMS.slice(HALF)] : [];
 
 /**
- * Hot products as a ranked list beside one large image: the whole top eight on the right, the style at the top of the
- * moment large on the left over its own rank. The list steps down on its own, and every change rises: the old pair
- * lifts away and the next comes up from below. A thin timer line runs under the active row; it pauses under the
- * pointer and has a pause button (WCAG 2.2.2); under reduced motion it only moves when asked.
+ * Hot products as a deck that deals itself out. On desktop the section holds in place while the cards, stacked and
+ * fanned like a hand in the middle, are dealt one by one to their places in the grid as you scroll; on phones each
+ * card swings up into place as it arrives. Once dealt it is a plain grid, easy to compare and pick, and every card
+ * tilts toward the pointer with a glare and the pair shifting in depth. Reduced motion shows the grid as it is.
+ * With more than eight styles the grid becomes two layers, the top drifting left to right and the bottom right to
+ * left, once the deal is done; a layer stops under the pointer and a button stops both (WCAG 2.2.2).
  */
 export function HotProducts() {
-  const n = ITEMS.length;
-  const [cur, setCur] = useState(0);
-  const [prev, setPrev] = useState<number | null>(null);
-  const [paused, setPaused] = useState(false);
-  const [hover, setHover] = useState(false);
-  const reduced = useReducedMotion();
   const openQuickView = useUI((s) => s.openQuickView);
-  const curRef = useRef(0);
-  const outTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const still = paused || hover || reduced;
+  const ref = useRef<HTMLElement>(null);
+  const grid = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
 
-  const go = (i: number) => {
-    const next = ((i % n) + n) % n;
-    if (next === curRef.current) return;
-    setPrev(curRef.current);
-    curRef.current = next;
-    setCur(next);
-    clearTimeout(outTimer.current);
-    outTimer.current = setTimeout(() => setPrev(null), OUT_MS);
-  };
+  useGSAP(
+    () => {
+      const el = grid.current;
+      if (!el) return;
+      const mm = gsap.matchMedia();
 
-  useEffect(() => {
-    if (still) return;
-    const t = setTimeout(() => !document.hidden && go(curRef.current + 1), STEP_MS);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [still, cur]);
+      // desktop: hold the grid and deal the deck out across it
+      mm.add(`${MOTION_OK} and (min-width: 64rem)`, () => {
+        const cards = gsap.utils.toArray<HTMLElement>("[data-deal]", el);
+        const metas = gsap.utils.toArray<HTMLElement>("[data-deal] [data-meta]", el);
+        // offsets from each card's place to the middle of the grid (offset* ignore transforms, so refreshes stay true);
+        // a right-drifting layer waits shifted half its length, so its cards sit that much further left
+        const shift = (c: HTMLElement) => (c.parentElement?.dataset.reverse ? c.parentElement.offsetWidth / 2 : 0);
+        const dx = (c: HTMLElement) => el.offsetWidth / 2 - (c.offsetLeft - shift(c) + c.offsetWidth / 2);
+        const dy = (c: HTMLElement) => el.offsetHeight / 2 - (c.offsetTop + c.offsetHeight / 2);
 
-  useEffect(() => () => clearTimeout(outTimer.current), []);
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: el,
+            start: () => (el.offsetHeight < innerHeight - 120 ? "center center" : "top 96px"),
+            end: "+=85%",
+            pin: ref.current?.querySelector("[data-pin]") ?? el,
+            scrub: 0.7,
+            invalidateOnRefresh: true,
+            // the layers only start drifting once every card has landed
+            onUpdate: (st) => (el.dataset.dealt = String(st.progress > 0.999)),
+            onRefresh: (st) => (el.dataset.dealt = String(st.progress > 0.999)),
+          },
+        });
+        el.dataset.dealt = "false";
+        tl.fromTo(
+          cards,
+          {
+            x: (i, c: HTMLElement) => dx(c) + (i - MID) * 16,
+            y: (i, c: HTMLElement) => dy(c) + Math.abs(i - MID) * 6,
+            rotate: (i) => (i - MID) * 4.5,
+            scale: 0.78,
+            zIndex: (i) => ITEMS.length - i,
+          },
+          { x: 0, y: 0, rotate: 0, scale: 1, ease: "power3.inOut", duration: 1, stagger: 0.09 },
+        ).fromTo(metas, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.4, stagger: 0.05 }, "-=0.5");
+        return () => delete el.dataset.dealt;
+      });
 
-  const p = ITEMS[cur];
+      // phones and tablets: each card swings up into place as it arrives
+      mm.add(`${MOTION_OK} and (max-width: 63.99rem)`, () => {
+        gsap.utils.toArray<HTMLElement>("[data-deal]", el).forEach((c, i) => {
+          gsap.fromTo(
+            c,
+            { y: 90, rotate: i % 2 ? 7 : -7, scale: 0.88, autoAlpha: 0 },
+            { y: 0, rotate: 0, scale: 1, autoAlpha: 1, ease: "power3.out", scrollTrigger: { trigger: c, start: "top 98%", end: "top 62%", scrub: 0.6 } },
+          );
+        });
+      });
+
+      return () => mm.revert();
+    },
+    { scope: ref },
+  );
 
   return (
-    <section id="hot" aria-labelledby="h-hot" className="mt-sec scroll-mt-24">
+    <section ref={ref} id="hot" aria-labelledby="h-hot" className="mt-sec scroll-mt-24">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10">
         <div>
           <p className="eyebrow">Hot this season</p>
@@ -66,150 +105,165 @@ export function HotProducts() {
             The styles buyers <em>reorder.</em>
           </h2>
         </div>
-        <Link href="/catalog" className="group inline-flex h-11 items-center gap-2 text-[14px] font-semibold">
-          Shop the full range <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
+        <div className="flex items-center gap-4">
+          {MOVING && (
+            <button
+              type="button"
+              onClick={() => setPaused((v) => !v)}
+              aria-pressed={paused}
+              aria-label={paused ? "Play the hot styles" : "Pause the hot styles"}
+              className="glass grid size-10 place-items-center rounded-full text-ink-2 transition-colors hover:text-ink motion-reduce:hidden"
+            >
+              <Icon name={paused ? "play" : "pause"} className="size-3.5" />
+            </button>
+          )}
+          <Link href="/catalog" className="group inline-flex h-11 items-center gap-2 text-[14px] font-semibold">
+            Shop the full range <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
       </div>
 
-      <div
-        className="glass overflow-hidden rounded-[32px]"
-        onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)}
-        onPointerLeave={() => setHover(false)}
-      >
-        <div className="grid grid-cols-[minmax(0,1fr)] lg:h-[clamp(560px,70vh,640px)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-          {/* the style at the top, large */}
-          <div className="relative flex min-h-[440px] flex-col overflow-hidden lg:min-h-0">
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 transition-[background] duration-700"
-              style={{ background: `radial-gradient(55% 55% at 50% 50%, ${glow(p)}38, transparent 72%)` }}
-            />
-
-            {/* the rank, oversized behind the pair */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[4%] overflow-hidden text-center">
-              <span
-                key={`r-${cur}`}
-                className="inline-block font-headline text-[clamp(160px,22vw,300px)] leading-none font-semibold text-ink/[0.05] tabular-nums [animation:rise-up-in_700ms_cubic-bezier(.22,1,.36,1)_both] motion-reduce:animate-none"
-              >
-                {String(cur + 1).padStart(2, "0")}
-              </span>
-            </div>
-
-            <div className="relative z-[2] flex items-center justify-between p-5 sm:p-7">
-              {p.badge && p.badge !== "New" ? (
-                <span className="rounded-full bg-brand-soft px-3 py-1 text-[12px] font-semibold text-brand">{p.badge}</span>
-              ) : (
-                <span className="rounded-full bg-white/80 px-3 py-1 text-[12px] font-semibold text-ink-2">Hot this season</span>
-              )}
-              {!reduced && (
-                <button
-                  type="button"
-                  onClick={() => setPaused((v) => !v)}
-                  aria-pressed={paused}
-                  aria-label={paused ? "Play the hot styles" : "Pause the hot styles"}
-                  className="grid size-10 place-items-center rounded-full bg-white/70 text-ink-2 transition-colors hover:bg-white hover:text-ink"
-                >
-                  <Icon name={paused ? "play" : "pause"} className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* the pair: the last one lifts away, the next rises from below */}
-            <div className="relative mx-auto min-h-[220px] w-[min(88%,600px)] flex-1">
-              {prev !== null && prev !== cur && <Pair key={`out-${prev}`} p={ITEMS[prev]} className="[animation:rise-up-out_600ms_cubic-bezier(.4,0,.2,1)_both]" />}
-              <Pair key={`in-${cur}`} p={p} className="[animation:rise-up-in_800ms_cubic-bezier(.22,1,.36,1)_both] motion-reduce:animate-none" />
-              <span aria-hidden="true" className="absolute right-[18%] bottom-[3%] left-[18%] h-[7%] rounded-[50%] bg-ink/15 blur-[16px]" />
-            </div>
-
-            {/* what it is, and what to do */}
-            <div className="relative z-[2] flex flex-wrap items-end justify-between gap-4 p-5 sm:p-7">
-              <div key={`d-${cur}`} aria-live="polite" className="min-w-0 [animation:rise-up-in_700ms_cubic-bezier(.22,1,.36,1)_both] motion-reduce:animate-none">
-                <p className="text-[12.5px] font-semibold tracking-[0.12em] text-muted uppercase">
-                  {LINE_LABEL[p.line]} · {categoryOf(p)}
-                </p>
-                <h3 className="mt-1 font-headline text-[30px] leading-[1.05] font-semibold tracking-[-0.015em] sm:text-[36px]">Chime Long {p.name}</h3>
-                <p className="mt-1.5 text-[14px] text-ink-2">
-                  <b className="font-semibold text-ink">{MOQ_PAIRS} pairs</b> MOQ · {PACK} per case · {p.sizes}
-                </p>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => openQuickView(p.id)}
-                  className="inline-flex h-12 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-white transition-colors hover:bg-brand"
-                >
-                  View style <Icon name="arrow" className="size-4" />
-                </button>
-                <AddButton id={p.id} className="size-12 shrink-0 shadow-soft ring-1 ring-ink/10" />
-              </div>
-            </div>
+      <div data-pin>
+        {MOVING ? (
+          <div ref={grid} className="group/hot relative grid gap-3 sm:gap-5">
+            {ROWS.map((row, r) => (
+              <Layer key={r} items={row} start={r * HALF} reverse={r === 0} paused={paused} onView={openQuickView} />
+            ))}
           </div>
-
-          {/* the whole top eight */}
-          <ol aria-label="Hot styles, ranked" className="flex flex-col border-ink/8 p-2 max-lg:border-t sm:p-3 lg:border-l">
-            {ITEMS.map((x, i) => {
-              const on = i === cur;
-              return (
-                <li key={x.id} className="flex-1">
-                  <button
-                    type="button"
-                    onClick={() => go(i)}
-                    aria-pressed={on}
-                    aria-label={`Show Chime Long ${x.name}, number ${i + 1}`}
-                    className={`relative flex h-full min-h-[60px] w-full items-center gap-4 overflow-hidden rounded-2xl px-4 text-left transition-[background-color,box-shadow] duration-300 ${on ? "bg-white shadow-[0_10px_26px_-16px_rgb(18_20_22/.35)]" : "hover:bg-white/55"}`}
-                  >
-                    <span className={`w-7 shrink-0 font-headline text-[22px] font-semibold tabular-nums transition-colors ${on ? "text-brand" : "text-ink/25"}`}>
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <b className={`block truncate text-[15px] font-semibold transition-colors ${on ? "text-ink" : "text-ink-2"}`}>{x.name}</b>
-                      <span className="block truncate text-[12.5px] text-muted">
-                        {LINE_LABEL[x.line]} · {categoryOf(x)}
-                      </span>
-                    </span>
-                    {x.badge && x.badge !== "New" && <span className="shrink-0 rounded-full bg-brand-soft px-2 py-0.5 text-[11px] font-semibold text-brand max-sm:hidden">{x.badge}</span>}
-                    <Icon name="arrow" className={`size-4 shrink-0 transition-[opacity,translate] duration-300 ${on ? "translate-x-0 text-brand opacity-100" : "-translate-x-1 opacity-0"}`} />
-                    {/* the timer under the active row */}
-                    {on && (
-                      <span aria-hidden="true" className="absolute inset-x-4 bottom-1.5 h-[2px] overflow-hidden rounded-full bg-ink/8">
-                        <span
-                          key={`t-${cur}-${still}`}
-                          className="block h-full origin-left bg-brand"
-                          style={still ? { transform: "scaleX(0)" } : { animation: `spot-progress ${STEP_MS}ms linear both` }}
-                        />
-                      </span>
-                    )}
-                  </button>
+        ) : (
+          <div ref={grid} className="relative">
+            <ul aria-label="Hot styles, ranked" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+              {ITEMS.map((p, i) => (
+                <li key={p.id} data-deal className="relative will-change-transform">
+                  <Card p={p} rank={i + 1} onView={() => openQuickView(p.id)} />
                 </li>
-              );
-            })}
-          </ol>
-        </div>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-/** Black pairs glow a soft mauve rather than grey. */
-const glow = (p: Product) => (p.color.hex.toLowerCase() === "#1d1e19" ? "#b9a6c4" : p.color.hex);
-
-function Pair({ p, className }: { p: Product; className?: string }) {
+/**
+ * One drifting layer: its cards twice over in a strip that slides half its own length and starts again, so the loop
+ * is seamless (the second copy is hidden from assistive tech and the tab order, and is never dealt). A right-drifting
+ * layer puts the copy first and plays the slide backwards. Until the deal is done the strip holds still (and the
+ * clip and edge fade are off so cards can fly in from the deck).
+ */
+function Layer({
+  items,
+  start,
+  reverse,
+  paused,
+  onView,
+}: {
+  items: Product[];
+  start: number;
+  reverse?: boolean;
+  paused: boolean;
+  onView: (id: string) => void;
+}) {
+  const order = reverse ? [1, 0] : [0, 1];
   return (
-    <span className={`absolute inset-0 block ${className ?? ""}`}>
-      <Image src={p.outer.src} alt={p.desc} fill sizes="(min-width: 74rem) 44vw, 88vw" className="-scale-x-100 object-contain drop-shadow-[0_28px_26px_rgb(18_20_22/.22)]" />
-    </span>
+    <div className="group/row [overflow-x:clip] [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)] group-data-[dealt=false]/hot:[mask-image:none] group-data-[dealt=false]/hot:[overflow-x:visible] scrollbar-none motion-reduce:[overflow-x:auto] motion-reduce:[mask-image:none]">
+      <ul
+        aria-label={`Hot styles, ranked ${start + 1} to ${start + items.length}`}
+        data-reverse={reverse || undefined}
+        className={`flex w-max animate-marquee group-focus-within/row:[animation-play-state:paused] group-hover/row:[animation-play-state:paused] group-data-[dealt=false]/hot:animate-none motion-reduce:animate-none ${reverse ? "[animation-direction:reverse] group-data-[dealt=false]/hot:-translate-x-1/2" : ""} ${paused ? "[animation-play-state:paused]" : ""}`}
+        style={{ animationDuration: `${items.length * 7}s` }}
+      >
+        {order.map((c) =>
+          items.map((p, i) => (
+            <li
+              key={`${c}-${p.id}`}
+              data-deal={c === 0 ? "" : undefined}
+              aria-hidden={c > 0 || undefined}
+              inert={c > 0}
+              className={`relative w-[clamp(200px,calc(25vw-12px),336px)] shrink-0 pr-3 will-change-transform sm:pr-5 ${c > 0 ? "motion-reduce:hidden" : ""}`}
+            >
+              <Card p={p} rank={start + i + 1} onView={() => onView(p.id)} />
+            </li>
+          )),
+        )}
+      </ul>
+    </div>
   );
 }
 
-const REDUCE = "(prefers-reduced-motion: reduce)";
-function useReducedMotion() {
-  return useSyncExternalStore(
-    (onChange) => {
-      const mq = matchMedia(REDUCE);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    },
-    () => matchMedia(REDUCE).matches,
-    () => false,
+const TILT_VARS = ["--rx", "--ry", "--px", "--py", "--gx", "--gy"];
+
+/** Tilt toward the pointer: the card turns, the glare follows, the pair shifts the other way for depth. */
+function onTilt(e: PointerEvent<HTMLDivElement>) {
+  if (e.pointerType !== "mouse" || prefersReducedMotion()) return;
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width - 0.5;
+  const py = (e.clientY - r.top) / r.height - 0.5;
+  el.style.setProperty("--rx", `${(-py * 12).toFixed(2)}deg`);
+  el.style.setProperty("--ry", `${(px * 14).toFixed(2)}deg`);
+  el.style.setProperty("--px", px.toFixed(3));
+  el.style.setProperty("--py", py.toFixed(3));
+  el.style.setProperty("--gx", `${((px + 0.5) * 100).toFixed(1)}%`);
+  el.style.setProperty("--gy", `${((py + 0.5) * 100).toFixed(1)}%`);
+}
+function offTilt(e: PointerEvent<HTMLDivElement>) {
+  for (const v of TILT_VARS) e.currentTarget.style.removeProperty(v);
+}
+
+function Card({ p, rank, onView }: { p: Product; rank: number; onView: () => void }) {
+  const tint = glow(p);
+  return (
+    <article className="group relative [perspective:1100px]">
+      <div
+        onPointerMove={onTilt}
+        onPointerLeave={offTilt}
+        className="glass relative aspect-[4/5] overflow-hidden rounded-[24px] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(.22,1,.36,1)] [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] group-hover:shadow-[0_34px_50px_-30px_rgb(18_20_22/.5)] group-hover:duration-150 lg:aspect-square"
+        style={{ backgroundImage: `radial-gradient(80% 65% at 50% 58%, ${tint}40, ${tint}10 75%)` }}
+      >
+        <span className="absolute top-4 left-4 z-[1] font-headline text-[22px] leading-none font-semibold text-ink/70 tabular-nums sm:top-5 sm:left-5 sm:text-[26px]">
+          {String(rank).padStart(2, "0")}
+        </span>
+        {p.badge && p.badge !== "New" && (
+          <span className="absolute top-4 right-4 z-[1] rounded-full bg-white/85 px-2.5 py-0.5 text-[11px] font-semibold text-brand sm:top-5 sm:right-5">
+            {p.badge}
+          </span>
+        )}
+        <span className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] [transform:translate(calc(var(--px,0)*-16px),calc(var(--py,0)*-12px))] group-hover:duration-150">
+          <Image
+            src={p.outer.src}
+            alt={p.desc}
+            fill
+            sizes="(min-width: 74rem) 300px, 46vw"
+            className="-scale-x-100 object-contain p-[12%] pt-[18%] drop-shadow-[0_18px_16px_rgb(18_20_22/.22)] transition-[scale] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.07] lg:p-[14%] lg:pt-[17%]"
+          />
+        </span>
+        {/* the glare that follows the pointer */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: "radial-gradient(45% 45% at var(--gx,50%) var(--gy,30%), rgb(255 255 255/.5), transparent 70%)" }}
+        />
+        {/* the whole card opens quick view; the add button sits above it */}
+        <button type="button" onClick={onView} aria-label={`Quick view: Chime Long ${p.name}, number ${rank}`} className="absolute inset-0 z-[2] rounded-[24px]" />
+        <AddButton id={p.id} className="absolute right-3 bottom-3 z-[3] size-10 shadow-soft ring-1 ring-ink/10 sm:right-4 sm:bottom-4 sm:size-11" />
+      </div>
+      <div data-meta className="px-1 pt-3.5">
+        <p className="truncate text-[11.5px] font-semibold tracking-[0.12em] text-muted uppercase">
+          {LINE_LABEL[p.line]} · {categoryOf(p)}
+        </p>
+        <h3 className="mt-1 truncate font-headline text-[19px] leading-tight font-semibold sm:text-[21px]">
+          <span className="max-sm:hidden">Chime Long </span>
+          {p.name}
+        </h3>
+        <p className="mt-1 truncate text-[13px] text-ink-2">
+          <b className="font-semibold text-ink">{MOQ_PAIRS} pairs</b> MOQ<span className="max-sm:hidden"> · {PACK} per case</span>
+        </p>
+      </div>
+    </article>
   );
 }
+
+/** Black pairs tint a soft mauve rather than grey. */
+const glow = (p: Product) => (p.color.hex.toLowerCase() === "#1d1e19" ? "#b9a6c4" : p.color.hex);
