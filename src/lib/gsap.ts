@@ -3,10 +3,11 @@
 import gsap from "gsap";
 import { Flip } from "gsap/Flip";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP, ScrollTrigger, Flip);
+  gsap.registerPlugin(useGSAP, ScrollTrigger, Flip, SplitText);
   watchPageHeight();
 }
 
@@ -43,4 +44,4 @@ export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export { gsap, Flip, ScrollTrigger, useGSAP };
+export { gsap, Flip, ScrollTrigger, SplitText, useGSAP };

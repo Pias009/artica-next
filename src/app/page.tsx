@@ -2,6 +2,7 @@ import { BestSellers } from "@/components/home/BestSellers";
 import { BuyerTypes } from "@/components/home/BuyerTypes";
 import { GlobalReach } from "@/components/home/GlobalReach";
 import { HeroSpotlight } from "@/components/home/HeroSpotlight";
+import { HomeReveal } from "@/components/home/HomeReveal";
 import { HotProducts } from "@/components/home/HotProducts";
 import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
@@ -34,6 +35,7 @@ export default function Home() {
       <OrderJourney />
       <PrivateLabel />
       <LineSheetCta />
+      <HomeReveal />
     </>
   );
 }
