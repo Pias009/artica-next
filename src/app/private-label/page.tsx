@@ -158,7 +158,7 @@ export default function PrivateLabelPage() {
               </span>
               <span className="mono-label text-[10px] text-muted">[ MOQ 600 PR ]</span>
             </div>
-            <h2 className="text-[clamp(26px,3.2vw,44px)] font-extrabold uppercase tracking-tight text-ink">
+            <h2 className="type-section text-ink">
               Eliminate overseas factory friction.
             </h2>
             <p className="mt-3 text-base leading-relaxed text-ink-2">
@@ -211,7 +211,7 @@ export default function PrivateLabelPage() {
                 </div>
                 <span className="mono-label text-[9px] text-muted">{c.tag}</span>
               </div>
-              <h3 className="mt-4 text-base font-extrabold uppercase text-ink">{c.title}</h3>
+              <h3 className="mt-4 text-[16px] font-semibold tracking-[-0.01em] text-ink">{c.title}</h3>
               <p className="mt-1 text-xs text-ink-2">{c.desc}</p>
               <ul className="mt-4 space-y-2 border-t border-line/50 pt-3 text-xs text-ink-2">
                 {c.items.map((it) => (
@@ -250,7 +250,7 @@ export default function PrivateLabelPage() {
               )}
               <div>
                 <span className="mono-label text-xs text-muted">TIER SPECIFICATION</span>
-                <h3 className="mt-1 text-xl font-extrabold uppercase text-ink">{t.name}</h3>
+                <h3 className="mt-1 font-headline text-[22px] leading-tight font-semibold tracking-[-0.01em] text-ink">{t.name}</h3>
                 <div className="mt-3 flex items-baseline gap-2 border-b border-line/60 pb-3">
                   <span className="text-3xl font-extrabold tabular-nums text-ink">{t.moq}</span>
                   <span className="text-xs font-semibold text-muted">/ {t.leadTime}</span>
@@ -292,7 +292,7 @@ export default function PrivateLabelPage() {
                 <span className="mono-label text-xs font-extrabold text-accent">STEP {s.step}</span>
                 <span className="rounded bg-chip px-2 py-0.5 text-[10px] font-mono text-muted">{s.time}</span>
               </div>
-              <h3 className="mt-3 text-base font-extrabold uppercase text-ink">{s.title}</h3>
+              <h3 className="mt-3 text-[16px] font-semibold tracking-[-0.01em] text-ink">{s.title}</h3>
               <p className="mt-2 text-xs leading-relaxed text-ink-2">{s.desc}</p>
             </div>
           ))}
@@ -303,7 +303,7 @@ export default function PrivateLabelPage() {
       <section className="mt-sec mb-4 flex flex-col items-center justify-between gap-4 rounded-shell border border-line/60 bg-accent p-8 text-center text-on-accent md:flex-row md:text-left">
         <div>
           <span className="mono-label text-kraft text-[10px]">READY TO BUILD YOUR LINE?</span>
-          <h2 className="text-2xl font-extrabold uppercase mt-1">Speak directly with an OEM Technical Director</h2>
+          <h2 className="font-headline text-[26px] leading-tight font-semibold tracking-[-0.015em] mt-1">Speak directly with an OEM Technical Director</h2>
           <p className="mt-1 text-xs text-white/80">Send your moodboard or volume requirements. Confidentiality NDA provided upon request.</p>
         </div>
         <OpenInquiryButton buyerType="Private label brand" className="btn bg-surface text-ink hover:bg-white shadow-soft">

@@ -30,8 +30,8 @@ export function HomeReveal() {
         fastScrollEnd: true,
       });
 
-      /** Tied to the scroll: the panel opens as its top travels from the bottom of the screen to a little above the middle. */
-      const scrub = (trigger: Element, start = "top 95%", end = "top 45%") => ({ trigger, start, end, scrub: 0.8 });
+      /** Tied to the scroll: the panel opens as its top travels from the bottom of the screen to the upper third. */
+      const scrub = (trigger: Element, start = "top 95%", end = "top 30%") => ({ trigger, start, end, scrub: 1.2 });
 
       /** Words in their own masks; the masks get a little room so ascenders, descenders and italics are never cut. */
       const words = (el: HTMLElement) => {
@@ -39,7 +39,7 @@ export function HomeReveal() {
         gsap.set(split.masks, { padding: "0.14em 0.1em", margin: "-0.14em -0.1em" });
         return split.words;
       };
-      const rise = { yPercent: 125, rotate: 5, duration: 1.05, ease: EASE, stagger: 0.06 };
+      const rise = { yPercent: 125, rotate: 5, duration: 1.45, ease: EASE, stagger: 0.09 };
 
       // the hero: eyebrow, headline, line, actions; replays whenever you come back up to it
       const hero = $("#hero");
@@ -47,10 +47,10 @@ export function HomeReveal() {
       if (hero && title)
         gsap
           .timeline({ scrollTrigger: visit(hero, "top bottom", "bottom 30%") })
-          .from(hero.querySelectorAll('[data-hero-in="eyebrow"]'), { x: -32, autoAlpha: 0, duration: 0.8, ease: "power3.out" }, 0)
-          .from(words(title), { ...rise, stagger: 0.05 }, 0.05)
-          .from(hero.querySelectorAll('[data-hero-in="copy"]'), { y: 18, autoAlpha: 0, duration: 0.9, ease: "power3.out" }, 0.35)
-          .from(hero.querySelectorAll('[data-hero-in="cta"] > *'), { y: 22, autoAlpha: 0, duration: 0.8, ease: EASE, stagger: 0.08 }, 0.45);
+          .from(hero.querySelectorAll('[data-hero-in="eyebrow"]'), { x: -32, autoAlpha: 0, duration: 1.1, ease: "power3.out" }, 0)
+          .from(words(title), { ...rise, stagger: 0.075 }, 0.1)
+          .from(hero.querySelectorAll('[data-hero-in="copy"]'), { y: 18, autoAlpha: 0, duration: 1.2, ease: "power3.out" }, 0.5)
+          .from(hero.querySelectorAll('[data-hero-in="cta"] > *'), { y: 22, autoAlpha: 0, duration: 1.1, ease: EASE, stagger: 0.12 }, 0.65);
 
       // every section heading
       for (const h2 of $$("section h2.type-section")) {
@@ -58,9 +58,9 @@ export function HomeReveal() {
         const eyebrow = h2.parentElement?.querySelector(":scope > .eyebrow");
         const sub = h2.nextElementSibling?.matches("p") ? h2.nextElementSibling : null;
         const tl = gsap.timeline({ scrollTrigger: visit(h2, "top 90%") });
-        if (eyebrow) tl.from(eyebrow, { x: -32, autoAlpha: 0, duration: 0.8, ease: "power3.out" }, 0);
-        tl.from(words(h2), rise, 0.05);
-        if (sub) tl.from(sub, { y: 18, autoAlpha: 0, duration: 0.9, ease: "power3.out" }, 0.35);
+        if (eyebrow) tl.from(eyebrow, { x: -32, autoAlpha: 0, duration: 1.1, ease: "power3.out" }, 0);
+        tl.from(words(h2), rise, 0.1);
+        if (sub) tl.from(sub, { y: 18, autoAlpha: 0, duration: 1.2, ease: "power3.out" }, 0.5);
       }
 
       // new arrivals: the panels grow up from their base, one after another

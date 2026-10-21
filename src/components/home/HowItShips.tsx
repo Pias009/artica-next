@@ -131,7 +131,7 @@ export function HowItShips() {
     () => {
       gsap.matchMedia().add(MOTION_OK, () => {
         const card = (id: string) => ref.current!.querySelector<HTMLElement>(`[data-ship="${id}"]`)!;
-        const st = (id: string) => ({ trigger: card(id), start: "top 88%", end: "top 30%", scrub: 0.6 });
+        const st = (id: string) => ({ trigger: card(id), start: "top 92%", end: "top 22%", scrub: 1.1 });
         const q = (id: string, a: string) => card(id).querySelectorAll(`[data-anim="${a}"]`);
 
         gsap.timeline({ scrollTrigger: st("box") }).from(q("box", "lid"), { y: -70, opacity: 0, ease: "power2.out", duration: 1 });
@@ -148,8 +148,8 @@ export function HowItShips() {
         gsap.from("[data-ratio]", {
           opacity: 0,
           y: 8,
-          stagger: 0.05,
-          duration: 0.4,
+          stagger: 0.08,
+          duration: 0.6,
           scrollTrigger: { trigger: card("case"), start: "top 75%", end: "bottom top", toggleActions: "play reverse play reverse" },
         });
       });
@@ -161,8 +161,13 @@ export function HowItShips() {
     <section ref={ref} id="packing" aria-labelledby="h-packing" className="mt-sec scroll-mt-24">
       <SectionHead
         id="h-packing"
-        title="How your order is packed and shipped."
-        sub="From a single pair to a full pallet at your door: wholesale quantities, packed the way your stockroom works."
+        eyebrow="Packing"
+        title={
+          <>
+            How your order is <em>packed and shipped.</em>
+          </>
+        }
+        sub="From one pair to a full pallet, packed the way your stockroom works."
       />
       <ol className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((s, i) => {

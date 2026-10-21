@@ -43,7 +43,7 @@ export function PageIntro({
               </Fragment>
             ))}
           </nav>
-          <h1 className="max-w-[18ch] text-[clamp(40px,5.4vw,72px)] leading-[1.02] font-semibold tracking-[-0.04em]">{title}</h1>
+          <h1 className="max-w-[18ch] font-headline text-[clamp(40px,5.4vw,72px)] leading-[1.04] font-semibold tracking-[-0.02em]">{title}</h1>
           {text && <p className="mt-5 max-w-[52ch] text-[18px] text-ink-2">{text}</p>}
           {children}
         </div>

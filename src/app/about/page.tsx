@@ -54,7 +54,7 @@ export default function AboutPage() {
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div>
             <span className="mono-label text-accent font-bold">OUR PHILOSOPHY</span>
-            <h2 className="text-[clamp(26px,3.2vw,40px)] font-extrabold uppercase tracking-tight text-ink mt-1">
+            <h2 className="type-section text-ink mt-1">
               Zero compromises between brutal weather protection and store-shelf aesthetics.
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-ink-2">
@@ -100,7 +100,7 @@ export default function AboutPage() {
           {PILLARS.map((p) => (
             <div key={p.title} className="rounded-card border border-line/60 bg-tile p-5 card-lift shadow-xs">
               <span className="mono-label text-[9.5px] text-accent font-bold">{p.subtitle}</span>
-              <h3 className="mt-1 text-base font-extrabold uppercase text-ink">{p.title}</h3>
+              <h3 className="mt-1 text-[16px] font-semibold tracking-[-0.01em] text-ink">{p.title}</h3>
               <p className="mt-3 text-xs leading-relaxed text-ink-2">{p.desc}</p>
             </div>
           ))}
@@ -135,7 +135,7 @@ export default function AboutPage() {
         <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div>
             <span className="mono-label text-accent font-bold">ETHICAL MANUFACTURING</span>
-            <h3 className="text-xl font-extrabold uppercase text-ink mt-1">
+            <h3 className="font-headline text-[22px] leading-tight font-semibold tracking-[-0.01em] text-ink mt-1">
               BSCI & SMETA 4-Pillar Audited Facilities
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-ink-2">
@@ -156,7 +156,7 @@ export default function AboutPage() {
       <section className="mt-sec mb-4 flex flex-col items-center justify-between gap-4 rounded-shell border border-line/60 bg-accent p-8 text-center text-on-accent md:flex-row md:text-left">
         <div>
           <span className="mono-label text-kraft text-[10px]">PARTNER WITH CHIME LONG</span>
-          <h2 className="text-2xl font-extrabold uppercase mt-1">Request wholesale line sheet & samples</h2>
+          <h2 className="font-headline text-[26px] leading-tight font-semibold tracking-[-0.015em] mt-1">Request wholesale line sheet & samples</h2>
           <p className="mt-1 text-xs text-white/80">Experience the leather hand-feel and durable construction firsthand.</p>
         </div>
         <OpenInquiryButton className="btn bg-surface text-ink hover:bg-white shadow-soft">

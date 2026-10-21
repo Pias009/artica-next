@@ -21,7 +21,7 @@ function FaceText({ x, y, z, size, weight = 700, children }: { x: number; y: num
   const [px, py] = iso(x, y, z, U);
   return (
     <g transform={`translate(${px.toFixed(1)} ${py.toFixed(1)}) skewY(30)`}>
-      <text fontFamily="var(--font-hanken), Arial" fontSize={size} fontWeight={weight} fill="#121416" letterSpacing={size * 0.08}>
+      <text fontFamily="var(--font-inter), Arial" fontSize={size} fontWeight={weight} fill="#121416" letterSpacing={size * 0.08}>
         {children}
       </text>
     </g>
@@ -259,7 +259,16 @@ export function BuyerTypes() {
 
   return (
     <section ref={ref} id="programs" aria-labelledby="h-programs" className="mt-sec scroll-mt-24">
-      <SectionHead id="h-programs" title="Who we supply, and how they order." sub="Pick your kind of business to see what a first order looks like and how it ships." />
+      <SectionHead
+        id="h-programs"
+        eyebrow="Buyer programs"
+        title={
+          <>
+            Who we supply, <em>and how they order.</em>
+          </>
+        }
+        sub="Pick your kind of business to see a typical first order."
+      />
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,9fr)]">
         {/* buyer tabs */}

@@ -50,16 +50,12 @@ export function GlobalReach() {
 
   return (
     <section id="worldwide" aria-labelledby="h-worldwide" className="mt-sec scroll-mt-24">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10">
-        <div>
-          <p className="eyebrow">Worldwide</p>
-          <h2 id="h-worldwide" className="type-section mt-3 max-w-[18ch]">
-            From our factory to <em>your shelves</em>, anywhere.
-          </h2>
-        </div>
-        <p className="max-w-[34ch] text-[15px] text-ink-2">
-          Every order ships from Guangzhou, DDP, FOB or EXW, door-to-door or to your port.
-        </p>
+      <div className="mb-8 md:mb-10">
+        <p className="eyebrow">Worldwide</p>
+        <h2 id="h-worldwide" className="type-section mt-3 max-w-[18ch]">
+          From our factory to <em>your shelves</em>, anywhere.
+        </h2>
+        <p className="mt-3 max-w-[52ch] text-[17px] text-ink-2">Every order ships from Guangzhou, DDP, FOB or EXW, door-to-door or to your port.</p>
       </div>
 
       <div className="glass relative overflow-hidden rounded-[28px]">

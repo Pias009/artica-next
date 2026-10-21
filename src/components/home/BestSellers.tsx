@@ -51,8 +51,13 @@ export function BestSellers() {
     <section ref={ref} id="styles" aria-labelledby="h-styles" className="mt-sec scroll-mt-24">
       <SectionHead
         id="h-styles"
-        title="The wholesale range, by line"
-        sub="Every style, line by line. Slide a row, or open the whole line."
+        eyebrow="The range"
+        title={
+          <>
+            The wholesale range, <em>by line.</em>
+          </>
+        }
+        sub="Every style, line by line. Slide a row or open the whole line."
         right={
           <div className="flex items-center gap-5">
             {view === "list" && <MotionToggle stopped={stopped} onToggle={() => setStopped((v) => !v)} />}
@@ -244,7 +249,7 @@ function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) 
       mm.add(MOTION_OK, () => {
         const s = from === "left" ? -1 : 1;
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: row.current, start: "top 88%", end: "top 38%", scrub: 0.6 },
+          scrollTrigger: { trigger: row.current, start: "top 92%", end: "top 25%", scrub: 1.1 },
         });
         tl.fromTo("[data-row-head]", { x: s * 70, autoAlpha: 0 }, { x: 0, autoAlpha: 1, ease: "power3.out", duration: 0.6 }).fromTo(
           "[data-swing]",

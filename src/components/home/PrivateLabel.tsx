@@ -36,9 +36,9 @@ export function PrivateLabel() {
         <span aria-hidden className="absolute top-1/2 right-[-10%] -z-10 size-[min(90vw,720px)] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#fff_0%,rgb(255_255_255/0)_65%)] opacity-80" />
 
         <div className="px-[clamp(24px,5vw,72px)] pt-12 md:py-16">
-          <p className="text-[13px] font-semibold tracking-[0.08em] text-brand uppercase">Private label · OEM</p>
+          <p className="eyebrow">Private label · OEM</p>
           <h2 id="h-partner" className="type-section mt-3 max-w-[14ch]">
-            Your brand on our boots.
+            Your brand <em>on our boots.</em>
           </h2>
           <p className="mt-4 max-w-[40ch] text-[17px] text-ink-2">
             Private label from {PRIVATE_LABEL_MIN} pairs per style, made on the same lines as the Chime Long range.
@@ -158,7 +158,7 @@ function Carton({ name, className }: { name: string; className?: string }) {
         y="118"
         transform="skewY(18) translate(0 -42)"
         textAnchor="middle"
-        fontFamily="var(--font-hanken),Arial"
+        fontFamily="var(--font-inter),Arial"
         fontSize="10"
         fontWeight="800"
         fill="#6e5333"
@@ -170,10 +170,10 @@ function Carton({ name, className }: { name: string; className?: string }) {
       </text>
       <g transform="translate(146 92) skewY(-18)">
         <rect width="78" height="46" rx="3" fill="#fff" />
-        <text x="7" y="14" fontFamily="var(--font-hanken),Arial" fontSize="7.5" fontWeight="700" fill="#121416" letterSpacing="0.6" {...fit}>
+        <text x="7" y="14" fontFamily="var(--font-inter),Arial" fontSize="7.5" fontWeight="700" fill="#121416" letterSpacing="0.6" {...fit}>
           {name}
         </text>
-        <text x="7" y="23" fontFamily="var(--font-hanken),Arial" fontSize="5.5" fontWeight="600" fill="#4B5157">
+        <text x="7" y="23" fontFamily="var(--font-inter),Arial" fontSize="5.5" fontWeight="600" fill="#4B5157">
           12 PRS · US 7–13
         </text>
         <g fill="#121416">

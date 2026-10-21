@@ -40,7 +40,7 @@ export function SampleRequest() {
     () => {
       gsap.matchMedia().add(MOTION_OK, () => {
         gsap
-          .timeline({ scrollTrigger: { trigger: "[data-box]", start: "top 80%", end: "center 45%", scrub: 0.7 } })
+          .timeline({ scrollTrigger: { trigger: "[data-box]", start: "top 85%", end: "center 35%", scrub: 1.1 } })
           .fromTo("[data-lid]", { y: 0, x: 0, rotation: 0 }, { y: -150, x: 120, rotation: 16, transformOrigin: "50% 50%", ease: "power2.inOut", duration: 1 })
           .fromTo("[data-rise]", { yPercent: 78 }, { yPercent: 0, ease: "power3.out", duration: 1.2 }, 0.45)
           .fromTo("[data-tissue]", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
@@ -98,7 +98,12 @@ export function SampleRequest() {
         <div className="px-[clamp(24px,5vw,64px)] pb-12 lg:py-16">
           <SectionHead
             id="h-samples"
-            title="Order samples first."
+            eyebrow="Samples"
+            title={
+              <>
+                Order <em>samples first.</em>
+              </>
+            }
             sub={`Check fit, leather and finish in your own hands. Samples reach you in about ${LEAD.samples.replace("d", "")} days.`}
             className="mb-8!"
           />

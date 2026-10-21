@@ -137,7 +137,7 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
       {/* details: capped at the dialog height on desktop and scrolls on its own, so nothing is cut off */}
       <div className="scrollbar-soft relative flex flex-col gap-5 p-5 md:max-h-[min(780px,92dvh)] md:overflow-y-auto md:overscroll-contain md:p-8">
         <div className="md:pr-12">
-          <h2 id="qv-title" className="text-[clamp(28px,3vw,38px)] leading-tight font-semibold tracking-[-0.03em]">
+          <h2 id="qv-title" className="font-headline text-[clamp(28px,3vw,38px)] leading-tight font-semibold tracking-[-0.015em]">
             Chime Long {p.name}
           </h2>
           <p className="mt-1 text-[16px] text-ink-2">

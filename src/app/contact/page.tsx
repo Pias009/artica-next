@@ -94,7 +94,7 @@ export default function ContactPage() {
                   </div>
                   <span className="mono-label text-[9px] text-accent font-bold">{s.type}</span>
                 </div>
-                <h3 className="mt-4 text-xl font-extrabold uppercase text-ink">{s.city}</h3>
+                <h3 className="mt-4 font-headline text-[22px] leading-tight font-semibold tracking-[-0.01em] text-ink">{s.city}</h3>
                 <p className="mt-2 text-xs font-semibold text-ink leading-relaxed">{s.address}</p>
                 <p className="mt-2 text-xs text-ink-2 leading-relaxed">{s.notes}</p>
               </div>
@@ -118,7 +118,7 @@ export default function ContactPage() {
         <div className="grid gap-4 md:grid-cols-3">
           {DEPARTMENTS.map((d) => (
             <div key={d.role} className="rounded-card border border-line/50 bg-tile p-5 shadow-xs">
-              <h3 className="text-sm font-extrabold uppercase text-ink">{d.role}</h3>
+              <h3 className="text-[14px] font-semibold text-ink">{d.role}</h3>
               <p className="mt-1 text-xs text-ink-2 leading-relaxed">{d.desc}</p>
               <div className="mt-4 pt-3 border-t border-line/50 space-y-1.5 text-xs">
                 <div className="flex items-center gap-2 text-accent font-bold">
@@ -140,7 +140,7 @@ export default function ContactPage() {
         <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div>
             <span className="mono-label text-accent font-bold">DIGITAL SHOWROOM PREVIEW</span>
-            <h2 className="text-2xl font-extrabold uppercase text-ink mt-1">
+            <h2 className="font-headline text-[26px] leading-tight font-semibold tracking-[-0.015em] text-ink mt-1">
               Book a 1-on-1 virtual walkthrough
             </h2>
             <p className="mt-2 text-xs leading-relaxed text-ink-2">

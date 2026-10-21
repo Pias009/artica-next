@@ -57,9 +57,9 @@ export function HotProducts() {
           scrollTrigger: {
             trigger: el,
             start: () => (el.offsetHeight < innerHeight - 120 ? "center center" : "top 96px"),
-            end: "+=85%",
+            end: "+=125%",
             pin: ref.current?.querySelector("[data-pin]") ?? el,
-            scrub: 0.7,
+            scrub: 1.1,
             invalidateOnRefresh: true,
             // the layers only start drifting once every card has landed
             onUpdate: (st) => (el.dataset.dealt = String(st.progress > 0.999)),
@@ -87,7 +87,7 @@ export function HotProducts() {
           gsap.fromTo(
             c,
             { y: 90, rotate: i % 2 ? 7 : -7, scale: 0.88, autoAlpha: 0 },
-            { y: 0, rotate: 0, scale: 1, autoAlpha: 1, ease: "power3.out", scrollTrigger: { trigger: c, start: "top 98%", end: "top 62%", scrub: 0.6 } },
+            { y: 0, rotate: 0, scale: 1, autoAlpha: 1, ease: "power3.out", scrollTrigger: { trigger: c, start: "top 98%", end: "top 48%", scrub: 1 } },
           );
         });
       });

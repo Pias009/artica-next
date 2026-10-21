@@ -66,7 +66,7 @@ export default async function ProductPage({ params }: Props) {
 
         <Reveal className="flex flex-col gap-5 md:py-4">
           <div data-reveal>
-            <h1 className="text-[clamp(36px,4.4vw,56px)] leading-[1.02] font-semibold tracking-[-0.04em]">Chime Long {p.name}</h1>
+            <h1 className="font-headline text-[clamp(36px,4.4vw,56px)] leading-[1.06] font-semibold tracking-[-0.02em]">Chime Long {p.name}</h1>
             <p className="mt-2 text-[18px] text-ink-2">
               {p.type} · <span className="capitalize">{p.line}</span>
             </p>

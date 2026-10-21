@@ -36,7 +36,7 @@ export function OrderJourney() {
 
           const tl = gsap.timeline({
             defaults: { ease: "none" },
-            scrollTrigger: { trigger: track, start: "top 75%", end: "bottom 45%", scrub: 0.6, invalidateOnRefresh: true },
+            scrollTrigger: { trigger: track, start: "top 80%", end: "bottom 35%", scrub: 1.1, invalidateOnRefresh: true },
           });
           tl.to(
             walker,
@@ -56,7 +56,16 @@ export function OrderJourney() {
   return (
     <section ref={ref} id="journey" aria-labelledby="h-journey" className="mt-sec">
       <div className="glass rounded-shell px-[clamp(20px,4vw,64px)] py-[clamp(48px,6vw,88px)] [--glass-bg:rgb(232_239_242/.6)]">
-        <SectionHead id="h-journey" title="From inquiry to your shelf in about 11 weeks." sub="One contact handles your order from quote to delivery." />
+        <SectionHead
+          id="h-journey"
+          eyebrow="Timeline"
+          title={
+            <>
+              From inquiry to your shelf <em>in about 11 weeks.</em>
+            </>
+          }
+          sub="One contact handles your order from quote to delivery."
+        />
 
         <div className="relative grid gap-0 md:block">
           {/* track: horizontal on wide screens, vertical on phones */}

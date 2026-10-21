@@ -42,6 +42,7 @@ export function LineSheetCta() {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: ref.current, start: "top 80%", end: "bottom top", toggleActions: "play reverse play reverse" },
         });
+        tl.timeScale(0.72); // a touch slower, so the pages are seen landing
         tl.from("[data-sheet-copy] > *", {
           y: 24,
           opacity: 0,
@@ -89,20 +90,17 @@ export function LineSheetCta() {
       className="glass mt-sec overflow-hidden rounded-shell [--glass-bg:rgb(226_236_241/.6)]"
     >
       <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-16 gap-y-12 px-[clamp(20px,4vw,64px)] py-[clamp(48px,7vw,104px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-        <div data-sheet-copy className="max-lg:text-center">
-<p className="eyebrow">Line sheet · {products.length} styles</p>
-          <h2
-            id="h-sheet"
-            className="type-section mt-5 max-w-[16ch] max-lg:mx-auto"
-          >
-            Get the full wholesale line sheet.
+        <div data-sheet-copy>
+          <p className="eyebrow">Line sheet · {products.length} styles</p>
+          <h2 id="h-sheet" className="type-section mt-3 max-w-[16ch]">
+            Get the full <em>wholesale line sheet.</em>
           </h2>
-          <p className="mt-4 max-w-[46ch] text-[17px] text-ink-2 max-lg:mx-auto">
+          <p className="mt-4 max-w-[46ch] text-[17px] text-ink-2">
             Every style, size run and case-pack ratio, with tier pricing for
             your volume.
           </p>
           <form
-            className="mt-9 flex max-w-[520px] items-center gap-2 rounded-full bg-white p-1.5 pl-6 text-left shadow-soft focus-within:ring-2 focus-within:ring-ink max-lg:mx-auto"
+            className="mt-9 flex max-w-[520px] items-center gap-2 rounded-full bg-white p-1.5 pl-6 text-left shadow-soft focus-within:ring-2 focus-within:ring-ink"
             onSubmit={(e) => {
               e.preventDefault();
               const f = e.currentTarget;
@@ -136,7 +134,7 @@ export function LineSheetCta() {
               />
             </button>
           </form>
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 max-lg:justify-center">
+          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
             {POINTS.map((t) => (
               <li
                 key={t}

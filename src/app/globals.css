@@ -12,9 +12,10 @@
   --breakpoint-lg: 74rem;
   --breakpoint-xl: 86rem;
 
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-headline: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-headline: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-headline);
+  --font-serif: var(--font-headline);
 
   /* canvas + surfaces */
   --color-bg: #ffffff;
@@ -406,8 +407,8 @@
   font-size: clamp(32px, 3.6vw, 52px);
   color: var(--color-ink);
   font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.02em;
+  line-height: 1.08;
+  letter-spacing: -0.018em;
   text-wrap: balance;
   & em {
     font-weight: 500;
@@ -727,5 +728,13 @@ main:has(> #hero) {
 @keyframes motion-fallback {
   to {
     visibility: visible;
+  }
+}
+
+/* The nav's dropdowns swing down from the bar, hinged at the top. */
+@keyframes nav-drop {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-10deg) translateY(-8px) scale(0.98);
   }
 }

@@ -37,7 +37,8 @@ export function OrderSheet() {
           .from("[data-row]", { x: -16, opacity: 0, duration: 0.5, ease: "power2.out", stagger: 0.12 }, 0.35)
           .from("[data-cell]", { opacity: 0, y: 6, duration: 0.25, stagger: 0.012 }, 0.5)
           .from("[data-total]", { scaleX: 0, transformOrigin: "0% 50%", duration: 0.6, ease: "power2.out" }, ">-0.1")
-          .from("[data-stamp]", { scale: 1.6, opacity: 0, rotation: -24, duration: 0.5, ease: "expo.out" }, ">-0.1");
+          .from("[data-stamp]", { scale: 1.6, opacity: 0, rotation: -24, duration: 0.5, ease: "expo.out" }, ">-0.1")
+          .timeScale(0.72);
       });
     },
     { scope: ref },
@@ -47,8 +48,13 @@ export function OrderSheet() {
     <section ref={ref} id="order-sheet" aria-labelledby="h-sheet-live" className="mt-sec scroll-mt-24">
       <SectionHead
         id="h-sheet-live"
-        title="Your order sheet, built as you browse."
-        sub="Every style you add becomes a line with its full size breakdown. Send it once; tier pricing comes back within 24 hours."
+        eyebrow="Order sheet"
+        title={
+          <>
+            Your order sheet, <em>built as you browse.</em>
+          </>
+        }
+        sub="Every style you add becomes a line with its size breakdown. Tier pricing back within 24 hours."
         right={
           <div className="flex flex-wrap gap-3">
             <a href="#styles" className="btn btn-line">

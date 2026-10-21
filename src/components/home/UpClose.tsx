@@ -164,8 +164,8 @@ export function UpClose() {
         {/* Section Header */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-6 md:mb-9">
           <div className="max-w-[640px]">
-<p className="eyebrow mb-3">Up close · Chime Long Nord</p>
-            <h2 id="h-close" className="type-section">
+            <p className="eyebrow">Up close · Chime Long Nord</p>
+            <h2 id="h-close" className="type-section mt-3">
               Look closer. <em>Every stitch</em> inspected.
             </h2>
             <p className="mt-2.5 text-[15px] leading-relaxed text-ink-2 md:text-[16.5px]">

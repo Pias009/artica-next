@@ -97,7 +97,7 @@ export function ProductCard({
           {many && group.length > DOTS && <span className="pl-2 text-[12px] font-semibold text-muted tabular-nums">+{group.length - DOTS}</span>}
         </span>
       </div>
-      <p className={clsx("mt-0.5 text-[14px] text-muted", glass && "px-2")}>
+      <p className={clsx("mt-0.5 text-[13.5px] text-muted", glass && "px-2")}>
         {many ? (
           <>
             <span className="font-medium text-brand">{group.length} styles</span> · {p.name} and {group.length - 1} more · {LINE_LABEL[p.line]}
@@ -108,11 +108,11 @@ export function ProductCard({
           </>
         )}
       </p>
-      <p className={clsx("mt-2 text-[14px] font-semibold tabular-nums", glass && "px-2")}>
+      <p className={clsx("mt-2 text-[13.5px] font-semibold tabular-nums", glass && "px-2")}>
         {MOQ_PAIRS} pairs MOQ
         <span className="font-normal text-muted">
           {" "}
-          · {PACK} per case · {p.sizes}
+          · {PACK} per case · <span className="whitespace-nowrap">{p.sizes}</span>
         </span>
       </p>
     </article>

@@ -96,7 +96,7 @@ export default function FaqPage() {
           {CATEGORIES.map((cat) => (
             <section key={cat.name} className="rounded-shell border border-line/60 bg-tile p-6 sm:p-8 shadow-soft">
               <span className="mono-label text-accent font-bold">CATEGORY</span>
-              <h2 className="text-xl font-extrabold uppercase text-ink mt-1 mb-6 border-b border-line/50 pb-3">
+              <h2 className="font-headline text-[24px] leading-tight font-semibold tracking-[-0.015em] text-ink mt-1 mb-6 border-b border-line/50 pb-3">
                 {cat.name}
               </h2>
               <div className="divide-y divide-line/50">
@@ -119,7 +119,7 @@ export default function FaqPage() {
         <aside className="space-y-4">
           <div className="rounded-shell border border-line/60 bg-studio p-6 shadow-soft">
             <span className="mono-label text-accent font-bold">TRADE DESK</span>
-            <h3 className="text-lg font-extrabold uppercase text-ink mt-1">Have an unlisted question?</h3>
+            <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ink mt-1">Have an unlisted question?</h3>
             <p className="mt-2 text-xs text-ink-2 leading-relaxed">
               Our international wholesale accounts team responds to commercial inquiries within 24 hours.
             </p>
