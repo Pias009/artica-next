@@ -261,7 +261,7 @@ export function BuyerTypes() {
     <section ref={ref} id="programs" aria-labelledby="h-programs" className="mt-sec scroll-mt-24">
       <SectionHead id="h-programs" title="Who we supply, and how they order." sub="Pick your kind of business to see what a first order looks like and how it ships." />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,9fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,4fr)_minmax(0,9fr)]">
         {/* buyer tabs */}
         <div role="tablist" aria-label="Business type" aria-orientation="vertical" className="no-scrollbar flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
           {PROGRAMS.map((x, i) => (
@@ -289,7 +289,7 @@ export function BuyerTypes() {
         </div>
 
         {/* program panel */}
-        <div id="bt-panel" role="tabpanel" aria-labelledby={`bt-${p.key}`} className="grid overflow-hidden rounded-shell bg-white ring-1 ring-line md:grid-cols-2">
+        <div id="bt-panel" role="tabpanel" aria-labelledby={`bt-${p.key}`} className="glass-strong grid overflow-hidden rounded-shell md:grid-cols-2">
           <div className={clsx("relative grid min-h-[300px] place-items-center px-[7%] pt-[7%] pb-16", p.tone)}>
             <div className="size-full max-h-[440px]">
               <Scene key={p.key} />

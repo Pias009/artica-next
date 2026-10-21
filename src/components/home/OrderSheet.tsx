@@ -61,7 +61,7 @@ export function OrderSheet() {
         }
       />
 
-      <div className="rounded-shell bg-tile px-[clamp(12px,4vw,64px)] py-[clamp(28px,5vw,72px)]">
+      <div className="glass rounded-shell px-[clamp(12px,4vw,64px)] py-[clamp(28px,5vw,72px)]">
         <p className="mb-5 flex items-center justify-center gap-2 text-[14px] text-ink-2">
           <span className={clsx("size-2 rounded-full", example ? "bg-muted" : "bg-glacier")} />
           {example ? "Example sheet. Add styles with + to build your own." : `Built from your inquiry list · ${rows.length} style${rows.length > 1 ? "s" : ""}`}

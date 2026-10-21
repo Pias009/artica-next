@@ -31,7 +31,7 @@ export function PrivateLabel() {
 
   return (
     <section id="partner" aria-labelledby="h-partner" className="mt-sec scroll-mt-24">
-      <div className="relative isolate grid items-center gap-6 overflow-hidden rounded-shell bg-sand md:grid-cols-2 md:gap-10">
+      <div className="glass relative isolate grid items-center gap-6 overflow-hidden rounded-shell [--glass-bg:rgb(241_236_228/.62)] md:grid-cols-2 md:gap-10">
         {/* warm studio light behind the boot */}
         <span aria-hidden className="absolute top-1/2 right-[-10%] -z-10 size-[min(90vw,720px)] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#fff_0%,rgb(255_255_255/0)_65%)] opacity-80" />
 

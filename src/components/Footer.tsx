@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Icon, type IconName } from "./Icon";
+import { Icon } from "./Icon";
 import { Logo } from "./Logo";
+import { COMPANY, SOCIAL, tel } from "@/lib/company";
 
 const COLS: { title: string; links: [string, string][] }[] = [
   {
@@ -31,21 +32,6 @@ const COLS: { title: string; links: [string, string][] }[] = [
   },
 ];
 
-// Client placeholders: replace with the real phone, email and address.
-const CONTACT: [IconName, string][] = [
-  ["phone", "+1 (000) 000-0000"],
-  ["mail", "sales@yourbrand.com"],
-  ["pin", "Showroom address"],
-  ["clock", "Mon–Fri 9:00–18:00 EST"],
-];
-
-const SOCIAL: [IconName, string][] = [
-  ["linkedin", "LinkedIn"],
-  ["instagram", "Instagram"],
-  ["whatsapp", "WhatsApp"],
-  ["youtube", "YouTube"],
-];
-
 export function Footer() {
   return (
     <footer id="footer" className="mt-sec bg-tile px-(--shell-pad) pt-16 pb-10">
@@ -56,20 +42,23 @@ export function Footer() {
             <p className="mt-5 max-w-[34ch] text-[15px] text-ink-2">
               Guangzhou Chime Long Trading Co., Ltd. Footwear for retailers, distributors and private-label brands worldwide.
             </p>
-            <div className="mt-6 flex gap-2">
-              {SOCIAL.map(([icon, label]) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="grid size-11 place-items-center rounded-full bg-white text-ink-2 transition-colors hover:text-ink"
-                >
-                  <Icon name={icon} className="size-[18px]" />
-                </a>
-              ))}
-            </div>
+            {/* only profiles that exist (src/lib/company.ts) */}
+            {SOCIAL.length > 0 && (
+              <div className="mt-6 flex gap-2">
+                {SOCIAL.map((x) => (
+                  <a
+                    key={x.label}
+                    href={x.href}
+                    aria-label={x.label}
+                    className="grid size-11 place-items-center rounded-full bg-white text-ink-2 transition-colors hover:text-ink"
+                  >
+                    <Icon name={x.icon} className="size-[18px]" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-[1fr_1fr_1fr_1.7fr]">
             {COLS.map((c) => (
               <div key={c.title}>
                 <h2 className="mb-4 text-[14px] font-semibold">{c.title}</h2>
@@ -87,26 +76,31 @@ export function Footer() {
             <div className="col-span-2 sm:col-span-1">
               <h2 className="mb-4 text-[14px] font-semibold">Contact</h2>
               <ul className="grid gap-2.5 text-[15px] text-ink-2">
-                {CONTACT.map(([icon, text]) => (
-                  <li key={text} className="flex items-center gap-2.5">
-                    <Icon name={icon} className="size-4 flex-none text-muted" />
-                    {text}
-                  </li>
-                ))}
+                <li>
+                  <a href={tel(COMPANY.phone)} className="flex items-center gap-2.5 transition-colors hover:text-ink">
+                    <Icon name="phone" className="size-4 flex-none text-muted" />
+                    {COMPANY.phone}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${COMPANY.email.general}`} className="flex items-center gap-2.5 transition-colors hover:text-ink">
+                    <Icon name="mail" className="size-4 flex-none text-muted" />
+                    {COMPANY.email.general}
+                  </a>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Icon name="clock" className="size-4 flex-none text-muted" />
+                  {COMPANY.hours}
+                </li>
               </ul>
             </div>
           </div>
         </div>
         <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-[13px] text-muted">
           <span>© 2026 Guangzhou Chime Long Trading Co., Ltd. Trade buyers only.</span>
-          <div className="flex gap-6">
-            <Link href="#footer" className="hover:text-ink">
-              Privacy policy
-            </Link>
-            <Link href="#footer" className="hover:text-ink">
-              Terms of trade
-            </Link>
-          </div>
+          <Link href="/shipping" className="hover:text-ink">
+            Shipping and trade terms
+          </Link>
         </div>
       </div>
     </footer>

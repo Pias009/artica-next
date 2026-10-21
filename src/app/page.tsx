@@ -1,6 +1,8 @@
 import { BestSellers } from "@/components/home/BestSellers";
 import { BuyerTypes } from "@/components/home/BuyerTypes";
+import { GlobalReach } from "@/components/home/GlobalReach";
 import { HeroSpotlight } from "@/components/home/HeroSpotlight";
+import { HotProducts } from "@/components/home/HotProducts";
 import { HowItShips } from "@/components/home/HowItShips";
 import { LineSheetCta } from "@/components/home/LineSheetCta";
 import { NewArrivals } from "@/components/home/NewArrivals";
@@ -17,9 +19,13 @@ import { UpClose } from "@/components/home/UpClose";
 export default function Home() {
   return (
     <>
+      {/* the colour field the glass surfaces sit on (home page only) */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-aurora" />
       <HeroSpotlight />
+      <HotProducts />
       <NewArrivals />
       <BestSellers />
+      <GlobalReach />
       <BuyerTypes />
       <HowItShips />
       <UpClose />

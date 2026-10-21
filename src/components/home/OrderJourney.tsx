@@ -55,7 +55,7 @@ export function OrderJourney() {
 
   return (
     <section ref={ref} id="journey" aria-labelledby="h-journey" className="mt-sec">
-      <div className="rounded-shell bg-frost px-[clamp(20px,4vw,64px)] py-[clamp(48px,6vw,88px)]">
+      <div className="glass rounded-shell px-[clamp(20px,4vw,64px)] py-[clamp(48px,6vw,88px)] [--glass-bg:rgb(232_239_242/.6)]">
         <SectionHead id="h-journey" title="From inquiry to your shelf in about 11 weeks." sub="One contact handles your order from quote to delivery." />
 
         <div className="relative grid gap-0 md:block">

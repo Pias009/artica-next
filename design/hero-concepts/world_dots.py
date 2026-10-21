@@ -1,6 +1,6 @@
 """Rasterise world land (world-atlas land-110m, Natural Earth) into a dotted-map SVG, equirectangular.
 
-Usage: python3 -I dots.py <land-110m.json> <out.svg>
+Usage: python3 -I world_dots.py <land-110m.json> <out.svg> [centre longitude, default 0]
 viewBox is 0 0 1000 500 (lon -180..180, lat 90..-90); the hero crops it to the inhabited band.
 """
 
@@ -8,6 +8,7 @@ import json
 import sys
 
 src, out = sys.argv[1:3]
+CENTER = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0  # e.g. 160 for a Pacific-centred map
 topo = json.load(open(src))
 sx, sy = topo["transform"]["scale"]
 tx, ty = topo["transform"]["translate"]
@@ -74,7 +75,8 @@ while lat > -60:
     lon = -180 + STEP / 2
     while lon < 180:
         if land(lon, lat):
-            dots.append(((lon + 180) / 360 * 1000, (90 - lat) / 180 * 500))
+            shifted = (lon - CENTER + 540) % 360  # 0..360, with CENTER in the middle
+            dots.append((shifted / 360 * 1000, (90 - lat) / 180 * 500))
         lon += STEP
     lat -= STEP
 

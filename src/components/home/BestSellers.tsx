@@ -70,7 +70,7 @@ export function BestSellers() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start">
           {/* featured stage: the boot does the talking */}
           <div className={clsx("relative isolate flex h-[440px] flex-col justify-between overflow-hidden rounded-shell p-6 transition-colors duration-700 ease-soft sm:h-[500px] lg:h-[560px] lg:p-8", TONE[p.scene])}>
             <QuickViewButton id={p.id} aria-label={`View details: Chime Long ${p.name}`} className="group absolute inset-0 z-[1] cursor-zoom-in">

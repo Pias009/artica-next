@@ -86,14 +86,11 @@ export function LineSheetCta() {
       ref={ref}
       id="line-sheet"
       aria-labelledby="h-sheet"
-      className="bleed bg-linesheet mt-sec overflow-hidden"
+      className="glass mt-sec overflow-hidden rounded-shell [--glass-bg:rgb(226_236_241/.6)]"
     >
-      <div className="wrap grid items-center gap-x-16 gap-y-14 px-(--shell-pad) py-[clamp(72px,9vw,136px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-16 gap-y-12 px-[clamp(20px,4vw,64px)] py-[clamp(48px,7vw,104px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         <div data-sheet-copy className="max-lg:text-center">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[13px] font-semibold text-brand">
-            <span className="size-1.5 animate-pulse-glow rounded-full bg-brand" />{" "}
-            Wholesale · {products.length} styles · {PAGES} pages
-          </p>
+<p className="eyebrow">Line sheet · {products.length} styles</p>
           <h2
             id="h-sheet"
             className="type-section mt-5 max-w-[16ch] max-lg:mx-auto"

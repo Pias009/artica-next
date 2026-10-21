@@ -55,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="bg-white font-sans text-ink antialiased">
         <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />
         <StoreHydrator />
-        <div id="page" className="min-h-screen w-full overflow-x-clip bg-white [--shell-pad:clamp(16px,3.2vw,48px)]">
+        <div id="page" className="min-h-screen w-full overflow-x-clip [--shell-pad:clamp(16px,3.2vw,48px)]">
           <Header />
           <main id="top" className="px-(--shell-pad) pb-4 max-md:pb-24">
             {children}

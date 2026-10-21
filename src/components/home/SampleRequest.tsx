@@ -58,7 +58,7 @@ export function SampleRequest() {
 
   return (
     <section ref={ref} id="samples" aria-labelledby="h-samples" className="mt-sec scroll-mt-24">
-      <div className="grid items-center gap-10 overflow-hidden rounded-shell bg-blush lg:grid-cols-2">
+      <div className="glass grid items-center gap-10 overflow-hidden rounded-shell [--glass-bg:rgb(244_232_229/.62)] lg:grid-cols-2">
         {/* the box */}
         <div data-box aria-hidden="true" className="relative mx-auto w-full max-w-[480px] px-6 pt-10 lg:pb-6">
           <div className="relative" style={{ aspectRatio: `${VB.w} / ${VB.h}` }}>

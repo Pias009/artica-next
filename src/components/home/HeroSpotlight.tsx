@@ -19,9 +19,9 @@ const SPOT: { slug: string; tint: string }[] = [
 
 /** The three ways in, along the bottom. */
 const CARDS: { line: ProductLine; slug: string; block: string; kinds: string }[] = [
-  { line: "women", slug: "maple", block: "#f0c7cc", kinds: "Ankle, chelsea and tall boots" },
-  { line: "men", slug: "nord", block: "#9fb7cf", kinds: "Leather lace-up boots" },
-  { line: "kids", slug: "blossom", block: "#b9d9a9", kinds: "Snow boots and hikers" },
+  { line: "women", slug: "maple", block: "#f6e4e6", kinds: "Ankle, chelsea and tall boots" },
+  { line: "men", slug: "nord", block: "#e2eaf2", kinds: "Leather lace-up boots" },
+  { line: "kids", slug: "blossom", block: "#e5efdd", kinds: "Snow boots and hikers" },
 ];
 
 const LINKS = [
@@ -143,59 +143,26 @@ export function HeroSpotlight() {
         </ul>
       </nav>
 
-      <div className="wrap relative grid gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6 lg:pl-[clamp(48px,6vw,104px)]">
+      <div className="wrap relative grid grid-cols-[minmax(0,1fr)] gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6 lg:pl-[clamp(48px,6vw,104px)]">
         {/* the promise */}
-        <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-14">
-          <span className="inline-flex animate-rise-in items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1 text-[10.5px] font-bold tracking-[0.16em] text-brand uppercase shadow-soft backdrop-blur-sm transition-transform duration-300 hover:scale-[1.02] motion-reduce:animate-none">
-            <span aria-hidden="true" className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
-            </span>
-            Wholesale Footwear Collection · Worldwide
-          </span>
-          <h1 id="hero-title" className="mt-3.5 animate-rise-in [animation-delay:70ms] motion-reduce:animate-none lg:mt-5">
-            <span className="block text-[clamp(40px,6vw,90px)] leading-[0.9] font-black tracking-[-0.04em] text-ink drop-shadow-[0_2px_12px_rgb(0_0_0/.04)]">
-              FOOTWEAR
-            </span>
-            <span className="mt-1 block text-[clamp(24px,3.6vw,54px)] leading-[1.05] font-light tracking-[-0.02em] whitespace-nowrap bg-gradient-to-r from-brand via-brand-deep to-brand bg-[length:200%_auto] bg-clip-text text-transparent animate-[text-gradient-shimmer_6s_ease-in-out_infinite] motion-reduce:animate-none">
-              STOCK, SORTED.
-            </span>
+        <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-10">
+          <p className="eyebrow animate-rise-in motion-reduce:animate-none">FW26 wholesale</p>
+          <h1
+            id="hero-title"
+            className="mt-4 animate-rise-in font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink [animation-delay:70ms] motion-reduce:animate-none lg:text-[clamp(44px,4.4vw,74px)]"
+          >
+            Factory-direct footwear, <em className="font-medium text-brand">for shelves worldwide.</em>
           </h1>
-          <p className="mt-3.5 max-w-[25rem] animate-rise-in text-[14.5px] leading-[1.55] text-ink-2 [animation-delay:140ms] motion-reduce:animate-none max-lg:mx-auto lg:mt-5 lg:text-[15.5px]">
-            Factory-direct boots, sneakers and sandals for retailers and distributors worldwide.
+          <p className="mt-5 max-w-[26rem] animate-rise-in text-[15.5px] leading-[1.6] text-ink-2 [animation-delay:140ms] motion-reduce:animate-none max-lg:mx-auto lg:text-[16.5px]">
+            Boots, sneakers and sandals from our Guangzhou factory, for retailers and distributors in every market.
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-3 max-lg:justify-center animate-rise-in [animation-delay:210ms] motion-reduce:animate-none lg:mt-7">
-            <OpenInquiryButton className="group relative overflow-hidden inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-[12.5px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_12px_26px_-10px_rgb(152_64_128/.65)] transition-all duration-300 hover:bg-brand-deep hover:shadow-[0_20px_36px_-10px_rgb(152_64_128/.85)] hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] lg:h-12 lg:px-7 lg:text-[13px]">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-[button-sheen_4.5s_ease-in-out_infinite] motion-reduce:hidden"
-              />
-              <span className="relative z-[1] flex items-center gap-2">
-                Get wholesale pricing <Icon name="arrow" className="size-3.5 transition-transform duration-300 group-hover:translate-x-1 lg:size-4" />
-              </span>
+          <div className="mt-8 flex animate-rise-in flex-wrap items-center gap-3 [animation-delay:210ms] motion-reduce:animate-none max-lg:justify-center">
+            <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
+              Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>
-            <a
-              href="#styles"
-              className="inline-flex h-11 items-center rounded-full border border-ink/15 bg-white/80 px-5 text-[12.5px] font-semibold text-ink backdrop-blur-sm transition-all hover:border-ink/35 hover:bg-white hover:-translate-y-0.5 hover:shadow-soft active:scale-[0.98] lg:h-12 lg:px-6 lg:text-[13px]"
-            >
-              Browse range
+            <a href="#hot" className="glass inline-flex h-12 items-center rounded-full px-6 text-[14px] font-semibold text-ink transition-[translate] duration-300 ease-soft hover:-translate-y-0.5">
+              See what&rsquo;s hot
             </a>
-          </div>
-
-          {/* Dynamic wholesale feature badges */}
-          <div className="mt-5 flex flex-wrap items-center gap-2 max-lg:justify-center animate-rise-in [animation-delay:280ms] motion-reduce:animate-none lg:mt-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
-              <span className="size-1.5 rounded-full bg-brand animate-pulse" />
-              300 prs MOQ
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
-              <span className="size-1.5 rounded-full bg-brand animate-pulse [animation-delay:250ms]" />
-              10-day custom samples
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/8 bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-ink-2 shadow-xs backdrop-blur-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-white hover:shadow-soft">
-              <span className="size-1.5 rounded-full bg-brand animate-pulse [animation-delay:500ms]" />
-              Door-to-door worldwide
-            </span>
           </div>
         </div>
 
@@ -216,11 +183,11 @@ export function HeroSpotlight() {
           >
             <div className="flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-[hero-float-soft_4.8s_ease-in-out_infinite] motion-reduce:animate-none">
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex size-full rounded-full bg-brand/60 opacity-75 animate-ping" />
+                <span className="relative inline-flex size-2 rounded-full bg-brand" />
               </span>
               <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">
-                Factory Production · 10d Samples
+                FW26 · in production now
               </span>
             </div>
           </div>
@@ -353,7 +320,7 @@ export function HeroSpotlight() {
             </div>
           </div>
 
-          {/* Luxury floating console below the shoe on the right with Antigravity Glassmorphism */}
+          {/* what is on show, and the controls */}
           <div className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-2 max-lg:right-1/2 max-lg:translate-x-1/2 animate-[hero-float-counter_5.8s_ease-in-out_infinite] motion-reduce:animate-none">
             <button
               type="button"
@@ -376,7 +343,7 @@ export function HeroSpotlight() {
                   <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase animate-rise-in">{s.p.name}</span>
                 </div>
                 <span className="text-[11.5px] text-muted whitespace-nowrap">
-                  {LINE_LABEL[s.p.line]} · {categoryOf(s.p)} · <strong className="font-semibold text-ink-2">{MOQ_PAIRS} prs</strong>
+                  {LINE_LABEL[s.p.line]} · {categoryOf(s.p)} · <strong className="font-semibold text-ink-2">{MOQ_PAIRS} pairs</strong>
                 </span>
               </div>
 

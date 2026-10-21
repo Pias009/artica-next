@@ -221,6 +221,26 @@
     opacity: 0;
   }
 }
+/* New arrivals: the next featured style slides in from the right as the last one leaves. */
+@keyframes slide-in-r {
+  from {
+    transform: translateX(14%) scale(0.96);
+    opacity: 0;
+  }
+}
+/* Hot products: the next style rises up from below as the last one lifts away. */
+@keyframes rise-up-in {
+  from {
+    transform: translateY(22%);
+    opacity: 0;
+  }
+}
+@keyframes rise-up-out {
+  to {
+    transform: translateY(-16%);
+    opacity: 0;
+  }
+}
 /* The hero's timer line: fills over one slide, then the next pair comes in. */
 @keyframes spot-progress {
   from {
@@ -382,11 +402,18 @@
   letter-spacing: -0.04em;
 }
 @utility type-section {
-  font-size: clamp(30px, 3.4vw, 46px);
-  color: var(--color-brand);
+  font-family: var(--font-headline);
+  font-size: clamp(32px, 3.6vw, 52px);
+  color: var(--color-ink);
   font-weight: 600;
-  line-height: 1.06;
-  letter-spacing: -0.03em;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  & em {
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-brand);
+  }
 }
 @utility type-giant {
   font-size: clamp(56px, 7vw, 108px);
@@ -403,6 +430,55 @@
 @utility text-outline {
   color: transparent;
   -webkit-text-stroke: 1.25px rgb(18 20 22 / 0.18);
+}
+
+/* The home page's colour field: soft light behind the glass surfaces, fixed so it stays still while content scrolls. */
+@utility bg-aurora {
+  background:
+    radial-gradient(42% 36% at 12% 8%, rgb(152 64 128 / 0.1), transparent 70%),
+    radial-gradient(38% 34% at 88% 22%, rgb(160 196 214 / 0.22), transparent 72%),
+    radial-gradient(46% 40% at 70% 78%, rgb(232 206 176 / 0.24), transparent 72%),
+    radial-gradient(40% 34% at 18% 86%, rgb(196 178 220 / 0.18), transparent 72%),
+    linear-gradient(180deg, #fbfaf8, #f6f4f1);
+}
+/* Frosted glass: translucent white, blurred backdrop, a lit top edge and a soft drop. */
+@utility glass {
+  /* tint a pane with [--glass-bg:...] */
+  background: var(--glass-bg, rgb(255 255 255 / 0.55));
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    0 1px 2px rgb(18 20 22 / 0.04),
+    0 22px 48px -28px rgb(18 20 22 / 0.22);
+}
+@utility glass-strong {
+  background: var(--glass-bg, rgb(255 255 255 / 0.78));
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 1px 2px rgb(18 20 22 / 0.05),
+    0 28px 60px -30px rgb(18 20 22 / 0.28);
+}
+/* Small caps label above a section heading. */
+@utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  &::before {
+    content: "";
+    width: 1.5rem;
+    height: 1px;
+    background: var(--color-brand);
+  }
 }
 
 /* Full-width bands that break out to the page edges. */
@@ -627,3 +703,10 @@ main:has(> .bleed:last-child) + footer {
   }
 }
 
+
+/* Home page: the snow tile and chip grounds go translucent, so every card reads as glass over the colour field. */
+main:has(> #hero) {
+  --color-tile: rgb(255 255 255 / 0.6);
+  --color-chip: rgb(255 255 255 / 0.7);
+  --color-chip-hover: rgb(255 255 255 / 0.92);
+}

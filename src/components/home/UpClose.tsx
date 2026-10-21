@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
 import { QuickViewButton } from "../ui/QuickViewButton";
-import { gsap, useGSAP, ScrollTrigger } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
 import { byId } from "@/lib/products";
 
 const P = byId.p04;
@@ -25,43 +25,43 @@ interface StepDetail {
 const STEPS: StepDetail[] = [
   {
     title: "Wool herringbone collar",
-    text: "Padded and soft where the boot meets the leg. Provides thermal insulation without chafing.",
-    spec: "Italian Wool Blend · 12mm Ergonomic Padding",
-    benefit: "Zero ankle bite & thermal breathing",
-    badge: "Thermal Wool",
+    text: "A padded wool herringbone collar where the boot meets the leg: warm, and soft against the ankle.",
+    spec: "Wool herringbone · padded collar",
+    benefit: "Lined with a shearling blend",
+    badge: "Collar",
     icon: "layers",
     x: 22,
     y: 22,
     scale: 2.45,
   },
   {
-    title: "Anti-oxidation metal hooks",
-    text: "Fast, uniform lacing tension from toe to collar with dual-riveted base anchors.",
-    spec: "Zinc-Alloy Speed Hooks · Waxed Cord",
-    benefit: "Snag-free glide & high-tensile pull rating",
-    badge: "Speed Hooks",
+    title: "Metal lacing hooks",
+    text: "Metal speed hooks over the instep for quick, even lacing, with a side zip to get the boot on and off.",
+    spec: "Metal hooks · laces + side zip",
+    benefit: "On and off in seconds",
+    badge: "Closure",
     icon: "shield",
     x: 42,
     y: 23,
     scale: 2.5,
   },
   {
-    title: "360° Stitched Goodyear welt",
-    text: "Upper stitched directly to the sole with braided waxed thread, then vulcanized sealed against slush.",
-    spec: "Braided Waxed Thread · Vulcanized Seal",
-    benefit: "Re-soleable & watertight snow barrier",
-    badge: "Lockstitch Welt",
+    title: "Stitched, sealed welt",
+    text: "The full-grain leather upper is stitched to the sole and the seam sealed, to keep slush out.",
+    spec: "Stitched welt · sealed seam",
+    benefit: "Full-grain leather upper",
+    badge: "Welt",
     icon: "boot",
     x: 74,
     y: 77,
     scale: 2.65,
   },
   {
-    title: "Deep-siped rubber lug outsole",
-    text: "6 mm self-clearing lugs engineered to bite packed snow, icy cobblestones, and wet sidewalks.",
-    spec: "Cold-Resistant Rubber · Rated −30°C",
-    benefit: "Multi-directional ice traction & shock absorption",
-    badge: "6mm Ice Lugs",
+    title: "Rubber lug outsole",
+    text: "6 mm rubber lugs for grip on packed snow and wet pavements.",
+    spec: "Rubber lug · 6 mm",
+    benefit: "Rated to −25°C",
+    badge: "Outsole",
     icon: "sole",
     x: 44,
     y: 91,
@@ -70,147 +70,66 @@ const STEPS: StepDetail[] = [
 ];
 
 /**
- * Signature moment: Precision inspection studio with scroll-driven pinned camera,
- * interactive step navigation, optical magnifying loupe, and angle toggling.
+ * Signature moment: Chime Long Nord up close. The section scrolls normally; the camera
+ * only moves when a point is picked (hotspot, detail card, chip or arrows).
+ * Also: optical magnifying loupe and angle toggling.
  */
 export function UpClose() {
-  const containerRef = useRef<HTMLElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const zoomStageRef = useRef<HTMLDivElement>(null);
   const zoomTargetRef = useRef<HTMLDivElement>(null);
-  const stRef = useRef<ScrollTrigger | null>(null);
 
-  const [activeStep, setActiveStep] = useState<number>(0);
+  // null = full view of the boot, no point in focus
+  const [activeStep, setActiveStep] = useState<number | null>(null);
   const [viewAngle, setViewAngle] = useState<"outer" | "zip">("outer");
   const [loupeActive, setLoupeActive] = useState<boolean>(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0, relX: 0.5, relY: 0.5, inside: false });
-
-  const activeStepRef = useRef<number>(0);
-  activeStepRef.current = activeStep;
+  // the stage size rides along with the pointer, so the loupe never reads the DOM during render
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0, relX: 0.5, relY: 0.5, w: 600, h: 460, inside: false });
 
   const currentShot = viewAngle === "outer" ? P.outer : P.zip ?? P.outer;
+  const current = activeStep === null ? null : STEPS[activeStep];
 
   // Manual smooth zoom application
   const applyZoomToTarget = useCallback((xPercent: number, yPercent: number, scale: number, duration = 0.75) => {
     if (!zoomTargetRef.current) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     gsap.to(zoomTargetRef.current, {
       xPercent,
       yPercent,
       scale,
-      duration,
-      ease: "power2.out",
+      duration: reduced ? 0 : duration,
+      ease: "power2.inOut",
       overwrite: "auto",
     });
   }, []);
 
-  const scrollToStep = useCallback((index: number) => {
-    setActiveStep(index);
-    const step = STEPS[index];
-    const targetX = (50 - step.x) * step.scale;
-    const targetY = (50 - step.y) * step.scale;
-
-    if (stRef.current) {
-      // Map step to scroll position along timeline
-      const progressTargets = [0.12, 0.38, 0.64, 0.9];
-      const targetScroll =
-        stRef.current.start + progressTargets[index] * (stRef.current.end - stRef.current.start);
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
-    } else {
-      applyZoomToTarget(targetX, targetY, step.scale);
-    }
-  }, [applyZoomToTarget]);
-
   const resetToOverview = useCallback(() => {
-    if (stRef.current) {
-      window.scrollTo({ top: stRef.current.start, behavior: "smooth" });
-    }
+    setActiveStep(null);
     applyZoomToTarget(0, 0, 1, 0.6);
   }, [applyZoomToTarget]);
 
-  // GSAP ScrollTrigger timeline setup
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia();
-      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
-        const zoomEl = zoomTargetRef.current;
-        if (!zoomEl || !panelRef.current) return;
-
-        // Reset transform
-        gsap.set(zoomEl, { xPercent: 0, yPercent: 0, scale: 1 });
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: panelRef.current,
-            start: "top 72px",
-            end: "+=260%",
-            pin: true,
-            scrub: 0.6,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              const p = self.progress;
-              let nextStep = 0;
-              if (p < 0.25) nextStep = 0;
-              else if (p < 0.5) nextStep = 1;
-              else if (p < 0.75) nextStep = 2;
-              else nextStep = 3;
-
-              if (nextStep !== activeStepRef.current) {
-                activeStepRef.current = nextStep;
-                setActiveStep(nextStep);
-              }
-            },
-          },
-        });
-
-        stRef.current = tl.scrollTrigger ?? null;
-
-        // Step 0: Collar
-        const s0 = STEPS[0];
-        tl.to(zoomEl, {
-          xPercent: (50 - s0.x) * s0.scale,
-          yPercent: (50 - s0.y) * s0.scale,
-          scale: s0.scale,
-          duration: 1.2,
-          ease: "power2.inOut",
-        });
-        tl.to({}, { duration: 1.2 }); // Hold stop
-
-        // Step 1: Hooks
-        const s1 = STEPS[1];
-        tl.to(zoomEl, {
-          xPercent: (50 - s1.x) * s1.scale,
-          yPercent: (50 - s1.y) * s1.scale,
-          scale: s1.scale,
-          duration: 1.2,
-          ease: "power2.inOut",
-        });
-        tl.to({}, { duration: 1.2 }); // Hold stop
-
-        // Step 2: Welt
-        const s2 = STEPS[2];
-        tl.to(zoomEl, {
-          xPercent: (50 - s2.x) * s2.scale,
-          yPercent: (50 - s2.y) * s2.scale,
-          scale: s2.scale,
-          duration: 1.2,
-          ease: "power2.inOut",
-        });
-        tl.to({}, { duration: 1.2 }); // Hold stop
-
-        // Step 3: Outsole
-        const s3 = STEPS[3];
-        tl.to(zoomEl, {
-          xPercent: (50 - s3.x) * s3.scale,
-          yPercent: (50 - s3.y) * s3.scale,
-          scale: s3.scale,
-          duration: 1.2,
-          ease: "power2.inOut",
-        });
-        tl.to({}, { duration: 1.2 }); // Hold stop
-      });
+  // Zoom the camera onto one point; picking the point already in focus pulls back out
+  const focusStep = useCallback(
+    (index: number) => {
+      if (index === activeStep) {
+        resetToOverview();
+        return;
+      }
+      const step = STEPS[index];
+      // hotspot coordinates are mapped on the lateral shot, and the loupe reads the unzoomed image
+      setViewAngle("outer");
+      setLoupeActive(false);
+      setActiveStep(index);
+      applyZoomToTarget((50 - step.x) * step.scale, (50 - step.y) * step.scale, step.scale);
     },
-    { scope: containerRef },
+    [activeStep, applyZoomToTarget, resetToOverview],
   );
+
+  useEffect(() => {
+    const el = zoomTargetRef.current;
+    return () => {
+      if (el) gsap.killTweensOf(el);
+    };
+  }, []);
 
   // Mouse tracking on zoom stage for Optical Loupe
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -220,7 +139,7 @@ export function UpClose() {
     const y = e.clientY - rect.top;
     const relX = Math.max(0, Math.min(1, x / rect.width));
     const relY = Math.max(0, Math.min(1, y / rect.height));
-    setMousePos({ x, y, relX, relY, inside: true });
+    setMousePos({ x, y, relX, relY, w: rect.width, h: rect.height, inside: true });
   };
 
   const handleMouseLeave = () => {
@@ -236,27 +155,21 @@ export function UpClose() {
     const y = touch.clientY - rect.top;
     const relX = Math.max(0, Math.min(1, x / rect.width));
     const relY = Math.max(0, Math.min(1, y / rect.height));
-    setMousePos({ x, y, relX, relY, inside: true });
+    setMousePos({ x, y, relX, relY, w: rect.width, h: rect.height, inside: true });
   };
 
   return (
-    <section ref={containerRef} id="up-close" aria-labelledby="h-close" className="relative mt-sec pt-2">
-      <div ref={panelRef} data-zoom-panel className="relative lg:min-h-[calc(100svh-80px)] lg:flex lg:flex-col lg:justify-center">
+    <section id="up-close" aria-labelledby="h-close" className="relative mt-sec pt-2">
+      <div className="relative">
         {/* Section Header */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-6 md:mb-9">
           <div className="max-w-[640px]">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-1 text-[11px] font-bold tracking-[0.16em] text-brand uppercase shadow-soft">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex size-full rounded-full bg-brand opacity-75 animate-ping" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-brand" />
-              </span>
-              Precision Engineering · Model Nord
-            </div>
-            <h2 id="h-close" className="text-[clamp(30px,4.5vw,48px)] font-bold tracking-tight text-ink leading-[1.08]">
-              Look closer. <em className="font-serif italic font-normal text-brand">Every stitch</em> inspected.
+<p className="eyebrow mb-3">Up close · Chime Long Nord</p>
+            <h2 id="h-close" className="type-section">
+              Look closer. <em>Every stitch</em> inspected.
             </h2>
             <p className="mt-2.5 text-[15px] leading-relaxed text-ink-2 md:text-[16.5px]">
-              Scroll to move through each key feature stop, or activate the optical loupe to inspect fine leather grain and stitching.
+              Tap a point on the boot to zoom in, or switch on the loupe to see the leather grain up close.
             </p>
           </div>
 
@@ -264,19 +177,19 @@ export function UpClose() {
           <div className="flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 p-1.5 shadow-soft backdrop-blur-md">
             <button
               type="button"
-              onClick={() => scrollToStep(Math.max(0, activeStep - 1))}
-              disabled={activeStep === 0}
+              onClick={() => activeStep !== null && focusStep(Math.max(0, activeStep - 1))}
+              disabled={activeStep === null || activeStep === 0}
               className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-all hover:bg-ink/5 disabled:opacity-30 disabled:pointer-events-none"
               aria-label="Previous component"
             >
               <Icon name="arrow" className="size-3.5 rotate-180" />
             </button>
             <span className="px-2 text-[12.5px] font-bold tracking-wider text-ink tabular-nums">
-              0{activeStep + 1} <span className="text-muted font-normal">/</span> 04
+              {activeStep === null ? "--" : `0${activeStep + 1}`} <span className="text-muted font-normal">/</span> 04
             </span>
             <button
               type="button"
-              onClick={() => scrollToStep(Math.min(STEPS.length - 1, activeStep + 1))}
+              onClick={() => focusStep(activeStep === null ? 0 : Math.min(STEPS.length - 1, activeStep + 1))}
               disabled={activeStep === STEPS.length - 1}
               className="inline-flex size-9 items-center justify-center rounded-full text-ink transition-all hover:bg-ink/5 disabled:opacity-30 disabled:pointer-events-none"
               aria-label="Next component"
@@ -287,23 +200,25 @@ export function UpClose() {
         </div>
 
         {/* Two-Column Inspection Chamber */}
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,6.4fr)] lg:gap-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,6.4fr)] lg:gap-12">
           {/* LEFT: Interactive Step Cards */}
           <div className="flex flex-col justify-center">
             {/* Progress Bar */}
             <div className="mb-4 flex items-center justify-between text-[11px] font-bold tracking-wider uppercase text-muted">
-              <span>Component Inspection</span>
-              <span className="text-brand tabular-nums">{Math.round(((activeStep + 1) / 4) * 100)}% Complete</span>
+              <span>The details</span>
+              <span className="text-brand tabular-nums">
+                {activeStep === null ? "Full view" : `${activeStep + 1} / ${STEPS.length}`}
+              </span>
             </div>
             <div className="mb-5 h-1 w-full overflow-hidden rounded-full bg-ink/8">
               <div
                 className="h-full bg-gradient-to-r from-brand via-brand-deep to-brand transition-all duration-400 ease-out"
-                style={{ width: `${((activeStep + 1) / 4) * 100}%` }}
+                style={{ width: `${(((activeStep ?? -1) + 1) / STEPS.length) * 100}%` }}
               />
             </div>
 
             {/* Stepper Card List */}
-            <div className="space-y-3" role="tablist" aria-label="Footwear craftsmanship details">
+            <div className="space-y-3" role="tablist" aria-label="Details of Chime Long Nord">
               {STEPS.map((s, i) => {
                 const isActive = activeStep === i;
                 return (
@@ -312,7 +227,7 @@ export function UpClose() {
                     type="button"
                     role="tab"
                     aria-selected={isActive}
-                    onClick={() => scrollToStep(i)}
+                    onClick={() => focusStep(i)}
                     className={`group relative w-full rounded-2xl border p-4 text-left transition-all duration-300 ${
                       isActive
                         ? "border-brand/40 bg-gradient-to-r from-brand/6 via-white to-brand/3 shadow-[0_12px_28px_-10px_rgba(152,64,128,0.22)] scale-[1.01]"
@@ -423,6 +338,7 @@ export function UpClose() {
                   <button
                     type="button"
                     onClick={() => setViewAngle("outer")}
+                    aria-pressed={viewAngle === "outer"}
                     className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wide transition-all ${
                       viewAngle === "outer"
                         ? "bg-ink text-white shadow-xs"
@@ -433,7 +349,12 @@ export function UpClose() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setViewAngle("zip")}
+                    onClick={() => {
+                      // the zip shot has no mapped points, so show it whole
+                      setViewAngle("zip");
+                      resetToOverview();
+                    }}
+                    aria-pressed={viewAngle === "zip"}
                     className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wide transition-all ${
                       viewAngle === "zip"
                         ? "bg-ink text-white shadow-xs"
@@ -448,7 +369,11 @@ export function UpClose() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setLoupeActive(!loupeActive)}
+                    onClick={() => {
+                      // the loupe magnifies the unzoomed image, so pull the camera back first
+                      if (!loupeActive) resetToOverview();
+                      setLoupeActive(!loupeActive);
+                    }}
                     className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11.5px] font-bold tracking-wide transition-all duration-300 ${
                       loupeActive
                         ? "bg-brand text-white shadow-[0_6px_20px_rgba(152,64,128,0.45)] ring-2 ring-brand/40 scale-102"
@@ -456,7 +381,7 @@ export function UpClose() {
                     }`}
                   >
                     <Icon name="zoom" className="size-3.5" />
-                    <span>{loupeActive ? "Close Loupe" : "Look closer (Loupe)"}</span>
+                    <span>{loupeActive ? "Close loupe" : "Loupe"}</span>
                   </button>
 
                   <button
@@ -475,7 +400,7 @@ export function UpClose() {
                 <div
                   ref={zoomTargetRef}
                   data-zoom
-                  className="relative w-[78%] transition-transform duration-500 ease-out will-change-transform"
+                  className="relative w-[78%] will-change-transform"
                   style={{ aspectRatio: `${currentShot.w} / ${currentShot.h}` }}
                 >
                   <Image
@@ -499,11 +424,12 @@ export function UpClose() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              scrollToStep(i);
+                              focusStep(i);
                             }}
                             className="pointer-events-auto group absolute -translate-x-1/2 -translate-y-1/2 transition-transform duration-300 hover:scale-125 focus:outline-none"
                             style={{ left: `${s.x}%`, top: `${s.y}%` }}
-                            aria-label={`Inspect ${s.title}`}
+                            aria-label={isSelected ? `Back to full view from ${s.title}` : `Zoom in on ${s.title}`}
+                            aria-pressed={isSelected}
                           >
                             {/* Animated Radar Pulse */}
                             <span
@@ -524,9 +450,9 @@ export function UpClose() {
                               <span className="text-[10px] font-bold">0{i + 1}</span>
                             </span>
 
-                            {/* Floating Tooltip */}
+                            {/* name tag, kept on the inner side of hotspots near an edge */}
                             <span
-                              className={`pointer-events-none absolute left-1/2 -translate-x-1/2 -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[10.5px] font-bold shadow-soft transition-all duration-200 ${
+                              className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[10.5px] font-bold shadow-soft transition-all duration-200 ${s.x > 62 ? "right-0" : s.x < 38 ? "left-0" : "left-1/2 -translate-x-1/2"} ${
                                 isSelected
                                   ? "bg-brand text-white opacity-100 -translate-y-1"
                                   : "bg-ink/90 text-white opacity-0 group-hover:opacity-100 group-hover:-translate-y-1"
@@ -552,7 +478,7 @@ export function UpClose() {
                     transform: "translate(-50%, -50%)",
                     backgroundImage: `url(${currentShot.src})`,
                     backgroundRepeat: "no-repeat",
-                    backgroundSize: `${(zoomStageRef.current?.clientWidth ?? 600) * 3.6}px ${(zoomStageRef.current?.clientHeight ?? 460) * 3.6}px`,
+                    backgroundSize: `${mousePos.w * 3.6}px ${mousePos.h * 3.6}px`,
                     backgroundPosition: `${mousePos.relX * 100}% ${mousePos.relY * 100}%`,
                   }}
                 >
@@ -582,16 +508,16 @@ export function UpClose() {
                     <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                   </span>
                   <span className="text-[12px] font-bold text-ink">
-                    {STEPS[activeStep].title}
+                    {current ? current.title : "Full view"}
                   </span>
                   <span className="text-black/15">·</span>
                   <span className="text-[11.5px] font-medium text-ink-2 max-sm:hidden">
-                    {STEPS[activeStep].spec}
+                    {current ? current.spec : "Tap a point to zoom in"}
                   </span>
                 </div>
 
                 <div className="pointer-events-auto rounded-full border border-ink/8 bg-white/80 px-3 py-1 text-[11px] font-bold text-ink-2 shadow-xs backdrop-blur-md">
-                  Cold Rating −25°C
+                  Rated −25°C
                 </div>
               </div>
             </div>
@@ -599,14 +525,12 @@ export function UpClose() {
             {/* Quick Zoom Preset Buttons */}
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 px-1">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted mr-1">
-                  Preset focus:
-                </span>
                 {STEPS.map((s, i) => (
                   <button
                     key={s.title}
                     type="button"
-                    onClick={() => scrollToStep(i)}
+                    onClick={() => focusStep(i)}
+                    aria-pressed={activeStep === i}
                     className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
                       activeStep === i
                         ? "bg-brand text-white shadow-xs"
