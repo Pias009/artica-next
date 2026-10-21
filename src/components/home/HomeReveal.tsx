@@ -5,10 +5,10 @@ import { gsap, MOTION_OK, SplitText, useGSAP } from "@/lib/gsap";
 const EASE = "expo.out";
 
 /**
- * The home page's entrances. Each one plays as its part comes into view and plays backwards as it leaves, from either
- * direction, so scrolling down, back up, or past it again always shows it arriving. Every heading arrives the same way
- * (the eyebrow slides in, the words rise out of a mask one by one, the line under it follows) and each section's main
- * panel opens with its own move. Sections that run their own scroll motion (the hot deck, the range rows, the ship
+ * The home page's entrances. Every heading arrives the same way (the eyebrow slides in, the words rise out of a mask
+ * one by one, the line under it follows), playing as it comes into view and backwards as it leaves, from either
+ * direction. Each section's main panel opens with its own move, tied to the scroll itself: it opens as you scroll it
+ * into view and closes again, in step, as you scroll back. Sections that run their own scroll motion (the hot deck, the range rows, the ship
  * cards, samples, the journey) keep it and only get the heading. Renders nothing; reduced motion skips it all.
  * Mounted last on the page, so its setup runs after every section's own; it then marks <html data-motion-ready>, which
  * lifts the stylesheet's hold on the moving parts (see globals.css) now that they sit in their starting state.
@@ -29,6 +29,9 @@ export function HomeReveal() {
         toggleActions: "play reverse play reverse",
         fastScrollEnd: true,
       });
+
+      /** Tied to the scroll: the panel opens as its top travels from the bottom of the screen to a little above the middle. */
+      const scrub = (trigger: Element, start = "top 95%", end = "top 45%") => ({ trigger, start, end, scrub: 0.8 });
 
       /** Words in their own masks; the masks get a little room so ascenders, descenders and italics are never cut. */
       const words = (el: HTMLElement) => {
@@ -68,17 +71,17 @@ export function HomeReveal() {
           scaleY: 0.5,
           autoAlpha: 0,
           transformOrigin: "50% 100%",
-          duration: 1.1,
-          ease: EASE,
-          stagger: 0.07,
-          scrollTrigger: visit(panels[0].parentElement!),
+          duration: 1,
+          ease: "power2.out",
+          stagger: 0.08,
+          scrollTrigger: scrub(panels[0].parentElement!),
         });
 
       // worldwide: the map opens out of an inset frame, then the lanes slide in
       const map = $("#worldwide > .glass");
       if (map)
         gsap
-          .timeline({ scrollTrigger: visit(map) })
+          .timeline({ scrollTrigger: scrub(map) })
           .fromTo(
             map,
             { clipPath: "inset(14% 12% 14% 12% round 28px)", autoAlpha: 0.2 },
@@ -97,14 +100,14 @@ export function HomeReveal() {
           transformOrigin: "50% 0%",
           duration: 1.3,
           ease: EASE,
-          scrollTrigger: visit(programs),
+          scrollTrigger: scrub(programs),
         });
 
       // up close: the details slide in from the left, the boot's stage from the right
       const close = $("[data-upclose]");
       if (close)
         gsap
-          .timeline({ scrollTrigger: visit(close, "top 80%") })
+          .timeline({ scrollTrigger: scrub(close) })
           .from(close.children[0], { x: -70, autoAlpha: 0, duration: 1.1, ease: EASE }, 0)
           .from(close.children[1], { x: 90, rotateY: -14, transformPerspective: 1400, autoAlpha: 0, duration: 1.3, ease: EASE }, 0.1);
 
@@ -114,7 +117,7 @@ export function HomeReveal() {
         gsap.fromTo(
           samples,
           { clipPath: "circle(12% at 50% 55%)" },
-          { clipPath: "circle(120% at 50% 55%)", duration: 1.5, ease: "power3.inOut", scrollTrigger: visit(samples) },
+          { clipPath: "circle(120% at 50% 55%)", duration: 1.5, ease: "power3.inOut", scrollTrigger: scrub(samples) },
         );
 
       // order sheet: the panel splits open from the centre line
@@ -123,7 +126,7 @@ export function HomeReveal() {
         gsap.fromTo(
           sheet,
           { clipPath: "inset(0% 50% 0% 50% round 28px)" },
-          { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.2, ease: "expo.inOut", scrollTrigger: visit(sheet) },
+          { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.2, ease: "expo.inOut", scrollTrigger: scrub(sheet) },
         );
 
       // order journey: a curtain drops from the top
@@ -132,14 +135,14 @@ export function HomeReveal() {
         gsap.fromTo(
           journey,
           { clipPath: "inset(0% 0% 100% 0% round 28px)" },
-          { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.2, ease: "expo.inOut", scrollTrigger: visit(journey, "top 80%") },
+          { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.2, ease: "expo.inOut", scrollTrigger: scrub(journey) },
         );
 
       // private label: a curtain wipes in from the left while the pair settles
       const partner = $("#partner > .glass");
       if (partner)
         gsap
-          .timeline({ scrollTrigger: visit(partner) })
+          .timeline({ scrollTrigger: scrub(partner) })
           .fromTo(
             partner,
             { clipPath: "inset(0% 100% 0% 0% round 28px)" },
