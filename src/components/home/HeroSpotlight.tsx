@@ -146,17 +146,19 @@ export function HeroSpotlight() {
       <div className="wrap relative grid grid-cols-[minmax(0,1fr)] gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6 lg:pl-[clamp(48px,6vw,104px)]">
         {/* the promise */}
         <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-10">
-          <p className="eyebrow animate-rise-in motion-reduce:animate-none">FW26 wholesale</p>
+          <p data-hero-in="eyebrow" className="eyebrow">
+            FW26 wholesale
+          </p>
           <h1
             id="hero-title"
-            className="mt-4 animate-rise-in font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink [animation-delay:70ms] motion-reduce:animate-none lg:text-[clamp(44px,4.4vw,74px)]"
+            className="mt-4 font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink lg:text-[clamp(44px,4.4vw,74px)]"
           >
             Factory-direct footwear, <em className="font-medium text-brand">for shelves worldwide.</em>
           </h1>
-          <p className="mt-5 max-w-[26rem] animate-rise-in text-[15.5px] leading-[1.6] text-ink-2 [animation-delay:140ms] motion-reduce:animate-none max-lg:mx-auto lg:text-[16.5px]">
+          <p data-hero-in="copy" className="mt-5 max-w-[26rem] text-[15.5px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[16.5px]">
             Boots, sneakers and sandals from our Guangzhou factory, for retailers and distributors in every market.
           </p>
-          <div className="mt-8 flex animate-rise-in flex-wrap items-center gap-3 [animation-delay:210ms] motion-reduce:animate-none max-lg:justify-center">
+          <div data-hero-in="cta" className="mt-8 flex flex-wrap items-center gap-3 max-lg:justify-center">
             <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
               Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>

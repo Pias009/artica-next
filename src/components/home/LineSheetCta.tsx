@@ -40,7 +40,7 @@ export function LineSheetCta() {
     () => {
       gsap.matchMedia().add(MOTION_OK, () => {
         const tl = gsap.timeline({
-          scrollTrigger: { trigger: ref.current, start: "top 70%", once: true },
+          scrollTrigger: { trigger: ref.current, start: "top 80%", end: "bottom top", toggleActions: "play reverse play reverse" },
         });
         tl.from("[data-sheet-copy] > *", {
           y: 24,

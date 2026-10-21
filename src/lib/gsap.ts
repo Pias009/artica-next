@@ -8,6 +8,8 @@ import { useGSAP } from "@gsap/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(useGSAP, ScrollTrigger, Flip, SplitText);
+  // phones show and hide the address bar as you scroll; don't re-measure every trigger for it (no jumps mid-scroll)
+  ScrollTrigger.config({ ignoreMobileResize: true });
   watchPageHeight();
 }
 

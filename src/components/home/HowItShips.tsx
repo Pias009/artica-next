@@ -150,7 +150,7 @@ export function HowItShips() {
           y: 8,
           stagger: 0.05,
           duration: 0.4,
-          scrollTrigger: { trigger: card("case"), start: "top 60%", once: true },
+          scrollTrigger: { trigger: card("case"), start: "top 75%", end: "bottom top", toggleActions: "play reverse play reverse" },
         });
       });
     },

@@ -32,7 +32,7 @@ export function OrderSheet() {
     () => {
       gsap.matchMedia().add(MOTION_OK, () => {
         gsap
-          .timeline({ scrollTrigger: { trigger: "[data-paper]", start: "top 78%", once: true } })
+          .timeline({ scrollTrigger: { trigger: "[data-paper]", start: "top 85%", end: "bottom top", toggleActions: "play reverse play reverse" } })
           .from("[data-paper]", { y: 60, rotation: 3, opacity: 0, duration: 1, ease: "expo.out" })
           .from("[data-row]", { x: -16, opacity: 0, duration: 0.5, ease: "power2.out", stagger: 0.12 }, 0.35)
           .from("[data-cell]", { opacity: 0, y: 6, duration: 0.25, stagger: 0.012 }, 0.5)

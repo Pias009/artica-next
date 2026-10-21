@@ -11,15 +11,43 @@ const DOTS = 4;
 /**
  * Catalogue card for a category (or a single style): the photo does the work. Hover swaps to the zip-side view, or to the
  * category's next style; the whole card opens Quick View (Enter on the name button).
+ * `variant="glass"` sets the card on a frosted pane; `single` always shows the one style, never its category.
  */
-export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", className }: { p: Product; sizes?: string; className?: string }) {
+export function ProductCard({
+  p,
+  sizes = "(max-width: 864px) 70vw, 300px",
+  className,
+  variant = "plain",
+  single = false,
+}: {
+  p: Product;
+  sizes?: string;
+  className?: string;
+  variant?: "plain" | "glass";
+  single?: boolean;
+}) {
   const group = groupOf(p);
   // A card that stands for a whole category is named after it; a one-shoe category keeps the shoe's name.
-  const many = group.length > 1;
-  const alt = p.zip ?? group.find((x) => x.id !== p.id)?.outer;
+  const many = !single && group.length > 1;
+  const alt = p.zip ?? (single ? undefined : group.find((x) => x.id !== p.id)?.outer);
+  const glass = variant === "glass";
   return (
-    <article data-card data-flip-id={p.id} className={clsx("group relative flex min-w-0 flex-col", className)}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-tile">
+    <article
+      data-card
+      data-flip-id={p.id}
+      className={clsx(
+        "group relative flex min-w-0 flex-col",
+        glass &&
+          "glass rounded-[24px] p-2 pb-4 transition-[translate,box-shadow] duration-500 ease-soft hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_30px_60px_-30px_rgb(152_64_128/0.35)]",
+        className,
+      )}
+    >
+      <div
+        className={clsx(
+          "relative aspect-[4/5] overflow-hidden",
+          glass ? "rounded-[18px] bg-[radial-gradient(80%_70%_at_50%_45%,rgb(255_255_255/0.95),rgb(255_255_255/0.35))]" : "rounded-card bg-tile",
+        )}
+      >
         <Badge badge={p.badge} className="absolute top-3 left-3 z-[2]" />
         {/* several colours: the + opens a colour chooser; a single style adds straight away */}
         {many ? (
@@ -53,20 +81,23 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
         </span>
       </div>
 
-      <div className="mt-4 flex items-start justify-between gap-3">
+      <div className={clsx("mt-4 flex items-start justify-between gap-3", glass && "px-2")}>
         <h3 className="text-[16px] font-semibold tracking-[-0.01em]">
-          <QuickViewButton id={p.id} className="text-left after:absolute after:inset-0 after:z-[1] after:rounded-card">
+          <QuickViewButton
+            id={p.id}
+            className={clsx("text-left after:absolute after:inset-0 after:z-[1]", glass ? "after:rounded-[24px]" : "after:rounded-card")}
+          >
             {many ? categoryOf(p) : `Chime Long ${p.name}`}
           </QuickViewButton>
         </h3>
-        <span className="mt-1.5 flex flex-none items-center -space-x-1" title={group.map((x) => `${x.name} (${x.color.name})`).join(", ")}>
-          {group.slice(0, DOTS).map((x) => (
+        <span className="mt-1.5 flex flex-none items-center -space-x-1" title={(many ? group : [p]).map((x) => `${x.name} (${x.color.name})`).join(", ")}>
+          {(many ? group : [p]).slice(0, DOTS).map((x) => (
             <span key={x.id} className="size-3.5 rounded-full ring-2 ring-white inset-ring inset-ring-ink/15" style={{ background: x.color.hex }} />
           ))}
-          {group.length > DOTS && <span className="pl-2 text-[12px] font-semibold text-muted tabular-nums">+{group.length - DOTS}</span>}
+          {many && group.length > DOTS && <span className="pl-2 text-[12px] font-semibold text-muted tabular-nums">+{group.length - DOTS}</span>}
         </span>
       </div>
-      <p className="mt-0.5 text-[14px] text-muted">
+      <p className={clsx("mt-0.5 text-[14px] text-muted", glass && "px-2")}>
         {many ? (
           <>
             <span className="font-medium text-brand">{group.length} styles</span> · {p.name} and {group.length - 1} more · {LINE_LABEL[p.line]}
@@ -77,7 +108,7 @@ export function ProductCard({ p, sizes = "(max-width: 864px) 70vw, 300px", class
           </>
         )}
       </p>
-      <p className="mt-2 text-[14px] font-semibold tabular-nums">
+      <p className={clsx("mt-2 text-[14px] font-semibold tabular-nums", glass && "px-2")}>
         {MOQ_PAIRS} pairs MOQ
         <span className="font-normal text-muted">
           {" "}

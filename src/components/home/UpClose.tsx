@@ -200,7 +200,7 @@ export function UpClose() {
         </div>
 
         {/* Two-Column Inspection Chamber */}
-        <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,6.4fr)] lg:gap-12">
+        <div data-upclose className="grid grid-cols-[minmax(0,1fr)] items-center gap-8 lg:grid-cols-[minmax(0,4.6fr)_minmax(0,6.4fr)] lg:gap-12">
           {/* LEFT: Interactive Step Cards */}
           <div className="flex flex-col justify-center">
             {/* Progress Bar */}
