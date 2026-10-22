@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SeasonSignup } from "./buyer/SeasonSignup";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { COMPANY, SOCIAL, tel, whatsappLink } from "@/lib/company";
@@ -18,6 +19,11 @@ const COLS: { title: string; links: [string, string][] }[] = [
     title: "For buyers",
     links: [
       ["Line sheet", "/inquiry"],
+      ["Buyer desk", "/buyer-desk"],
+      ["Size guide", "/size-guide"],
+      ["Order calendar", "/order-calendar"],
+      ["Container planner", "/container-planner"],
+      ["Ships to your country", "/ship-to"],
       ["Private label", "/private-label"],
       ["Shipping terms", "/shipping"],
       ["Buyer FAQ", "/faq"],
@@ -27,6 +33,9 @@ const COLS: { title: string; links: [string, string][] }[] = [
     title: "Company",
     links: [
       ["About", "/about"],
+      ["Quality", "/quality"],
+      ["Verify us", "/verify"],
+      ["Meet us", "/meet"],
       ["Contact", "/contact"],
     ],
   },
@@ -34,9 +43,10 @@ const COLS: { title: string; links: [string, string][] }[] = [
 
 export function Footer() {
   return (
-    <footer id="footer" className="mt-sec bg-tile px-(--shell-pad) pt-16 pb-10">
+    <footer id="footer" data-deco="footer" className="mt-sec bg-tile px-(--shell-pad) pt-16 pb-10">
       <div className="wrap">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_2fr]">
+        <SeasonSignup />
+        <div className="mt-16 grid gap-12 lg:grid-cols-[1.4fr_2fr]">
           <div>
             <Logo className="h-14 sm:h-16" />
             <p className="mt-5 max-w-[34ch] text-[15px] text-ink-2">
@@ -106,9 +116,17 @@ export function Footer() {
         </div>
         <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6 text-[13px] text-muted">
           <span>© 2026 Guangzhou Chime Long Trading Co., Ltd. Trade buyers only.</span>
-          <Link href="/shipping" className="hover:text-ink">
-            Shipping and trade terms
-          </Link>
+          <span className="flex flex-wrap gap-x-5 gap-y-2">
+            {[
+              ["Terms of trade", "/terms"],
+              ["Privacy policy", "/privacy"],
+              ["Shipping terms", "/shipping"],
+            ].map(([label, href]) => (
+              <Link key={href} href={href} className="hover:text-ink">
+                {label}
+              </Link>
+            ))}
+          </span>
         </div>
       </div>
     </footer>

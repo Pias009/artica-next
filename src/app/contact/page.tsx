@@ -3,11 +3,13 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Contact & Showrooms · Chime Long Wholesale",
-  description: "Schedule showroom appointments in New York and Montreal, contact our trade desk, or request wholesale line sheets and samples.",
-};
+export const metadata: Metadata = pageMeta({
+  title: "Contact the wholesale trade desk",
+  description: "Contact the Chime Long trade desk for wholesale pricing, line sheets, samples and showroom appointments. Replies within 24 hours.",
+  path: "/contact",
+});
 
 const SHOWROOMS: {
   city: string;
@@ -70,7 +72,7 @@ export default function ContactPage() {
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Contact & Showrooms" }]}
         eyebrow="Commercial Trade Inquiries"
-        title="Direct access to our trade desk."
+        title="Contact our wholesale trade desk."
         text="Whether scheduling an in-person showroom preview, ordering swatch rings, or tracking a container shipment, our wholesale team is here to assist."
       />
 

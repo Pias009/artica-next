@@ -4,6 +4,7 @@ import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Icon } from "../Icon";
 import { FEATURES, LINES, type CatalogState, type Facets, type Feature } from "@/lib/catalog-filters";
+import { SEASONS } from "@/lib/season";
 
 type Toggle = (key: "features" | "cats" | "colors", value: string) => void;
 
@@ -202,6 +203,7 @@ export function ActiveChips({
 }) {
   const chips: { key: string; label: ReactNode; remove: () => void }[] = [
     ...(s.q.trim() ? [{ key: "q", label: <>“{s.q.trim()}”</>, remove: () => onSet({ q: "" }) }] : []),
+    ...(s.season ? [{ key: "season", label: `${SEASONS[s.season].name} styles`, remove: () => onSet({ season: null }) }] : []),
     ...(s.line !== "all" ? [{ key: "line", label: LINES.find((l) => l.id === s.line)?.label, remove: () => onLine("all") }] : []),
     ...s.features.map((x: Feature) => ({ key: x, label: FEATURES.find((f) => f.id === x)?.label, remove: () => onToggle("features", x) })),
     ...s.cats.map((x) => ({ key: `c:${x}`, label: x, remove: () => onToggle("cats", x) })),
@@ -225,7 +227,7 @@ export function ActiveChips({
       {chips.length > 1 && (
         <button
           type="button"
-          onClick={() => onSet({ q: "", line: "all", features: [], cats: [], colors: [] })}
+          onClick={() => onSet({ q: "", line: "all", features: [], cats: [], colors: [], season: null })}
           className="h-9 px-2 text-[13px] font-semibold text-brand underline-offset-4 hover:underline"
         >
           Clear all

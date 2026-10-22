@@ -1,13 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { Fab } from "@/components/Fab";
+import { SeasonPreview } from "@/components/season/SeasonPreview";
+import { SeasonWorld } from "@/components/season/world/SeasonWorld";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { InquiryDrawer } from "@/components/inquiry/InquiryDrawer";
+import { JsonLd } from "@/components/JsonLd";
 import { QuickView } from "@/components/product/QuickView";
 import { StoreHydrator } from "@/components/StoreHydrator";
 import { Toast } from "@/components/Toast";
 import { COMPANY, SOCIAL } from "@/lib/company";
+import { seasonScript } from "@/lib/season";
+import { absoluteUrl, ORG_ID, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 /*
@@ -29,23 +34,22 @@ const serif = Source_Serif_4({
   axes: ["opsz"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
+// kept under ~155 characters so search results show it whole
 const DESCRIPTION =
-  "Factory-direct wholesale footwear from Guangzhou: boots, sneakers and sandals for retailers, distributors and private-label brands worldwide. From 300 pairs per style, samples in 10 days.";
+  "Factory-direct wholesale boots, sneakers and sandals from Guangzhou for retailers and private-label brands. From 300 pairs per style, samples in 10 days.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "Chime Long · Wholesale footwear, factory-direct", template: "%s · Chime Long" },
+  title: { default: "Chime Long · Wholesale footwear, factory-direct", template: `%s · ${SITE_NAME}` },
   description: DESCRIPTION,
-  applicationName: "Chime Long",
-  keywords: ["wholesale footwear", "wholesale boots", "shoe manufacturer", "factory-direct shoes", "private label footwear", "OEM footwear", "Guangzhou"],
+  applicationName: SITE_NAME,
   // the share image is the opengraph-image file beside this layout; these are the words that go with it
   openGraph: {
     type: "website",
-    siteName: "Chime Long",
+    siteName: SITE_NAME,
     title: "Chime Long · Wholesale footwear, factory-direct",
     description: DESCRIPTION,
+    url: "/",
     locale: "en_US",
   },
   twitter: { card: "summary_large_image", title: "Chime Long · Wholesale footwear, factory-direct", description: DESCRIPTION },
@@ -63,14 +67,31 @@ export const viewport: Viewport = {
 const ORGANIZATION = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": ORG_ID,
   name: COMPANY.name,
-  alternateName: "Chime Long",
-  url: SITE_URL,
-  logo: `${SITE_URL}/images/chime-long-logo.png`,
+  alternateName: SITE_NAME,
+  url: absoluteUrl("/"),
+  logo: absoluteUrl("/images/chime-long-logo.png"),
   description: DESCRIPTION,
   address: { "@type": "PostalAddress", addressLocality: "Guangzhou", addressCountry: "CN" },
   areaServed: "Worldwide",
+  knowsAbout: ["Wholesale footwear", "Private label footwear", "OEM shoe manufacturing", "Winter boots", "Footwear export shipping"],
   ...(SOCIAL.length ? { sameAs: SOCIAL.map((s) => s.href) } : {}),
+};
+
+/** The site itself, with the catalog search so engines can offer a search box straight into it. */
+const WEBSITE = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: absoluteUrl("/"),
+  publisher: { "@id": ORG_ID },
+  inLanguage: "en",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: { "@type": "EntryPoint", urlTemplate: `${absoluteUrl("/catalog")}?q={search_term_string}` },
+    "query-input": "required name=search_term_string",
+  },
 };
 
 // Design direction contract, kept in the rendered HTML for design reviews.
@@ -85,11 +106,20 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${serif.variable}`} data-scroll-behavior="smooth">
+    // data-season is set by the head script before first paint, so React leaves it alone on hydration
+    <html lang="en" className={`${inter.variable} ${serif.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        {/* the visitor's season theme, painted before anything shows (src/lib/season.ts) */}
+        <script dangerouslySetInnerHTML={{ __html: seasonScript() }} />
+      </head>
       <body className="bg-white font-sans text-ink antialiased">
-        <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION) }} />
+        {/* design notes are for reviews of a local or preview build, not for the live site's source */}
+        {process.env.NODE_ENV !== "production" && <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />}
+        <JsonLd data={ORGANIZATION} />
+        <JsonLd data={WEBSITE} />
         <StoreHydrator />
+        {/* the season's 3D world behind every page (WebGL; the CSS season gradient stays as the fallback) */}
+        <SeasonWorld />
         <div id="page" className="min-h-screen w-full overflow-x-clip [--shell-pad:clamp(16px,3.2vw,48px)]">
           <Header />
           <main id="top" className="px-(--shell-pad) pb-4 max-md:pb-24">
@@ -98,6 +128,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Footer />
         </div>
         <Fab />
+        <SeasonPreview />
         <QuickView />
         <InquiryDrawer />
         <Toast />

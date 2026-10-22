@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
+import { useSeason } from "../season/SeasonContext";
 import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
+import { bySeason } from "@/lib/season-products";
 import { useInCart, useInquiry, useUI } from "@/lib/store";
 
 /** Just in for FW26 (client placeholder list). */
@@ -15,9 +17,7 @@ const AUTOPLAY_MS = 4200;
 type Filter = "all" | ProductLine;
 const FILTERS: Filter[] = ["all", "women", "men", "kids"];
 
-/** Computed once: the list never changes while the page is open. */
-const ALL = NEW_ARRIVAL_SLUGS.map(getProduct).filter((p): p is Product => !!p);
-const inFilter = (f: Filter) => (f === "all" ? ALL : ALL.filter((p) => p.line === f));
+const ARRIVALS = NEW_ARRIVAL_SLUGS.map(getProduct).filter((p): p is Product => !!p);
 
 /**
  * New arrivals as expanding panels: every new style is a slim glass panel tinted in its own colour, side by side on
@@ -26,6 +26,10 @@ const inFilter = (f: Filter) => (f === "all" ? ALL : ALL.filter((p) => p.line ==
  * pauses under the pointer, has a pause button (WCAG 2.2.2); under reduced motion it only moves when asked.
  */
 export function NewArrivals() {
+  const season = useSeason();
+  // the drop in the visitor's season order: what suits their weather opens first. Fixed for the page's life.
+  const ALL = useMemo(() => bySeason(ARRIVALS, season), [season]);
+  const inFilter = useCallback((f: Filter) => (f === "all" ? ALL : ALL.filter((p) => p.line === f)), [ALL]);
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState(ALL[0]?.id ?? "");
   const [paused, setPaused] = useState(false);
@@ -50,7 +54,7 @@ export function NewArrivals() {
       if (!document.hidden) setActiveId((cur) => ids[(Math.max(0, ids.indexOf(cur)) + 1) % ids.length]);
     }, AUTOPLAY_MS);
     return () => clearTimeout(t);
-  }, [still, filter, activeId]);
+  }, [still, filter, activeId, inFilter]);
 
   if (!p) return null;
 

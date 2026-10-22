@@ -10,6 +10,7 @@ import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { LinePeek } from "./nav/LinePeek";
 import { NavSearch } from "./nav/NavSearch";
+import { SeasonSwitcher } from "./season/SeasonSwitcher";
 import { COMPANY, tel } from "@/lib/company";
 import { inLine, MOQ_PAIRS, stylesIn, type ProductLine } from "@/lib/products";
 import { useUI } from "@/lib/store";
@@ -21,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "/catalog?line=women", label: "Women", line: "women" },
   { href: "/catalog?line=kids", label: "Kids", line: "kids" },
   { href: "/catalog", label: "All products" },
+  { href: "/buyer-desk", label: "Buyer desk", opt: true },
   { href: "/shipping", label: "Shipping", opt: true },
   { href: "/about", label: "About", opt: true },
 ];
@@ -29,6 +31,7 @@ const NAV: NavItem[] = [
 const LINE_ITEMS = NAV.filter((n): n is NavItem & { line: ProductLine } => !!n.line);
 const PAGE_ITEMS: NavItem[] = [
   ...NAV.filter((n) => !n.line && !n.opt),
+  { href: "/buyer-desk", label: "Buyer desk" },
   { href: "/shipping", label: "Shipping" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
@@ -225,18 +228,30 @@ export function Header() {
 
   return (
     <>
-      <p className="bg-ink px-(--shell-pad) py-2.5 text-center text-[13px] font-medium text-white">
-        Samples in 10 days <span className="mx-2 text-white/40">·</span> Door-to-door worldwide
-        <span className="max-sm:hidden">
-          <span className="mx-2 text-white/40">·</span> From 300 pairs per style
-        </span>
-        <span className="max-lg:hidden">
-          <span className="mx-2 text-white/40">·</span> Trade buyers only
-        </span>
-      </p>
+      {/* the promise in the middle, the season the site is dressed for on the right */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-ink px-(--shell-pad) py-1 text-[13px] font-medium text-white max-sm:grid-cols-[1fr_auto]">
+        <span aria-hidden="true" className="max-sm:hidden" />
+        <p className="py-1.5 text-center max-sm:text-left">
+          Samples in 10 days
+          <span className="max-sm:hidden">
+            <span className="mx-2 text-white/40">·</span> Door-to-door worldwide
+          </span>
+          <span className="max-md:hidden">
+            <span className="mx-2 text-white/40">·</span> From 300 pairs per style
+          </span>
+          <span className="max-xl:hidden">
+            <span className="mx-2 text-white/40">·</span> Trade buyers only
+          </span>
+        </p>
+        <div className="justify-self-end">
+          <SeasonSwitcher />
+        </div>
+      </div>
 
       <header
         ref={headerRef}
+        data-deco="bar"
+        data-floating={floating || undefined}
         onPointerLeave={() => panel?.kind === "line" && later(closePanel, CLOSE_DELAY)}
         onPointerEnter={() => panel?.kind === "line" && clearTimeout(timer.current)}
         className={clsx(

@@ -3,11 +3,13 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "About Chime Long · Wholesale Footwear Atelier",
+export const metadata: Metadata = pageMeta({
+  title: "About us: footwear factory in Guangzhou",
   description: "Learn about Chime Long's technical footwear engineering, LWG certified leathers, sub-zero testing laboratory, and ethical manufacturing standards.",
-};
+  path: "/about",
+});
 
 const PILLARS = [
   {
@@ -45,7 +47,7 @@ export default function AboutPage() {
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "About Chime Long" }]}
         eyebrow="Specialist Footwear Engineering"
-        title="Engineered for harsh retail realities."
+        title="Wholesale footwear, engineered for harsh retail realities."
         text="Chime Long was founded to eliminate the high return rates and poor durability of conventional fashion footwear. We build footwear that keeps trade buyers and end consumers loyal year after year."
       />
 

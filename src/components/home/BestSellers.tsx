@@ -3,16 +3,18 @@
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { AddButton } from "../product/AddButton";
 import { ProductCard } from "../product/ProductCard";
+import { useSeason } from "../season/SeasonContext";
 import { Badge } from "../ui/Badge";
 import { QuickViewButton } from "../ui/QuickViewButton";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
 import { MotionToggle } from "../ui/MotionToggle";
 import { collapse, inLine, LINE_LABEL, products, stylesIn, type ProductLine, type Scene } from "@/lib/products";
 import { gsap, MOTION_OK, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { bySeason } from "@/lib/season-products";
 import { useInCart, useInquiry } from "@/lib/store";
 import { offTilt, onTilt } from "@/lib/tilt";
 import { useAutoCycle } from "@/lib/useAutoCycle";
@@ -29,7 +31,9 @@ const LINES: ProductLine[] = ["men", "women", "kids"];
  * List: a featured stage that walks through the ranked list.
  */
 export function BestSellers() {
-  const list = collapse(products);
+  const season = useSeason();
+  // one style per kind, the season's kinds first
+  const list = useMemo(() => collapse(bySeason(products, season)), [season]);
   const ref = useRef<HTMLElement>(null);
   const [view, setView] = useState<View>("rows");
   const [stopped, setStopped] = useState(false);

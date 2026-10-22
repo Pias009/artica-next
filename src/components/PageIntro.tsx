@@ -24,7 +24,7 @@ export function PageIntro({
   children?: ReactNode;
 }) {
   return (
-    <div className={`bleed px-(--shell-pad) pt-10 md:pt-14 ${tone === "sky" ? "mb-12 bg-sky pb-14 md:pb-20" : "mb-8 pb-2 md:pb-4"}`}>
+    <div data-deco={tone === "sky" ? "band" : undefined} className={`bleed relative isolate px-(--shell-pad) pt-10 md:pt-14 ${tone === "sky" ? "mb-12 overflow-hidden bg-sky pb-14 md:pb-20" : "mb-8 pb-2 md:pb-4"}`}>
       <div className={`wrap ${aside ? "grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-12" : ""}`}>
         <div>
           <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-[14px] text-ink-2">

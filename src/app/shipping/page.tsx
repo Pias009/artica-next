@@ -3,11 +3,13 @@ import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { MOQ_CASES, MOQ_PAIRS } from "@/lib/products";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Shipping, Freight & Trade Terms",
+export const metadata: Metadata = pageMeta({
+  title: "Shipping and trade terms: DDP, FOB, EXW",
   description: "Wholesale shipping terms for buyers worldwide. DDP, FOB, and EXW logistics, transit times, pallet dimensions, and customs clearance.",
-};
+  path: "/shipping",
+});
 
 const INCOTERMS = [
   {
@@ -91,7 +93,7 @@ export default function ShippingPage() {
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Shipping terms" }]}
         eyebrow="Global Freight Operations"
-        title="Predictable landed delivery. Zero tariff risk."
+        title="Wholesale shipping terms, with predictable landed delivery."
         text="Whether you require turnkey DDP delivery direct to your loading dock or FOB consolidation at vessel, our logistics team coordinates smooth ocean and domestic transit."
       />
 

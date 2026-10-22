@@ -4,6 +4,8 @@
  */
 
 import { categoryOf, filterProducts, products, type Product, type ProductLine } from "./products";
+import { isSeason, type SeasonId } from "./season";
+import { bySeason, inSeason } from "./season-products";
 
 export type Line = ProductLine | "all";
 export type Feature = "waterproof" | "insulated";
@@ -18,6 +20,8 @@ export type CatalogState = {
   colors: string[];
   sort: Sort;
   view: View;
+  /** Only styles in season for this season (`?season=summer`, the home page's season edit links here). */
+  season: SeasonId | null;
 };
 
 export const LINES: { id: Line; label: string; icon: "grid" | "man" | "woman" | "kid" }[] = [
@@ -42,7 +46,7 @@ const LINE_IDS = LINES.map((l) => l.id);
 const FEATURE_IDS = FEATURES.map((f) => f.id);
 const isFeature = (v: string): v is Feature => (FEATURE_IDS as string[]).includes(v);
 
-export const EMPTY: CatalogState = { line: "all", q: "", features: [], cats: [], colors: [], sort: "featured", view: "grouped" };
+export const EMPTY: CatalogState = { line: "all", q: "", features: [], cats: [], colors: [], sort: "featured", view: "grouped", season: null };
 
 /** Reads the catalog's search params. `line=waterproof|insulated` (the header's old filter links) becomes a feature. */
 export function parseCatalogParams(sp: Record<string, string | string[] | undefined>): CatalogState {
@@ -63,6 +67,7 @@ export function parseCatalogParams(sp: Record<string, string | string[] | undefi
     colors: list("color"),
     sort: SORTS.some((s) => s.id === sort) ? (sort as Sort) : "featured",
     view: get("view") === "styles" ? "styles" : "grouped",
+    season: isSeason(get("season")) ? (get("season") as SeasonId) : null,
   };
 }
 
@@ -75,15 +80,18 @@ export function toSearch(s: CatalogState) {
   if (s.colors.length) p.set("color", s.colors.join(","));
   if (s.sort !== "featured") p.set("sort", s.sort);
   if (s.view !== "grouped") p.set("view", s.view);
+  if (s.season) p.set("season", s.season);
   return p.size ? `?${p}` : "";
 }
 
 /** Number of filters narrowing the list (search and sort/view excluded). */
-export const activeCount = (s: CatalogState) => (s.line !== "all" ? 1 : 0) + s.features.length + s.cats.length + s.colors.length;
+export const activeCount = (s: CatalogState) =>
+  (s.line !== "all" ? 1 : 0) + (s.season ? 1 : 0) + s.features.length + s.cats.length + s.colors.length;
 
 type Facet = "line" | "features" | "cats" | "colors";
 
 function passes(p: Product, s: CatalogState, skip?: Facet) {
+  if (s.season && !inSeason(p, s.season)) return false;
   if (skip !== "line" && s.line !== "all" && p.line !== s.line) return false;
   if (skip !== "features" && !s.features.every((f) => p.tags.includes(f))) return false;
   if (skip !== "cats" && s.cats.length && !s.cats.includes(categoryOf(p))) return false;
@@ -93,18 +101,19 @@ function passes(p: Product, s: CatalogState, skip?: Facet) {
 
 const BADGE_RANK: Record<string, number> = { New: 0, Trending: 1, "Top reorder": 2 };
 
-function sortStyles(list: Product[], sort: Sort) {
-  if (sort === "featured") return list;
+/** "Featured" puts the season's styles first: the one filtered for, else the visitor's own. */
+function sortStyles(list: Product[], sort: Sort, season: SeasonId | null) {
+  if (sort === "featured") return season ? bySeason(list, season) : list;
   const out = [...list];
   if (sort === "az") out.sort((a, b) => a.name.localeCompare(b.name));
   else out.sort((a, b) => (BADGE_RANK[a.badge ?? ""] ?? 3) - (BADGE_RANK[b.badge ?? ""] ?? 3));
   return out;
 }
 
-/** Styles matching the search alone (`searched`) and every filter (`matches`, sorted). */
-export function applyCatalog(s: CatalogState) {
+/** Styles matching the search alone (`searched`) and every filter (`matches`, sorted; `visitor` is their season). */
+export function applyCatalog(s: CatalogState, visitor: SeasonId | null = null) {
   const searched = filterProducts(products, "all", s.q);
-  return { searched, matches: sortStyles(searched.filter((p) => passes(p, s)), s.sort) };
+  return { searched, matches: sortStyles(searched.filter((p) => passes(p, s)), s.sort, s.season ?? visitor) };
 }
 
 /** Category and colour options in catalogue order, so the panel doesn't reshuffle as counts change. */

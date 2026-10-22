@@ -52,19 +52,13 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
   const inquiry = { company, email, country, buyerType, note, lines, pairs };
 
   if (mailReady()) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${MAIL.key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: MAIL.from,
-        to: MAIL.to,
-        reply_to: email,
-        subject: `Wholesale inquiry: ${company} (${buyerType}, ${country})${pairs ? `, ${pairs.toLocaleString("en-US")} pairs` : ""}`,
-        text: emailText(inquiry),
-      }),
-    }).catch(() => null);
-    if (!res?.ok) {
-      console.error("[inquiry] delivery failed", res?.status, inquiry);
+    const sent = await sendMail(
+      email,
+      `Wholesale inquiry: ${company} (${buyerType}, ${country})${pairs ? `, ${pairs.toLocaleString("en-US")} pairs` : ""}`,
+      emailText(inquiry),
+    );
+    if (!sent) {
+      console.error("[inquiry] delivery failed", inquiry);
       return { status: "error", errors: { form: "We couldn't send your inquiry just now. Please try again in a minute." } };
     }
   } else {
@@ -76,6 +70,35 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
     : `${company}: full line sheet and tier pricing go to ${email}.`;
 
   return { status: "success", summary, delivered: mailReady() };
+}
+
+/** One email to the trade desk through Resend. True when it was accepted. */
+async function sendMail(replyTo: string, subject: string, text: string) {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${MAIL.key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: MAIL.from, to: MAIL.to, reply_to: replyTo, subject, text }),
+  }).catch(() => null);
+  return !!res?.ok;
+}
+
+export type SignupResult = { status: "idle" } | { status: "error"; error: string } | { status: "success"; delivered: boolean };
+
+/** "Next line sheet first": the trade desk gets the address and adds it to the season mailing. */
+export async function subscribe(_prev: SignupResult, formData: FormData): Promise<SignupResult> {
+  if (String(formData.get("website") ?? "")) return { status: "success", delivered: true };
+
+  const email = String(formData.get("email") ?? "").trim().slice(0, 200);
+  const from = String(formData.get("from") ?? "").slice(0, 80);
+  if (!EMAIL.test(email)) return { status: "error", error: "Enter a valid work email." };
+
+  if (mailReady()) {
+    const sent = await sendMail(email, `Line sheet signup: ${email}`, `Add ${email} to the season line-sheet mailing.\nSigned up on: ${from || "the website"}.`);
+    if (!sent) return { status: "error", error: "We couldn't sign you up just now. Please try again in a minute." };
+  } else {
+    console.info("[signup] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", { email, from });
+  }
+  return { status: "success", delivered: mailReady() };
 }
 
 /** The inquiry as a plain-text email, laid out for whoever answers it. */

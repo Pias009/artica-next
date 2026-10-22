@@ -9,19 +9,21 @@ import { ProductCard } from "./ProductCard";
 import { activeCount, applyCatalog, EMPTY, facets, SORTS, toSearch, type CatalogState, type Sort } from "@/lib/catalog-filters";
 import { Flip, gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { collapse, MOQ_PAIRS, PACK } from "@/lib/products";
+import { SEASONS, type SeasonId } from "@/lib/season";
 
 /**
  * Catalog: a sticky glass toolbar (search, line, sort, view), faceted filters with live counts in a glass sidebar
  * (a bottom sheet on small screens), and a grid that animates cards to their new spots with GSAP Flip.
  * Every choice is mirrored in the URL so a filtered view can be shared.
  */
-export function CatalogView({ initial }: { initial: CatalogState }) {
+export function CatalogView({ initial, season = null }: { initial: CatalogState; season?: SeasonId | null }) {
   const [s, setS] = useState(initial);
   const gridRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDialogElement>(null);
   const flipState = useRef<Flip.FlipState | null>(null);
 
-  const { searched, matches } = useMemo(() => applyCatalog(s), [s]);
+  // `season` is the visitor's: their in-season styles lead the featured order
+  const { searched, matches } = useMemo(() => applyCatalog(s, season), [s, season]);
   const f = useMemo(() => facets(searched, s), [searched, s]);
   const cards = s.view === "grouped" ? collapse(matches) : matches;
   const filters = activeCount(s);
@@ -154,6 +156,24 @@ export function CatalogView({ initial }: { initial: CatalogState }) {
         </aside>
 
         <section aria-label="Results" className="min-w-0">
+          {/* the visitor's season leads the featured order; one tap narrows to it */}
+          {season && !s.season && s.sort === "featured" && (
+            <div className="bg-season-field mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-card px-4 py-3">
+              <p className="flex items-center gap-2.5 text-[14px] text-ink-2">
+                <Icon name={SEASONS[season].icon} className="size-5! text-season" />
+                <span>
+                  <b className="font-semibold text-ink">{SEASONS[season].name} styles first</b>, picked for this time of year where you are.
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={() => update({ season })}
+                className="inline-flex min-h-11 items-center gap-1.5 text-[14px] font-semibold text-ink hover:text-brand"
+              >
+                Only {SEASONS[season].name.toLowerCase()} styles <Icon name="arrow" className="size-4" />
+              </button>
+            </div>
+          )}
           <div className="mb-4 flex min-h-9 flex-wrap items-center justify-between gap-3">
             <p className="text-[14px] text-ink-2" aria-live="polite">
               {summary}
@@ -200,7 +220,7 @@ export function CatalogView({ initial }: { initial: CatalogState }) {
           <FilterPanel {...panel} showLine />
         </div>
         <div className="flex gap-2 border-t border-white/80 px-5 pt-3 pb-[calc(env(safe-area-inset-bottom)+14px)]">
-          <button type="button" disabled={!filters} onClick={() => update({ line: "all", features: [], cats: [], colors: [] })} className="btn btn-line flex-1">
+          <button type="button" disabled={!filters} onClick={() => update({ line: "all", features: [], cats: [], colors: [], season: null })} className="btn btn-line flex-1">
             Clear all
           </button>
           <button type="button" onClick={() => sheetRef.current?.close()} className="btn btn-dark flex-[1.4]">

@@ -2,22 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
+import { useSeason } from "../season/SeasonContext";
 import { categoryOf, getProduct, inLine, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
+import { SEASONS } from "@/lib/season";
+import { lineFor, seasonPicks } from "@/lib/season-products";
 import { useUI } from "@/lib/store";
 
-/** The styles that take turns in the spotlight, each with the tint of its glow and its swatch on the ring. */
-const SPOT: { slug: string; tint: string }[] = [
-  { slug: "toffee", tint: "#c98b52" },
-  { slug: "lynx", tint: "#b9a38c" },
-  { slug: "nord", tint: "#8a7a6c" },
-  { slug: "frost", tint: "#d9d1c4" },
-  { slug: "lilac", tint: "#c3a6d6" },
-];
+/** How many of the season's styles take turns in the spotlight, each with a glow tint from the season's theme. */
+const SPOT_COUNT = 5;
 
-/** The three ways in, along the bottom. */
+/** The three ways in, along the bottom; each shows its line's best pair for the season. `kinds` is the fallback. */
 const CARDS: { line: ProductLine; slug: string; block: string; kinds: string }[] = [
   { line: "women", slug: "maple", block: "#f6e4e6", kinds: "Ankle, chelsea and tall boots" },
   { line: "men", slug: "nord", block: "#e2eaf2", kinds: "Leather lace-up boots" },
@@ -34,7 +31,7 @@ const AUTOPLAY_MS = 5000;
 const OUT_MS = 650;
 
 /** Swatch positions on the ring's left arc, in degrees from 3 o'clock (negative is up), so the circle picker sits on the left. */
-const ANGLES = SPOT.map((_, i) => -110 - (100 / (SPOT.length - 1)) * i);
+const ANGLES = Array.from({ length: SPOT_COUNT }, (_, i) => -110 - (100 / (SPOT_COUNT - 1)) * i);
 const onRing = (deg: number): CSSProperties => {
   const r = (deg * Math.PI) / 180;
   // rounded here, so the server and the browser print the same string (no hydration mismatch)
@@ -49,7 +46,18 @@ const onRing = (deg: number): CSSProperties => {
  */
 export function HeroSpotlight() {
   const openQuickView = useUI((s) => s.openQuickView);
-  const spots = SPOT.map((s) => ({ ...s, p: getProduct(s.slug) as Product })).filter((s) => s.p);
+  const season = useSeason();
+  const theme = SEASONS[season];
+  // the season's best styles, one per kind, so the spotlight opens on what this visitor's customers buy now
+  const spots = useMemo(() => seasonPicks(season, SPOT_COUNT).map((p, i) => ({ p, slug: p.slug, tint: theme.tints[i % theme.tints.length] })), [season, theme]);
+  const cards = useMemo(
+    () =>
+      CARDS.map((c) => {
+        const best = lineFor(c.line, season);
+        return { ...c, p: best.p ?? (getProduct(c.slug) as Product), kinds: best.kinds ?? c.kinds };
+      }),
+    [season],
+  );
   const [cur, setCur] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [moved, setMoved] = useState(false); // false until the first change: the opening pair is shown, not flown in
@@ -102,11 +110,7 @@ export function HeroSpotlight() {
     <section
       id="hero"
       aria-labelledby="hero-title"
-      className="bleed relative isolate overflow-hidden text-ink"
-      style={{
-        background:
-          "radial-gradient(130% 85% at 90% 20%, rgb(245 235 245 / 0.6) 0%, transparent 60%), radial-gradient(100% 70% at 10% 15%, rgb(254 248 240 / 0.9) 0%, transparent 65%), radial-gradient(85% 65% at 50% 95%, rgb(238 243 248 / 0.7) 0%, transparent 70%), linear-gradient(180deg, #ffffff 0%, #fbf9f6 40%, #f3ede6 100%)",
-      }}
+      className="bleed bg-hero relative isolate overflow-hidden text-ink"
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -149,7 +153,8 @@ export function HeroSpotlight() {
         {/* the promise */}
         <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-10">
           <p data-hero-in="eyebrow" className="eyebrow">
-            FW26 wholesale
+            <Icon name={theme.icon} className="size-4! text-season" />
+            {theme.edit} · wholesale
           </p>
           <h1
             id="hero-title"
@@ -197,7 +202,7 @@ export function HeroSpotlight() {
                 <span className="relative inline-flex size-2 rounded-full bg-brand" />
               </span>
               <span className="text-[12px] font-bold tracking-[0.06em] text-ink uppercase">
-                FW26 · in production now
+                {theme.edit} · in production now
               </span>
             </div>
           </div>
@@ -413,8 +418,8 @@ export function HeroSpotlight() {
       {/* the three ways in with 3D depth and micro-interactions */}
       <nav aria-label="Shop by line" className="wrap relative z-[2] px-(--shell-pad) pt-8 pb-[clamp(20px,4vh,40px)] lg:pl-[clamp(48px,6vw,104px)]">
         <ul className="scrollbar-none flex snap-x gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6">
-          {CARDS.map((c, idx) => {
-            const p = getProduct(c.slug) as Product;
+          {cards.map((c, idx) => {
+            const p = c.p;
             return (
               <li
                 key={c.line}
@@ -423,6 +428,7 @@ export function HeroSpotlight() {
               >
                 <Link
                   href={`/catalog?line=${c.line}`}
+                  data-deco="card"
                   className="group relative flex h-[116px] overflow-hidden rounded-2xl border border-ink/[0.05] bg-tile text-ink shadow-[0_12px_32px_-20px_rgb(18_20_22/.25)] transition-all duration-400 ease-soft hover:-translate-y-2 hover:shadow-[0_24px_48px_-16px_rgb(18_20_22/.32),0_0_0_1px_rgb(152_64_128/.15)] hover:border-brand/25"
                 >
                   <span className="relative block w-[42%] shrink-0 overflow-hidden" style={{ background: c.block }}>

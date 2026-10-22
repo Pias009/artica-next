@@ -4,11 +4,13 @@ import { PageIntro } from "@/components/PageIntro";
 import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { PRIVATE_LABEL_MIN } from "@/lib/products";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Private Label & OEM Manufacturing",
+export const metadata: Metadata = pageMeta({
+  title: "Private label and OEM footwear manufacturing",
   description: "Bespoke footwear development for private-label retailers and brands. MOQ from 600 pairs, custom outsoles, leathers, hardware and packaging.",
-};
+  path: "/private-label",
+});
 
 const CAPABILITIES: {
   title: string;
@@ -144,7 +146,7 @@ export default function PrivateLabelPage() {
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Private label" }]}
         eyebrow="OEM & Custom Footwear Atelier"
-        title="Your brand. Our precision footwear engineering."
+        title="Private label footwear: your brand, our engineering."
         text="Turnkey private-label and OEM footwear manufacturing for retailers, apparel brands, and department store programs worldwide."
       />
 

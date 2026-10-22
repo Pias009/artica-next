@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { AddButton } from "../product/AddButton";
+import { useSeason } from "../season/SeasonContext";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
+import type { SeasonId } from "@/lib/season";
+import { inSeason, seasonPicks } from "@/lib/season-products";
 import { useUI } from "@/lib/store";
 import { offTilt, onTilt } from "@/lib/tilt";
 
@@ -15,13 +18,20 @@ import { offTilt, onTilt } from "@/lib/tilt";
  * "Top reorder" / "Trending" tags; reorder the slugs from real sales data).
  */
 const HOT = ["nord", "mira", "mira-tall", "ember", "maple", "cedar", "raven", "sable"];
-const ITEMS = HOT.map(getProduct).filter((p): p is Product => !!p);
-const MID = (ITEMS.length - 1) / 2;
+const DECK_SIZE = HOT.length;
 
-/** Up to eight fit as a still grid; past that the list splits into two layers that drift in opposite directions. */
-const HALF = Math.ceil(ITEMS.length / 2);
-const MOVING = HALF > 4;
-const ROWS = MOVING ? [ITEMS.slice(0, HALF), ITEMS.slice(HALF)] : [];
+/**
+ * The deck for a season: its in-season styles first (best first), topped up from the reorder list. Up to eight fit as
+ * a still grid; past that the list splits into two layers that drift in opposite directions.
+ */
+function deck(season: SeasonId) {
+  const hot = HOT.map(getProduct).filter((p): p is Product => !!p);
+  const fresh = seasonPicks(season, DECK_SIZE).filter((p) => inSeason(p, season));
+  const ITEMS = [...fresh, ...hot.filter((p) => !fresh.includes(p))].slice(0, DECK_SIZE);
+  const HALF = Math.ceil(ITEMS.length / 2);
+  const MOVING = HALF > 4;
+  return { ITEMS, MID: (ITEMS.length - 1) / 2, HALF, MOVING, ROWS: MOVING ? [ITEMS.slice(0, HALF), ITEMS.slice(HALF)] : [] };
+}
 
 /**
  * Hot products as a deck that deals itself out. On desktop the section holds in place while the cards, stacked and
@@ -33,6 +43,8 @@ const ROWS = MOVING ? [ITEMS.slice(0, HALF), ITEMS.slice(HALF)] : [];
  */
 export function HotProducts() {
   const openQuickView = useUI((s) => s.openQuickView);
+  const season = useSeason();
+  const { ITEMS, MID, HALF, MOVING, ROWS } = useMemo(() => deck(season), [season]);
   const ref = useRef<HTMLElement>(null);
   const grid = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
@@ -200,6 +212,7 @@ function Card({ p, rank, onView }: { p: Product; rank: number; onView: () => voi
       <div
         onPointerMove={onTilt}
         onPointerLeave={offTilt}
+        data-deco="card"
         className="glass relative aspect-[4/5] overflow-hidden rounded-[24px] transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(.22,1,.36,1)] [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] group-hover:shadow-[0_34px_50px_-30px_rgb(18_20_22/.5)] group-hover:duration-150 lg:aspect-square"
         style={{ backgroundImage: `radial-gradient(80% 65% at 50% 58%, ${tint}40, ${tint}10 75%)` }}
       >

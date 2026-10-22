@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import { Badge } from "../ui/Badge";
-import { QuickViewButton } from "../ui/QuickViewButton";
+import { QuickViewLink } from "../ui/QuickViewLink";
 import { AddButton } from "./AddButton";
 import { GroupAddButton } from "./ColorChooser";
 import { categoryOf, groupOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
@@ -10,7 +10,8 @@ const DOTS = 4;
 
 /**
  * Catalogue card for a category (or a single style): the photo does the work. Hover swaps to the zip-side view, or to the
- * category's next style; the whole card opens Quick View (Enter on the name button).
+ * category's next style; the whole card opens Quick View (Enter on the name link), while its href takes crawlers and
+ * new-tab clicks to the product page.
  * `variant="glass"` sets the card on a frosted pane; `single` always shows the one style, never its category.
  */
 export function ProductCard({
@@ -43,6 +44,7 @@ export function ProductCard({
       )}
     >
       <div
+        data-deco="card"
         className={clsx(
           "relative aspect-[4/5] overflow-hidden",
           glass ? "rounded-[18px] bg-[radial-gradient(80%_70%_at_50%_45%,rgb(255_255_255/0.95),rgb(255_255_255/0.35))]" : "rounded-card bg-tile",
@@ -83,12 +85,14 @@ export function ProductCard({
 
       <div className={clsx("mt-4 flex items-start justify-between gap-3", glass && "px-2")}>
         <h3 className="text-[16px] font-semibold tracking-[-0.01em]">
-          <QuickViewButton
+          <QuickViewLink
             id={p.id}
+            slug={p.slug}
+            aria-haspopup="dialog"
             className={clsx("text-left after:absolute after:inset-0 after:z-[1]", glass ? "after:rounded-[24px]" : "after:rounded-card")}
           >
             {many ? categoryOf(p) : `Chime Long ${p.name}`}
-          </QuickViewButton>
+          </QuickViewLink>
         </h3>
         <span className="mt-1.5 flex flex-none items-center -space-x-1" title={(many ? group : [p]).map((x) => `${x.name} (${x.color.name})`).join(", ")}>
           {(many ? group : [p]).slice(0, DOTS).map((x) => (

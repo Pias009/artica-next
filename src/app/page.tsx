@@ -1,58 +1,13 @@
-import { BestSellers } from "@/components/home/BestSellers";
-import { BuyerTypes } from "@/components/home/BuyerTypes";
-import { EditorialCampaignBanner } from "@/components/home/EditorialCampaignBanner";
-import { GlobalReach } from "@/components/home/GlobalReach";
-import { HeroSpotlight } from "@/components/home/HeroSpotlight";
-import { HomeReveal } from "@/components/home/HomeReveal";
-import { HotProducts } from "@/components/home/HotProducts";
-import { HowItShips } from "@/components/home/HowItShips";
-import { LineSheetCta } from "@/components/home/LineSheetCta";
-import { LookbookFittingBanner } from "@/components/home/LookbookFittingBanner";
-import { NewArrivals } from "@/components/home/NewArrivals";
-import { OrderJourney } from "@/components/home/OrderJourney";
-import { OrderSheet } from "@/components/home/OrderSheet";
-import { PrivateLabel } from "@/components/home/PrivateLabel";
-import { RetailMerchandisingBanner } from "@/components/home/RetailMerchandisingBanner";
-import { SampleRequest } from "@/components/home/SampleRequest";
-import { UpClose } from "@/components/home/UpClose";
 import type { Metadata } from "next";
+import { HomePage } from "@/components/home/HomePage";
+import { DEFAULT_SEASON } from "@/lib/season";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
- * A wholesale buyer's path, in chapters: what sells (hot, new), the brand (the campaign), the whole range and how it's
- * made (by line, up close, on foot), who it's for (buyer programs, in the window), ordering it (samples, the order
- * sheet), getting it (packing, trade lanes, the timeline), then the partnership and the close (private label, line
- * sheet). The three photography sections sit apart so the page alternates product, image and process.
+ * The home page without a known season. proxy.ts normally serves "/" from /season/[season] instead; this copy is what
+ * shows wherever the proxy doesn't run.
  */
 export default function Home() {
-  return (
-    <>
-      {/* the colour field the glass surfaces sit on (home page only) */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-aurora" />
-      <HeroSpotlight />
-      {/* what sells */}
-      <HotProducts />
-      <NewArrivals />
-      <EditorialCampaignBanner />
-      {/* the range, and how it's made */}
-      <BestSellers />
-      <UpClose />
-      <LookbookFittingBanner />
-      {/* who it's for */}
-      <BuyerTypes />
-      <RetailMerchandisingBanner />
-      {/* ordering it */}
-      <SampleRequest />
-      <OrderSheet />
-      {/* getting it */}
-      <HowItShips />
-      <GlobalReach />
-      <OrderJourney />
-      {/* the partnership, and the close */}
-      <PrivateLabel />
-      <LineSheetCta />
-      <HomeReveal />
-    </>
-  );
+  return <HomePage season={DEFAULT_SEASON} />;
 }

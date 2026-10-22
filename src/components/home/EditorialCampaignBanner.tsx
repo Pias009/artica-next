@@ -27,7 +27,8 @@ export function EditorialCampaignBanner() {
         const frame = "[data-campaign]";
         gsap
           .timeline({ scrollTrigger: { trigger: frame, start: "top bottom", end: "top 12%", scrub: 1.2 } })
-          .fromTo(frame, { clipPath: "inset(9% 11% 9% 11% round 40px)" }, { clipPath: "inset(0% 0% 0% 0% round 28px)", ease: "power2.out" }, 0)
+          // the frame grows to full size (a transform: the GPU moves it without repainting the photo)
+          .fromTo(frame, { scale: 0.8 }, { scale: 1, ease: "power2.out" }, 0)
           .fromTo("[data-campaign-img]", { scale: 1.28 }, { scale: 1.06, ease: "power2.out" }, 0)
           .from("[data-chip]", { y: 40, autoAlpha: 0, stagger: 0.15, ease: "power3.out" }, 0.45);
         gsap.fromTo(

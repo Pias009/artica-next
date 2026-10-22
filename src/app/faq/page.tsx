@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
+import { JsonLd } from "@/components/JsonLd";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { MOQ_CASES, MOQ_PAIRS, PACK, PRIVATE_LABEL_MIN } from "@/lib/products";
+import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Wholesale Buyer FAQ & Trade Terms",
-  description: "Frequently asked questions for wholesale footwear retail buyers, department stores, and private label brands. MOQs, terms, samples, and shipping.",
-};
+export const metadata: Metadata = pageMeta({
+  title: "Wholesale footwear FAQ: MOQ, samples, payment",
+  description: `Answers for wholesale footwear buyers: ${MOQ_PAIRS}-pair MOQ, samples, payment terms, Net 30, letters of credit, DDP and FOB shipping, and defects.`,
+  path: "/faq",
+});
 
 const CATEGORIES = [
   {
@@ -80,9 +83,17 @@ const CATEGORIES = [
   },
 ];
 
+/** The same questions and answers as the page, for search and AI answer engines. */
+const FAQ_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: CATEGORIES.flatMap((c) => c.faqs).map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+};
+
 export default function FaqPage() {
   return (
     <>
+      <JsonLd data={FAQ_SCHEMA} />
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Buyer FAQ" }]}
         eyebrow="Commercial Knowledge Base & FAQs"
