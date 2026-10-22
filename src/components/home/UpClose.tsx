@@ -204,7 +204,7 @@ export function UpClose() {
           {/* LEFT: Interactive Step Cards */}
           <div className="flex flex-col justify-center">
             {/* Progress Bar */}
-            <div className="mb-4 flex items-center justify-between text-[11px] font-bold tracking-wider uppercase text-muted">
+            <div className="mb-4 flex items-center justify-between text-[12px] font-bold tracking-wider uppercase text-muted">
               <span>The details</span>
               <span className="text-brand tabular-nums">
                 {activeStep === null ? "Full view" : `${activeStep + 1} / ${STEPS.length}`}
@@ -237,7 +237,7 @@ export function UpClose() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <span
-                          className={`flex size-6 items-center justify-center rounded-full text-[11px] font-bold transition-all ${
+                          className={`flex size-6 items-center justify-center rounded-full text-[12px] font-bold transition-all ${
                             isActive
                               ? "bg-brand text-white shadow-xs scale-105"
                               : "bg-ink/8 text-ink-2 group-hover:bg-ink/15"
@@ -254,7 +254,7 @@ export function UpClose() {
                         </h3>
                       </div>
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase transition-colors ${
+                        className={`rounded-md px-2 py-0.5 text-[12px] font-bold tracking-wider uppercase transition-colors ${
                           isActive ? "bg-brand/15 text-brand" : "bg-ink/6 text-muted"
                         }`}
                       >
@@ -277,7 +277,7 @@ export function UpClose() {
                           <Icon name={s.icon} className="size-3.5" />
                           {s.spec}
                         </span>
-                        <span className="text-[11px] text-muted">· {s.benefit}</span>
+                        <span className="text-[12px] text-muted">· {s.benefit}</span>
                       </div>
                     </div>
 
@@ -303,8 +303,11 @@ export function UpClose() {
                 <Icon name="search" className="size-3.5" />
                 <span>See all Nord specs</span>
               </QuickViewButton>
-              <OpenInquiryButton className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 text-[12.5px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(152,64,128,0.5)] transition-all hover:bg-brand-deep hover:shadow-md active:scale-98">
-                <span>Request sample pair</span>
+              <OpenInquiryButton
+                note={`Sample request: Chime Long ${P.name}, one pair, mid-run size.`}
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-white transition-colors hover:bg-brand active:scale-98"
+              >
+                <span>Order a sample pair</span>
                 <Icon name="arrow" className="size-3.5" />
               </OpenInquiryButton>
             </div>
@@ -339,7 +342,7 @@ export function UpClose() {
                     type="button"
                     onClick={() => setViewAngle("outer")}
                     aria-pressed={viewAngle === "outer"}
-                    className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wide transition-all ${
+                    className={`rounded-full px-3 py-1 text-[12px] font-bold tracking-wide transition-all ${
                       viewAngle === "outer"
                         ? "bg-ink text-white shadow-xs"
                         : "text-ink-2 hover:text-ink"
@@ -355,7 +358,7 @@ export function UpClose() {
                       resetToOverview();
                     }}
                     aria-pressed={viewAngle === "zip"}
-                    className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wide transition-all ${
+                    className={`rounded-full px-3 py-1 text-[12px] font-bold tracking-wide transition-all ${
                       viewAngle === "zip"
                         ? "bg-ink text-white shadow-xs"
                         : "text-ink-2 hover:text-ink"
@@ -387,7 +390,7 @@ export function UpClose() {
                   <button
                     type="button"
                     onClick={resetToOverview}
-                    className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 px-2.5 py-1.5 text-[11px] font-semibold text-ink-2 shadow-soft backdrop-blur-md transition-all hover:bg-white hover:text-ink hover:shadow-xs"
+                    className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 px-2.5 py-1.5 text-[12px] font-semibold text-ink-2 shadow-soft backdrop-blur-md transition-all hover:bg-white hover:text-ink hover:shadow-xs"
                     title="Reset to full view"
                   >
                     <span>1× Overview</span>
@@ -452,7 +455,7 @@ export function UpClose() {
 
                             {/* name tag, kept on the inner side of hotspots near an edge */}
                             <span
-                              className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[10.5px] font-bold shadow-soft transition-all duration-200 ${s.x > 62 ? "right-0" : s.x < 38 ? "left-0" : "left-1/2 -translate-x-1/2"} ${
+                              className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[12px] font-bold shadow-soft transition-all duration-200 ${s.x > 62 ? "right-0" : s.x < 38 ? "left-0" : "left-1/2 -translate-x-1/2"} ${
                                 isSelected
                                   ? "bg-brand text-white opacity-100 -translate-y-1"
                                   : "bg-ink/90 text-white opacity-0 group-hover:opacity-100 group-hover:-translate-y-1"
@@ -516,7 +519,7 @@ export function UpClose() {
                   </span>
                 </div>
 
-                <div className="pointer-events-auto rounded-full border border-ink/8 bg-white/80 px-3 py-1 text-[11px] font-bold text-ink-2 shadow-xs backdrop-blur-md">
+                <div className="pointer-events-auto rounded-full border border-ink/8 bg-white/80 px-3 py-1 text-[12px] font-bold text-ink-2 shadow-xs backdrop-blur-md">
                   Rated −25°C
                 </div>
               </div>
@@ -531,7 +534,7 @@ export function UpClose() {
                     type="button"
                     onClick={() => focusStep(i)}
                     aria-pressed={activeStep === i}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                    className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-all ${
                       activeStep === i
                         ? "bg-brand text-white shadow-xs"
                         : "bg-white/80 text-ink-2 hover:bg-white hover:text-ink"
@@ -542,7 +545,7 @@ export function UpClose() {
                 ))}
               </div>
 
-              <span className="text-[11px] font-medium text-muted">
+              <span className="text-[12px] font-medium text-muted">
                 Move cursor over boot to inspect
               </span>
             </div>

@@ -713,14 +713,14 @@ main:has(> #hero) {
 }
 
 /*
- * Home page: the parts the scroll animations move (the hot deck's cards, the hero copy, the headings) start hidden
+ * Home page: the parts the scroll animations move (the hot deck's cards, the section headings) start hidden
  * until those animations have set them in their starting state (HomeReveal then marks <html data-motion-ready>), so
  * nothing is drawn in its final place first and then jumps. If script never runs they show after 3s anyway.
  */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion-ready])
     main:has(> #hero)
-    :is([data-hero-in], #hero-title, section h2.type-section, section .eyebrow, #hot [data-deal]) {
+    :is(section:not(#hero) h2.type-section, section:not(#hero) .eyebrow, #hot [data-deal]) {
     visibility: hidden;
     animation: motion-fallback 0s 3s forwards;
   }

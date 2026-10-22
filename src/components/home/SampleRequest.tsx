@@ -152,7 +152,7 @@ export function SampleRequest() {
             </li>
           </ul>
           <button type="button" onClick={request} disabled={!picked.length} className="btn btn-dark mt-8">
-            Request {picked.length || ""} sample{picked.length === 1 ? "" : "s"} <Icon name="arrow" className="size-4" />
+            Order {picked.length || ""} sample{picked.length === 1 ? "" : "s"} <Icon name="arrow" className="size-4" />
           </button>
         </div>
       </div>

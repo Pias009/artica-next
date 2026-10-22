@@ -123,7 +123,7 @@ export function LineSheetCta() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@yourstore.com"
+              placeholder="Work email"
               className="h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
             />
             <button type="submit" className="btn btn-dark group/s">
@@ -216,7 +216,7 @@ export function LineSheetCta() {
                         </span>
                       </span>
                     </span>
-                    <span className="w-16 text-right text-[12px] text-ink-2 tabular-nums max-sm:hidden">
+                    <span className="w-16 text-right text-[12px] whitespace-nowrap text-ink-2 tabular-nums max-sm:hidden">
                       {p.sizes.replace(/^US\s*/, "")}
                     </span>
                     <span className="w-14 text-right text-[12px] font-semibold tabular-nums">

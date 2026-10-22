@@ -207,7 +207,7 @@ function Card({ p, rank, onView }: { p: Product; rank: number; onView: () => voi
           {String(rank).padStart(2, "0")}
         </span>
         {p.badge && p.badge !== "New" && (
-          <span className="absolute top-4 right-4 z-[1] rounded-full bg-white/85 px-2.5 py-0.5 text-[11px] font-semibold text-brand sm:top-5 sm:right-5">
+          <span className="absolute top-4 right-4 z-[1] rounded-full bg-white/85 px-2.5 py-0.5 text-[12px] font-semibold text-brand sm:top-5 sm:right-5">
             {p.badge}
           </span>
         )}

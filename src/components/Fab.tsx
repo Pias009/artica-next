@@ -5,26 +5,48 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CartCount } from "./CartCount";
 import { Icon } from "./Icon";
-import { useUI } from "@/lib/store";
+import { useInquiry, useUI } from "@/lib/store";
 
-/** Floating inquiry button: appears once the hero (or the top of the page) scrolls away. */
+/**
+ * Floating inquiry button: appears once the hero (or the top of the page) scrolls away. Once styles are on the list
+ * it says what it will do with them ("Get pricing"), a quiet reminder of the list the buyer has already built.
+ */
 export function Fab() {
   const [visible, setVisible] = useState(false);
   const openDrawer = useUI((s) => s.openDrawer);
   const drawerOpen = useUI((s) => s.drawerOpen);
+  const listed = useInquiry((s) => s.lines.length) > 0;
   const pathname = usePathname();
 
+  // Shown once the page's opening (the hero, or the first 280px) is behind you, and tucked away again over the footer,
+  // which has its own contact details and would otherwise sit under the button.
   useEffect(() => {
     const hero = document.getElementById("hero");
-    if (hero) {
-      const io = new IntersectionObserver(([e]) => setVisible(!e.isIntersecting));
-      io.observe(hero);
-      return () => io.disconnect();
+    const footer = document.getElementById("footer");
+    let pastTop = false;
+    let atFooter = false;
+    const sync = () => setVisible(pastTop && !atFooter);
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.target === hero) pastTop = !e.isIntersecting;
+        if (e.target === footer) atFooter = e.isIntersecting;
+      }
+      sync();
+    });
+    if (hero) io.observe(hero);
+    if (footer) io.observe(footer);
+    const onScroll = () => {
+      pastTop = window.scrollY > 280;
+      sync();
+    };
+    if (!hero) {
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
     }
-    const onScroll = () => setVisible(window.scrollY > 280);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [pathname]);
 
   if (pathname === "/inquiry") return null;
@@ -41,7 +63,7 @@ export function Fab() {
       )}
     >
       <Icon name="list" />
-      Inquiry
+      {listed ? "Get pricing" : "Inquiry"}
       <CartCount />
     </button>
   );

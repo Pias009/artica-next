@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
-import { OpenInquiryButton } from "../OpenInquiryButton";
+import { useUI } from "@/lib/store";
 /** The map is centred on the Pacific, so every lane runs the way the ships do (west through Suez, east to the Americas). */
 const CENTER_LON = 160;
 const at = (lon: number, lat: number) => ({ x: (((lon - CENTER_LON + 540) % 360) / 360) * 1000, y: ((90 - lat) / 180) * 500 });
@@ -38,6 +38,7 @@ export function GlobalReach() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduced = useReducedMotion();
+  const openDrawer = useUI((s) => s.openDrawer);
   const still = paused || reduced;
 
   useEffect(() => {
@@ -52,8 +53,8 @@ export function GlobalReach() {
     <section id="worldwide" aria-labelledby="h-worldwide" className="mt-sec scroll-mt-24">
       <div className="mb-8 md:mb-10">
         <p className="eyebrow">Worldwide</p>
-        <h2 id="h-worldwide" className="type-section mt-3 max-w-[18ch]">
-          From our factory to <em>your shelves</em>, anywhere.
+        <h2 id="h-worldwide" className="type-section mt-3 max-w-[20ch]">
+          From our factory to <em>your shelves, anywhere.</em>
         </h2>
         <p className="mt-3 max-w-[52ch] text-[17px] text-ink-2">Every order ships from Guangzhou, DDP, FOB or EXW, door-to-door or to your port.</p>
       </div>
@@ -125,7 +126,7 @@ export function GlobalReach() {
 
             {/* labels, in HTML so they stay crisp and readable */}
             <span
-              className="pointer-events-none absolute -translate-x-1/2 translate-y-2.5 rounded-full bg-ink px-2.5 py-1 text-[10.5px] font-bold tracking-[0.1em] whitespace-nowrap text-white uppercase max-sm:hidden"
+              className="pointer-events-none absolute -translate-x-1/2 translate-y-2.5 rounded-full bg-ink px-2.5 py-1 text-[12px] font-bold tracking-[0.1em] whitespace-nowrap text-white uppercase max-sm:hidden"
               style={pos(ORIGIN)}
             >
               Guangzhou · factory
@@ -183,10 +184,14 @@ export function GlobalReach() {
                 );
               })}
             </ul>
-            <OpenInquiryButton className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-[13px] font-semibold text-white transition-colors hover:bg-brand">
-              Quote my lane <Icon name="arrow" className="size-3.5" />
-            </OpenInquiryButton>
-            <p className="mt-2.5 text-center text-[11.5px] text-muted">Indicative ocean transit. Confirmed on every quote.</p>
+            <button
+              type="button"
+              onClick={() => openDrawer(undefined, undefined, `Shipping lane: Guangzhou to ${lane.port} (${lane.region}).`)}
+              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-[13px] font-semibold text-white transition-colors hover:bg-brand"
+            >
+              Get pricing to {lane.port} <Icon name="arrow" className="size-3.5" />
+            </button>
+            <p className="mt-2.5 text-center text-[12px] text-muted">Indicative ocean transit. Confirmed on every quote.</p>
           </div>
         </div>
       </div>

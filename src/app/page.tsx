@@ -15,6 +15,9 @@ import { PrivateLabel } from "@/components/home/PrivateLabel";
 import { RetailMerchandisingBanner } from "@/components/home/RetailMerchandisingBanner";
 import { SampleRequest } from "@/components/home/SampleRequest";
 import { UpClose } from "@/components/home/UpClose";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /**
  * A wholesale buyer's path, in chapters: what sells (hot, new), the brand (the campaign), the whole range and how it's

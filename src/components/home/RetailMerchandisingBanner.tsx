@@ -122,7 +122,7 @@ export function RetailMerchandisingBanner() {
                     />
                     <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/50 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
                     <span className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-2 text-white">
-                      <span className="truncate text-[11px] font-semibold tracking-[0.12em] uppercase sm:text-[11.5px]">
+                      <span className="truncate text-[12px] font-semibold tracking-[0.12em] uppercase sm:text-[11.5px]">
                         {/* phones keep just the category ("Tall boots"); the line shows from sm up */}
                         <span className="max-sm:hidden">{l.label.split(" · ")[0]} · </span>
                         {l.label.split(" · ")[1]}

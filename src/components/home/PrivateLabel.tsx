@@ -87,7 +87,7 @@ export function PrivateLabel() {
               className="btn btn-dark"
               onClick={() => openDrawer("Private label brand", undefined, typed ? `Private label brand name: ${brand.trim()}` : undefined)}
             >
-              {typed ? `Start the ${brand.trim()} brief` : "Start a private-label brief"}
+              {typed ? `Get pricing for ${brand.trim()}` : "Get private-label pricing"}
               <Icon name="arrow" className="size-4" />
             </button>
             <Link href="/private-label">

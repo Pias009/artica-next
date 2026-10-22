@@ -13,6 +13,8 @@ export const COMPANY = {
     logistics: "logistics@articafootwear.com",
   },
   phone: "+1 (800) 412-8820",
+  /** WhatsApp in international format, digits only (e.g. "8613800000000"). Empty hides every WhatsApp option. */
+  whatsapp: "",
   hours: "Mon–Fri 9:00–18:00 EST",
 };
 
@@ -20,3 +22,7 @@ export const COMPANY = {
 export const SOCIAL: { icon: IconName; label: string; href: string }[] = [];
 
 export const tel = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+
+/** A WhatsApp chat with the trade desk, with an opening line written for the buyer. Null until a number is set. */
+export const whatsappLink = (text = "Hello, I'd like wholesale pricing for Chime Long footwear.") =>
+  COMPANY.whatsapp ? `https://wa.me/${COMPANY.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(text)}` : null;

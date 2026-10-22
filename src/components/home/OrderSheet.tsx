@@ -61,7 +61,7 @@ export function OrderSheet() {
               Add styles
             </a>
             <button type="button" onClick={() => openDrawer()} className="btn btn-dark">
-              Send this order sheet <Icon name="arrow" className="size-4" />
+              Get pricing for this sheet <Icon name="arrow" className="size-4" />
             </button>
           </div>
         }

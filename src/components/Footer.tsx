@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
-import { COMPANY, SOCIAL, tel } from "@/lib/company";
+import { COMPANY, SOCIAL, tel, whatsappLink } from "@/lib/company";
 
 const COLS: { title: string; links: [string, string][] }[] = [
   {
@@ -88,6 +88,14 @@ export function Footer() {
                     {COMPANY.email.general}
                   </a>
                 </li>
+                {whatsappLink() && (
+                  <li>
+                    <a href={whatsappLink()!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 transition-colors hover:text-ink">
+                      <Icon name="whatsapp" className="size-4 flex-none text-muted" />
+                      WhatsApp
+                    </a>
+                  </li>
+                )}
                 <li className="flex items-center gap-2.5">
                   <Icon name="clock" className="size-4 flex-none text-muted" />
                   {COMPANY.hours}

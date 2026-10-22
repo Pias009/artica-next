@@ -52,6 +52,7 @@ export function HeroSpotlight() {
   const spots = SPOT.map((s) => ({ ...s, p: getProduct(s.slug) as Product })).filter((s) => s.p);
   const [cur, setCur] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
+  const [moved, setMoved] = useState(false); // false until the first change: the opening pair is shown, not flown in
   const [paused, setPaused] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const reduced = useReducedMotion();
@@ -63,6 +64,7 @@ export function HeroSpotlight() {
       const n = (next + spots.length) % spots.length;
       if (n === curRef.current) return;
       setPrev(curRef.current);
+      setMoved(true);
       curRef.current = n;
       setCur(n);
       clearTimeout(outTimer.current);
@@ -166,6 +168,12 @@ export function HeroSpotlight() {
               See what&rsquo;s hot
             </a>
           </div>
+          {/* what asking costs: nothing. Said once, plainly, beside the first ask */}
+          <p data-hero-in="copy" className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted max-lg:justify-center">
+            <Icon name="check" className="size-3.5 text-brand" /> Free quote, no payment
+            <span aria-hidden="true" className="text-ink/20">·</span> Reply within 24 hours
+            <span aria-hidden="true" className="text-ink/20">·</span> From {MOQ_PAIRS} pairs per style
+          </p>
         </div>
 
         {/* the stage with spatial mouse tilt */}
@@ -188,7 +196,7 @@ export function HeroSpotlight() {
                 <span className="absolute inline-flex size-full rounded-full bg-brand/60 opacity-75 animate-ping" />
                 <span className="relative inline-flex size-2 rounded-full bg-brand" />
               </span>
-              <span className="text-[11px] font-bold tracking-[0.06em] text-ink uppercase">
+              <span className="text-[12px] font-bold tracking-[0.06em] text-ink uppercase">
                 FW26 · in production now
               </span>
             </div>
@@ -281,7 +289,7 @@ export function HeroSpotlight() {
                         <Image src={x.p.outer.src} alt="" fill sizes="48px" className="-scale-x-100 object-contain drop-shadow-[0_2px_4px_rgb(0_0_0/.2)]" />
                       </span>
                       {/* Name tooltip */}
-                      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-ink/90 backdrop-blur-md px-2 py-0.5 text-[10.5px] font-semibold text-white whitespace-nowrap opacity-0 shadow-soft transition-all duration-200 group-hover:opacity-100 group-hover:-translate-y-1">
+                      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-ink/90 backdrop-blur-md px-2 py-0.5 text-[12px] font-semibold text-white whitespace-nowrap opacity-0 shadow-soft transition-all duration-200 group-hover:opacity-100 group-hover:-translate-y-1">
                         {x.p.name}
                       </span>
                     </button>
@@ -316,7 +324,8 @@ export function HeroSpotlight() {
                   p={s.p}
                   preload={cur === 0}
                   shadowOffset={tilt}
-                  className={reduced ? "rotate-[6deg]" : "[animation:spot-in_900ms_cubic-bezier(.22,1,.36,1)_both]"}
+                  // the first pair is on screen from the first paint (it is the page's largest paint); later pairs fly in
+                  className={reduced || !moved ? "rotate-[6deg]" : "[animation:spot-in_900ms_cubic-bezier(.22,1,.36,1)_both]"}
                 />
               </div>
             </div>
@@ -340,7 +349,7 @@ export function HeroSpotlight() {
             >
               <div className="flex flex-col text-left">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold tracking-[0.16em] text-muted uppercase">0{cur + 1}/0{spots.length}</span>
+                  <span className="text-[12px] font-bold tracking-[0.16em] text-muted uppercase">0{cur + 1}/0{spots.length}</span>
                   <span className="size-1 rounded-full bg-ink/20" />
                   <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase animate-rise-in">{s.p.name}</span>
                 </div>
@@ -369,7 +378,7 @@ export function HeroSpotlight() {
               <button
                 type="button"
                 onClick={() => openQuickView(s.p.id)}
-                className="group/btn pointer-events-auto relative overflow-hidden inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[11px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
+                className="group/btn pointer-events-auto relative overflow-hidden inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[12px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
               >
                 <span
                   aria-hidden="true"
@@ -433,7 +442,7 @@ export function HeroSpotlight() {
                     </span>
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center px-4">
-                    <span className="text-[17px] font-bold tracking-[0.04em] uppercase transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
+                    <span className="font-headline text-[20px] leading-tight font-semibold transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
                     <span className="mt-0.5 truncate text-[12.5px] text-muted">{c.kinds}</span>
                     <span className="mt-2 flex items-center justify-between text-[12.5px] font-semibold">
                       <span>

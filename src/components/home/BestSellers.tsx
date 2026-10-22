@@ -285,9 +285,10 @@ function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) 
   return (
     <section ref={row} aria-labelledby={`row-${line}`}>
       <div data-row-head className="mb-5 flex items-end justify-between gap-4">
-        <h3 id={`row-${line}`} className="text-[clamp(24px,2.4vw,32px)] leading-none font-semibold tracking-[-0.03em]">
+        <h3 id={`row-${line}`} className="min-w-0 font-headline text-[clamp(26px,2.4vw,34px)] leading-none font-semibold tracking-[-0.015em]">
           {label}
-          <span className="ml-2.5 text-[15px] font-normal tracking-normal text-muted">
+          {/* the count sits beside the line name on wide screens and under it on phones, never broken mid-phrase */}
+          <span className="mt-1.5 block font-sans text-[14px] font-normal tracking-normal whitespace-nowrap text-muted sm:mt-0 sm:ml-2.5 sm:inline sm:text-[15px]">
             {inLine(line).length} styles · {styles.length} {styles.length > 1 ? "categories" : "category"}
           </span>
         </h3>

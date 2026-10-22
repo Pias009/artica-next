@@ -41,7 +41,8 @@ export function HomeReveal() {
       };
       const rise = { yPercent: 125, rotate: 5, duration: 1.45, ease: EASE, stagger: 0.09 };
 
-      // the hero: eyebrow, headline, line, actions; replays whenever you come back up to it
+      // the hero: eyebrow, headline, line, actions. It is the first thing on screen, so it paints at once, finished
+      // (no hold, nothing to wait for); the entrance only plays when you scroll back up to it.
       const hero = $("#hero");
       const title = $("#hero-title");
       if (hero && title)
@@ -50,7 +51,8 @@ export function HomeReveal() {
           .from(hero.querySelectorAll('[data-hero-in="eyebrow"]'), { x: -32, autoAlpha: 0, duration: 1.1, ease: "power3.out" }, 0)
           .from(words(title), { ...rise, stagger: 0.075 }, 0.1)
           .from(hero.querySelectorAll('[data-hero-in="copy"]'), { y: 18, autoAlpha: 0, duration: 1.2, ease: "power3.out" }, 0.5)
-          .from(hero.querySelectorAll('[data-hero-in="cta"] > *'), { y: 22, autoAlpha: 0, duration: 1.1, ease: EASE, stagger: 0.12 }, 0.65);
+          .from(hero.querySelectorAll('[data-hero-in="cta"] > *'), { y: 22, autoAlpha: 0, duration: 1.1, ease: EASE, stagger: 0.12 }, 0.65)
+          .progress(1);
 
       // every section heading
       for (const h2 of $$("section h2.type-section")) {

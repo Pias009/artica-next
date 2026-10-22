@@ -7,6 +7,7 @@ import { InquiryDrawer } from "@/components/inquiry/InquiryDrawer";
 import { QuickView } from "@/components/product/QuickView";
 import { StoreHydrator } from "@/components/StoreHydrator";
 import { Toast } from "@/components/Toast";
+import { COMPANY, SOCIAL } from "@/lib/company";
 import "./globals.css";
 
 /*
@@ -28,14 +29,48 @@ const serif = Source_Serif_4({
   axes: ["opsz"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+const DESCRIPTION =
+  "Factory-direct wholesale footwear from Guangzhou: boots, sneakers and sandals for retailers, distributors and private-label brands worldwide. From 300 pairs per style, samples in 10 days.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "Guangzhou Chime Long Trading Co., Ltd", template: "%s · Chime Long" },
-  description: "Wholesale footwear for retailers, distributors and private-label brands worldwide.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Chime Long · Wholesale footwear, factory-direct", template: "%s · Chime Long" },
+  description: DESCRIPTION,
+  applicationName: "Chime Long",
+  keywords: ["wholesale footwear", "wholesale boots", "shoe manufacturer", "factory-direct shoes", "private label footwear", "OEM footwear", "Guangzhou"],
+  // the share image is the opengraph-image file beside this layout; these are the words that go with it
+  openGraph: {
+    type: "website",
+    siteName: "Chime Long",
+    title: "Chime Long · Wholesale footwear, factory-direct",
+    description: DESCRIPTION,
+    locale: "en_US",
+  },
+  twitter: { card: "summary_large_image", title: "Chime Long · Wholesale footwear, factory-direct", description: DESCRIPTION },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
   themeColor: "#FFFFFF",
+};
+
+/**
+ * Who we are, for search engines. Email and phone stay out until company.ts holds the real ones (they're placeholders);
+ * social profiles join through SOCIAL as soon as they exist.
+ */
+const ORGANIZATION = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: COMPANY.name,
+  alternateName: "Chime Long",
+  url: SITE_URL,
+  logo: `${SITE_URL}/images/chime-long-logo.png`,
+  description: DESCRIPTION,
+  address: { "@type": "PostalAddress", addressLocality: "Guangzhou", addressCountry: "CN" },
+  areaServed: "Worldwide",
+  ...(SOCIAL.length ? { sameAs: SOCIAL.map((s) => s.href) } : {}),
 };
 
 // Design direction contract, kept in the rendered HTML for design reviews.
@@ -53,6 +88,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} ${serif.variable}`} data-scroll-behavior="smooth">
       <body className="bg-white font-sans text-ink antialiased">
         <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION) }} />
         <StoreHydrator />
         <div id="page" className="min-h-screen w-full overflow-x-clip [--shell-pad:clamp(16px,3.2vw,48px)]">
           <Header />
