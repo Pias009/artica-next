@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { Fab } from "@/components/Fab";
 import { SeasonPreview } from "@/components/season/SeasonPreview";
-import { SeasonWorld } from "@/components/season/world/SeasonWorld";
+import { SeasonBackground } from "@/components/season/SeasonBackground";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { InquiryDrawer } from "@/components/inquiry/InquiryDrawer";
@@ -118,8 +118,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <JsonLd data={ORGANIZATION} />
         <JsonLd data={WEBSITE} />
         <StoreHydrator />
-        {/* the season's 3D world behind every page (WebGL; the CSS season gradient stays as the fallback) */}
-        <SeasonWorld />
+        {/* Normal polished background matching the season with subtle thematic graphics */}
+        <SeasonBackground />
         <div id="page" className="min-h-screen w-full overflow-x-clip [--shell-pad:clamp(16px,3.2vw,48px)]">
           <Header />
           <main id="top" className="px-(--shell-pad) pb-4 max-md:pb-24">

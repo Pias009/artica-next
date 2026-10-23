@@ -527,19 +527,18 @@
 /* The home page's colour field: soft light behind the glass surfaces, fixed so it stays still while content scrolls. */
 @utility bg-aurora {
   background:
-    radial-gradient(42% 36% at 12% 8%, rgb(152 64 128 / 0.1), transparent 70%),
+    radial-gradient(42% 36% at 12% 8%, rgb(152 64 128 / 0.08), transparent 70%),
     radial-gradient(38% 34% at 88% 22%, var(--aurora-a), transparent 72%),
     radial-gradient(46% 40% at 70% 78%, var(--aurora-b), transparent 72%),
-    radial-gradient(40% 34% at 18% 86%, var(--aurora-c), transparent 72%),
-    linear-gradient(180deg, #fbfaf8, #f6f4f1);
+    radial-gradient(40% 34% at 18% 86%, var(--aurora-c), transparent 72%);
 }
 /* The hero's backdrop, washed in the season's tints. */
 @utility bg-hero {
   background:
-    radial-gradient(130% 85% at 90% 20%, var(--hero-a) 0%, transparent 60%),
-    radial-gradient(100% 70% at 10% 15%, rgb(254 248 240 / 0.9) 0%, transparent 65%),
-    radial-gradient(85% 65% at 50% 95%, var(--hero-b) 0%, transparent 70%),
-    linear-gradient(180deg, #ffffff 0%, #fbf9f6 40%, var(--hero-base) 100%);
+    radial-gradient(130% 85% at 90% 20%, var(--hero-a) 0%, transparent 65%),
+    radial-gradient(100% 70% at 10% 15%, rgb(254 248 240 / 0.75) 0%, transparent 70%),
+    radial-gradient(85% 65% at 50% 95%, var(--hero-b) 0%, transparent 75%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.5) 0%, transparent 85%);
 }
 /* The season's edit: its own air, from frost to ice, with a glow of its accent tint in the corner. */
 @utility bg-season-field {
@@ -856,14 +855,14 @@ main:has(> #hero) {
  * ribbon and string lights for the holidays. Decorations never take clicks and sit under badges and buttons.
  */
 html[data-season] {
-  background: linear-gradient(180deg, var(--color-ice) 0%, var(--color-frost) 55%, #fff 100%) fixed;
+  background: #ffffff;
 }
 html[data-season] body {
   background: transparent;
 }
 html[data-season] .bg-hero {
   background:
-    radial-gradient(130% 85% at 90% 20%, var(--hero-a) 0%, transparent 60%),
+    radial-gradient(130% 85% at 90% 20%, var(--hero-a) 0%, transparent 65%),
     radial-gradient(85% 65% at 50% 95%, var(--hero-b) 0%, transparent 70%);
 }
 html[data-season] .bg-sky {
@@ -874,55 +873,85 @@ html[data-season] .bg-season-field {
     radial-gradient(55% 80% at 100% 0%, var(--aurora-a), transparent 70%),
     linear-gradient(135deg, color-mix(in srgb, var(--color-frost) 82%, transparent), color-mix(in srgb, var(--color-ice) 72%, transparent));
 }
-/*
- * Frosted glass re-blurs whatever moves behind it on every frame; over the live world that is the costliest thing on
- * the page. While the world runs, glass inside the page is a plain translucent sheet instead.
- */
-html[data-world] main :is(.glass, .glass-strong, [class*="backdrop-blur"]) {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-/*
- * Over the 3D world: a white veil that thickens as the page scrolls past the hero (vivid landscape up top, quiet
- * behind the words further down), and solid wells behind every shoe photo and card, so the scenery never shows
- * through a product.
- */
-.season-veil {
-  opacity: 0;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0.74));
-  transition: opacity 0.6s ease-out;
-}
-html[data-world] .season-veil {
-  opacity: 0.6;
-}
-@supports (animation-timeline: scroll()) {
-  html[data-world] .season-veil {
-    animation: season-veil linear both;
-    animation-timeline: scroll(root);
-    animation-range: 0 100vh;
+
+/* Seasonal background graphics micro-animations */
+@keyframes season-drift-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(10px, -18px, 0) rotate(14deg);
   }
 }
-@keyframes season-veil {
+
+@keyframes season-petal-flutter {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.95);
+  }
+  50% {
+    transform: translate3d(-16px, 20px, 0) rotate(42deg) scale(1.05);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.95);
+  }
+}
+
+@keyframes season-sun-rotate {
   from {
-    opacity: 0.08;
+    transform: rotate(0deg);
   }
   to {
-    opacity: 1;
+    transform: rotate(360deg);
   }
 }
-html[data-world] main [data-deco="card"] {
-  background-color: rgb(255 255 255 / 0.93);
+
+@keyframes season-rain-dash {
+  0% {
+    transform: translateY(-8px);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-8px);
+    opacity: 0.7;
+  }
 }
-/* the hero over the world: a soft light behind the words on the left and a glow behind the shoe on the right */
-html[data-world] .bg-hero {
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.82) 0%, rgb(255 255 255 / 0.62) 32%, rgb(255 255 255 / 0) 56%),
-    radial-gradient(34% 48% at 74% 42%, rgb(255 255 255 / 0.62) 0%, rgb(255 255 255 / 0) 72%),
-    linear-gradient(180deg, rgb(255 255 255 / 0) 70%, rgb(255 255 255 / 0.55) 100%);
+
+@keyframes season-ripple-expand {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.2);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
 }
-@media (max-width: 1023px) {
-  html[data-world] .bg-hero {
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.5) 60%, rgb(255 255 255 / 0.7));
+
+@keyframes season-leaf-sway {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-14px, 16px, 0) rotate(-22deg);
+  }
+}
+
+@keyframes season-star-twinkle {
+  0%, 100% {
+    transform: scale(0.85);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.95;
   }
 }
 

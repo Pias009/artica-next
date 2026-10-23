@@ -7,9 +7,62 @@ import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
 import { useSeason } from "../season/SeasonContext";
 import { categoryOf, getProduct, inLine, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
-import { SEASONS } from "@/lib/season";
+import { SEASONS, type SeasonId } from "@/lib/season";
 import { lineFor, seasonPicks } from "@/lib/season-products";
 import { useUI } from "@/lib/store";
+
+export type HeroSeasonCopy = {
+  eyebrowBadge: string;
+  headlineLead: string;
+  headlineAccent: string;
+  description: string;
+  benefits: [string, string, string];
+};
+
+export const HERO_SEASON_COPY: Record<SeasonId, HeroSeasonCopy> = {
+  winter: {
+    eyebrowBadge: "Winter Wholesale Edit",
+    headlineLead: "Factory-direct winter footwear, ",
+    headlineAccent: "built down to −25°C.",
+    description: "Insulated snow boots, shearling liners, and Arctic grip hikers from our Guangzhou factory. Tested for sub-zero retail shelves.",
+    benefits: ["−25°C thermal cold-room tested", "Arctic high-traction rubber lugs", `From ${MOQ_PAIRS} pairs per style`],
+  },
+  spring: {
+    eyebrowBadge: "Spring Wholesale Edit",
+    headlineLead: "Fresh spring footwear, ",
+    headlineAccent: "ready for the warm-up.",
+    description: "Lightweight canvas sneakers, soft leather flats, and cushioned loafers. Crafted with breathable linings and low MOQs.",
+    benefits: ["Ultra-light breathable builds", "Flexible memory insoles", `From ${MOQ_PAIRS} pairs per style`],
+  },
+  summer: {
+    eyebrowBadge: "Summer Wholesale Edit",
+    headlineLead: "Summer-season styles, ",
+    headlineAccent: "made for the warm rush.",
+    description: "Cork-footbed slides, ergonomic sandals, and lightweight slip-ons by the case. UV-resistant materials and fast container turnaround.",
+    benefits: ["Ergonomic arch-support footbeds", "Fast-dry water-resistant straps", `Ready to pack in ${PACK}-pair cases`],
+  },
+  rainy: {
+    eyebrowBadge: "Monsoon Wholesale Edit",
+    headlineLead: "Storm-tested waterproof footwear, ",
+    headlineAccent: "built for wet streets.",
+    description: "Seam-sealed water-resistant boots and closed-toe sport sandals that shrug off heavy rains. Hydrophobic leathers with deep drainage treads.",
+    benefits: ["Seam-sealed waterproof membrane", "High-grip wet pavement traction", `From ${MOQ_PAIRS} pairs per style`],
+  },
+  autumn: {
+    eyebrowBadge: "Autumn Wholesale Edit",
+    headlineLead: "Crisp autumn footwear, ",
+    headlineAccent: "ready for the first cold snap.",
+    description: "Full-grain leather Chelsea boots, rich suede ankle boots, and durable hikers. Weather-treated finishes with cushioned Goodyear welts.",
+    benefits: ["Weather-treated oiled leather", "Reinforced welt construction", `From ${MOQ_PAIRS} pairs per style`],
+  },
+  holiday: {
+    eyebrowBadge: "Holiday Wholesale Edit",
+    headlineLead: "Gift-ready footwear, ",
+    headlineAccent: "for peak holiday weeks.",
+    description: "High-shine patent boots, velvet pumps, and plush shearling slippers by the case. Complete with retail-ready presentation packaging.",
+    benefits: ["Retail-ready gift packaging", "Rush air-freight available", `From ${MOQ_PAIRS} pairs per style`],
+  },
+};
 
 /** How many of the season's styles take turns in the spotlight, each with a glow tint from the season's theme. */
 const SPOT_COUNT = 5;
@@ -48,6 +101,7 @@ export function HeroSpotlight() {
   const openQuickView = useUI((s) => s.openQuickView);
   const season = useSeason();
   const theme = SEASONS[season];
+  const copy = HERO_SEASON_COPY[season] ?? HERO_SEASON_COPY.winter;
   // the season's best styles, one per kind, so the spotlight opens on what this visitor's customers buy now
   const spots = useMemo(() => seasonPicks(season, SPOT_COUNT).map((p, i) => ({ p, slug: p.slug, tint: theme.tints[i % theme.tints.length] })), [season, theme]);
   const cards = useMemo(
@@ -129,6 +183,59 @@ export function HeroSpotlight() {
         className="pointer-events-none absolute top-[16%] left-[4%] size-[min(480px,52vw)] rounded-full blur-[90px] bg-brand/6 transition-all duration-1000 ease-out animate-[ambient-pulse-slow_11s_ease-in-out_infinite_reverse] motion-reduce:animate-none"
       />
 
+      {/* Subtle season thematic graphic watermark */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-8 right-[5%] z-[1] size-[clamp(260px,32vw,480px)] opacity-15 text-season transition-opacity duration-700 max-sm:hidden"
+      >
+        {season === "winter" && (
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2" className="size-full">
+            <line x1="50" y1="6" x2="50" y2="94" />
+            <line x1="12" y1="28" x2="88" y2="72" />
+            <line x1="12" y1="72" x2="88" y2="28" />
+            <circle cx="50" cy="50" r="14" strokeDasharray="3 4" strokeWidth="1" />
+            <path d="M40 22 L50 32 L60 22" />
+            <path d="M40 78 L50 68 L60 78" />
+            <circle cx="50" cy="50" r="2.5" fill="currentColor" />
+          </svg>
+        )}
+        {season === "spring" && (
+          <svg viewBox="0 0 100 100" fill="currentColor" className="size-full">
+            <path d="M50 15 C60 30 75 40 68 58 C60 72 40 72 32 58 C25 40 40 30 50 15 Z" opacity="0.6" />
+            <circle cx="68" cy="40" r="6" opacity="0.35" />
+            <circle cx="32" cy="40" r="5" opacity="0.35" />
+          </svg>
+        )}
+        {season === "summer" && (
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2" className="size-full">
+            <circle cx="50" cy="50" r="24" strokeDasharray="4 6" />
+            <circle cx="50" cy="50" r="42" strokeWidth="0.8" opacity="0.5" />
+            {Array.from({ length: 8 }, (_, i) => (
+              <line key={i} x1="50" y1="12" x2="50" y2="3" transform={`rotate(${i * 45} 50 50)`} />
+            ))}
+          </svg>
+        )}
+        {season === "rainy" && (
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2" className="size-full">
+            <line x1="30" y1="20" x2="20" y2="50" strokeDasharray="6 10" />
+            <line x1="60" y1="15" x2="50" y2="45" strokeDasharray="6 12" />
+            <line x1="80" y1="35" x2="70" y2="65" strokeDasharray="6 10" />
+            <circle cx="45" cy="75" r="15" strokeDasharray="3 5" opacity="0.5" />
+          </svg>
+        )}
+        {season === "autumn" && (
+          <svg viewBox="0 0 100 100" fill="currentColor" className="size-full">
+            <path d="M50 8 L56 30 L72 20 L66 40 L88 44 L72 56 L84 72 L62 68 L52 90 L48 90 L50 68 L28 72 L40 56 L24 44 L46 40 L40 20 L56 30 Z" opacity="0.5" />
+            <line x1="50" y1="20" x2="50" y2="95" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+        )}
+        {season === "holiday" && (
+          <svg viewBox="0 0 100 100" fill="currentColor" className="size-full">
+            <path d="M50 0 L54 36 L90 26 L64 50 L90 74 L54 64 L50 100 L46 64 L10 74 L36 50 L10 26 L46 36 Z" opacity="0.5" />
+          </svg>
+        )}
+      </div>
+
       {/* side links, set vertically like a magazine spine */}
       <nav aria-label="Buying information" className="absolute top-1/2 left-[clamp(10px,1.6vw,28px)] z-[3] -translate-y-1/2 max-lg:hidden">
         <ul className="flex flex-col items-center gap-7">
@@ -154,16 +261,17 @@ export function HeroSpotlight() {
         <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-10">
           <p data-hero-in="eyebrow" className="eyebrow">
             <Icon name={theme.icon} className="size-4! text-season" />
-            {theme.edit} · wholesale
+            {copy.eyebrowBadge}
           </p>
           <h1
             id="hero-title"
             className="mt-4 font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink lg:text-[clamp(44px,4.4vw,74px)]"
           >
-            Factory-direct footwear, <em className="font-medium text-brand">for shelves worldwide.</em>
+            {copy.headlineLead}
+            <em className="font-medium text-brand">{copy.headlineAccent}</em>
           </h1>
-          <p data-hero-in="copy" className="mt-5 max-w-[26rem] text-[15.5px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[16.5px]">
-            Boots, sneakers and sandals from our Guangzhou factory, for retailers and distributors in every market.
+          <p data-hero-in="copy" className="mt-5 max-w-[28rem] text-[15.5px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[16.5px]">
+            {copy.description}
           </p>
           <div data-hero-in="cta" className="mt-8 flex flex-wrap items-center gap-3 max-lg:justify-center">
             <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
@@ -173,12 +281,18 @@ export function HeroSpotlight() {
               See what&rsquo;s hot
             </a>
           </div>
-          {/* what asking costs: nothing. Said once, plainly, beside the first ask */}
-          <p data-hero-in="copy" className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted max-lg:justify-center">
-            <Icon name="check" className="size-3.5 text-brand" /> Free quote, no payment
-            <span aria-hidden="true" className="text-ink/20">·</span> Reply within 24 hours
-            <span aria-hidden="true" className="text-ink/20">·</span> From {MOQ_PAIRS} pairs per style
-          </p>
+          {/* Season-specific benefit highlights */}
+          <ul data-hero-in="copy" className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted max-lg:justify-center">
+            {copy.benefits.map((b, idx) => (
+              <li key={idx} className="inline-flex items-center gap-1.5">
+                <Icon name="check" className="size-3.5 text-brand shrink-0" />
+                <span>{b}</span>
+                {idx < copy.benefits.length - 1 && (
+                  <span aria-hidden="true" className="ml-1 text-ink/20">·</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* the stage with spatial mouse tilt */}
