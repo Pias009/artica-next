@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { isSeason, SEASON_COOKIE, SEASON_DATA, seasonOf } from "@/lib/season";
+import { SESSION_COOKIE, signInSkipped } from "@/lib/admin/cookie";
+import { isSeason, SEASON_COOKIE, SEASON_DATA, paintScript, seasonOf } from "@/lib/season";
 
 const MONTH = 60 * 60 * 24 * 30;
 const COOKIE = { path: "/", sameSite: "lax", maxAge: MONTH } as const;
@@ -14,6 +16,7 @@ const COOKIE = { path: "/", sameSite: "lax", maxAge: MONTH } as const;
  */
 export function proxy(req: NextRequest) {
   const url = req.nextUrl;
+  if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return admin(req);
   const asked = url.searchParams.get("country")?.toUpperCase();
   const country =
     (asked && /^[A-Z]{2}$/.test(asked) ? asked : null) ??
@@ -42,6 +45,55 @@ export function proxy(req: NextRequest) {
   res.cookies.set(SEASON_COOKIE.season, season, { ...COOKIE, maxAge: 60 * 60 * 24 });
   if (askedSeason === "auto") res.cookies.delete(SEASON_COOKIE.pick);
   else if (isSeason(askedSeason)) res.cookies.set(SEASON_COOKIE.pick, askedSeason, COOKIE);
+  return res;
+}
+
+/** The root layout's season script, allowed on /admin by its hash (it is the same text in every build's pages). */
+const SEASON_HASH = `'sha256-${createHash("sha256").update(paintScript()).digest("base64")}'`;
+
+/**
+ * /admin: no season cookies, a strict Content-Security-Policy with a fresh nonce per request (Next.js puts it on its
+ * own scripts), nothing cached anywhere, never framed or indexed. Without a session cookie, every page but the sign-in
+ * page sends you there. This is only a first, cheap filter: each page and action checks the session in the database
+ * (src/lib/admin/auth.ts requireAdmin).
+ */
+function admin(req: NextRequest) {
+  const dev = process.env.NODE_ENV === "development";
+  const signInPage = req.nextUrl.pathname === "/admin/login";
+  if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !signInSkipped(req.headers.get("host"))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
+
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' ${SEASON_HASH} 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
+    // style attributes and next/font's styles; scripts are what CSP has to hold tight
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self'",
+    `connect-src 'self'${dev ? " ws:" : ""}`,
+    "object-src 'none'",
+    "base-uri 'none'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    ...(dev ? [] : ["upgrade-insecure-requests"]),
+  ].join("; ");
+  const headers = new Headers(req.headers);
+  headers.set("x-nonce", nonce);
+  headers.set("Content-Security-Policy", csp);
+  const res = NextResponse.next({ request: { headers } });
+  res.headers.set("Content-Security-Policy", csp);
+  return secure(res);
+}
+
+function secure(res: NextResponse) {
+  res.headers.set("Cache-Control", "no-store, max-age=0");
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "no-referrer");
+  res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
+  if (process.env.NODE_ENV === "production") res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
   return res;
 }
 

@@ -10,6 +10,10 @@ export const SITE_URL =
 
 export const SITE_NAME = "Chime Long";
 
+// kept under ~155 characters so search results show it whole
+export const DESCRIPTION =
+  "Factory-direct wholesale boots, sneakers and sandals from Guangzhou for retailers and private-label brands. From 300 pairs per style, samples in 10 days.";
+
 /** "/catalog" → "https://…/catalog" */
 export const absoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
 

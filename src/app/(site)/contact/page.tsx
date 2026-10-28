@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { ClosingBand } from "@/components/ui/ClosingBand";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
@@ -20,48 +22,51 @@ const SHOWROOMS: {
   icon: IconName;
 }[] = [
   {
-    city: "New York Showroom",
-    type: "COMMERCIAL SALES & SAMPLES",
+    city: "New York showroom",
+    type: "Sales and samples",
     address: "530 7th Avenue, 14th Floor, New York, NY 10018",
     notes: "Full footwear collection on display. Physical size runs available for buyer fitting.",
-    hours: "Mon–Fri: 9:00 AM – 5:30 PM EST (By Appointment)",
+    hours: "Mon–Fri, 9:00–17:30 EST, by appointment",
     icon: "pin",
   },
   {
-    city: "Montreal Design Atelier",
-    type: "LABORATORY & PROTOTYPES",
+    city: "Montreal design atelier",
+    type: "Laboratory and prototypes",
     address: "4205 Saint-Laurent Blvd, Montreal, QC H2W 1Z4",
     notes: "Cold-room testing laboratory, leather swatch archives, and technical CAD development.",
-    hours: "Mon–Fri: 9:00 AM – 5:00 PM EST (By Appointment)",
+    hours: "Mon–Fri, 9:00–17:00 EST, by appointment",
     icon: "shield",
   },
   {
-    city: "Export Logistics Operations",
-    type: "PORT LOGISTICS & SHIPPING",
+    city: "Ningbo export logistics",
+    type: "Port logistics and shipping",
     address: "Tower 2, International Trade Center, Ningbo 315000",
     notes: "Container consolidation hub, customs documentation, and pre-shipment inspection verification.",
-    hours: "Mon–Sat: 8:30 AM – 6:30 PM CST",
+    hours: "Mon–Sat, 8:30–18:30 CST",
     icon: "truck",
   },
 ];
 
 const DEPARTMENTS = [
   {
-    role: "Retail Accounts & Line Sheets",
+    role: "Retail accounts and line sheets",
     email: "buyers@articafootwear.com",
     phone: "+1 (800) 412-8820 ext. 1",
+    tel: "+18004128820,1",
     desc: "For independent boutiques, department stores, and e-commerce stockists ordering existing catalog styles.",
   },
   {
-    role: "Private Label & OEM Projects",
+    role: "Private label and OEM projects",
     email: "oem@articafootwear.com",
     phone: "+1 (800) 412-8820 ext. 2",
+    tel: "+18004128820,2",
     desc: "For custom tooling, private-label branding, custom Pantone dyeing, and exclusive last development.",
   },
   {
-    role: "Freight, Customs & DDP Tracking",
+    role: "Freight, customs and DDP tracking",
     email: "logistics@articafootwear.com",
     phone: "+1 (800) 412-8820 ext. 3",
+    tel: "+18004128820,3",
     desc: "Container manifests, Bill of Lading releases, import customs entry numbers in your country, and dock scheduling.",
   },
 ];
@@ -70,95 +75,78 @@ export default function ContactPage() {
   return (
     <>
       <PageIntro
-        crumbs={[{ href: "/", label: "Home" }, { label: "Contact & Showrooms" }]}
-        eyebrow="Commercial Trade Inquiries"
-        title="Contact our wholesale trade desk."
-        text="Whether scheduling an in-person showroom preview, ordering swatch rings, or tracking a container shipment, our wholesale team is here to assist."
+        crumbs={[{ href: "/", label: "Home" }, { label: "Contact and showrooms" }]}
+        eyebrow="Commercial trade inquiries"
+        title="Talk to the trade desk."
+        text="Showroom visits, samples, line sheets or a shipment on the water: one team, a reply within 24 hours."
       />
 
-      {/* Showrooms Grid */}
-      <section className="mt-sec">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="mono-label text-accent font-bold">PHYSICAL HUBS</span>
-            <h2 className="type-section mt-1">Showrooms & Laboratories</h2>
-          </div>
-          <span className="mono-label text-xs text-muted">TRADE BUYERS ONLY · BY APPOINTMENT</span>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-3">
+      {/* Showrooms: the first section after the intro, so the intro's own margin is the gap */}
+      <section aria-labelledby="h-hubs">
+        <SectionHead
+          id="h-hubs"
+          eyebrow="Physical hubs"
+          title={<>Showrooms and <em>laboratories.</em></>}
+          right={<p className="type-label text-muted">Trade buyers only · by appointment</p>}
+        />
+        <ul className="grid gap-3.5 lg:grid-cols-3">
           {SHOWROOMS.map((s) => (
-            <div key={s.city} className="flex flex-col justify-between rounded-shell border border-line/60 bg-tile p-6 card-lift shadow-soft">
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="grid size-10 place-items-center rounded-xl bg-surface border border-line/60 text-accent shadow-xs">
-                    <Icon name={s.icon} className="size-5" />
-                  </div>
-                  <span className="mono-label text-[9px] text-accent font-bold">{s.type}</span>
-                </div>
-                <h3 className="mt-4 font-headline text-[22px] leading-tight font-semibold tracking-[-0.01em] text-ink">{s.city}</h3>
-                <p className="mt-2 text-xs font-semibold text-ink leading-relaxed">{s.address}</p>
-                <p className="mt-2 text-xs text-ink-2 leading-relaxed">{s.notes}</p>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-line/50 text-xs text-muted">
-                <span className="mono-label text-[9px] text-muted block mb-0.5">HOURS OF OPERATION</span>
-                <span>{s.hours}</span>
-              </div>
-            </div>
+            <li key={s.city} className="flex flex-col rounded-card bg-tile p-6">
+              <span className="flex items-center justify-between gap-3">
+                <Icon name={s.icon} className="size-6! stroke-[1.4] text-brand" />
+                <span className="type-label text-muted">{s.type}</span>
+              </span>
+              <h3 className="mt-6 font-headline text-[24px] leading-tight font-semibold tracking-[-0.01em]">{s.city}</h3>
+              <p className="mt-2 text-[15px] font-semibold">{s.address}</p>
+              <p className="mt-1.5 flex-1 text-[14px] leading-relaxed text-ink-2">{s.notes}</p>
+              <p className="mt-6 flex items-center gap-2 border-t border-line pt-4 text-[14px] text-ink-2">
+                <Icon name="clock" className="size-4 text-muted" />
+                {s.hours}
+              </p>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* Department Contacts */}
-      <section className="mt-sec rounded-shell border border-line/60 bg-surface p-6 sm:p-8 shadow-soft">
-        <div className="mb-6">
-          <span className="mono-label text-accent font-bold">DIRECTORY</span>
-          <h2 className="type-section mt-1">Department Contacts</h2>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
+      {/* Department contacts */}
+      <section aria-labelledby="h-directory" className="mt-sec">
+        <SectionHead id="h-directory" eyebrow="Directory" title={<>Reach the right <em>department.</em></>} />
+        <ul className="grid gap-3.5 md:grid-cols-3">
           {DEPARTMENTS.map((d) => (
-            <div key={d.role} className="rounded-card border border-line/50 bg-tile p-5 shadow-xs">
-              <h3 className="text-[14px] font-semibold text-ink">{d.role}</h3>
-              <p className="mt-1 text-xs text-ink-2 leading-relaxed">{d.desc}</p>
-              <div className="mt-4 pt-3 border-t border-line/50 space-y-1.5 text-xs">
-                <div className="flex items-center gap-2 text-accent font-bold">
-                  <Icon name="mail" className="size-3.5" />
-                  <span>{d.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted font-medium">
-                  <Icon name="phone" className="size-3.5" />
-                  <span>{d.phone}</span>
-                </div>
+            <li key={d.role} className="flex flex-col rounded-card bg-tile p-6">
+              <h3 className="text-[16px] font-semibold">{d.role}</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">{d.desc}</p>
+              <div className="mt-5 grid gap-1 border-t border-line pt-3 text-[14px]">
+                <a href={`mailto:${d.email}`} className="inline-flex min-h-10 items-center gap-2.5 font-semibold hover:text-brand">
+                  <Icon name="mail" className="size-4 text-muted" />
+                  {d.email}
+                </a>
+                <a href={`tel:${d.tel}`} className="inline-flex min-h-10 items-center gap-2.5 text-ink-2 hover:text-brand">
+                  <Icon name="phone" className="size-4 text-muted" />
+                  {d.phone}
+                </a>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* Appointment & Fast Inquiry Action */}
-      <section className="mt-sec mb-4 rounded-shell border border-line/60 bg-studio p-8 shadow-soft">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div>
-            <span className="mono-label text-accent font-bold">DIGITAL SHOWROOM PREVIEW</span>
-            <h2 className="font-headline text-[26px] leading-tight font-semibold tracking-[-0.015em] text-ink mt-1">
-              Book a 1-on-1 virtual walkthrough
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-ink-2">
-              Unable to visit our New York or Montreal locations in person? Our accounts team can host a 20-minute private video walkthrough to present physical footwear samples, leather swatches, and case pack curves.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 lg:items-end">
-            <OpenInquiryButton className="btn btn-dark">
-              Book Showroom Walkthrough <Icon name="arrow" />
+      <ClosingBand
+        id="h-walkthrough"
+        eyebrow="Digital showroom preview"
+        title="Book a one-to-one virtual walkthrough."
+        text="Can't visit New York or Montreal? Our accounts team hosts a 20-minute private video call to show samples, leather swatches and case-pack curves."
+        action={
+          <div className="flex flex-none flex-col items-start gap-2 md:items-end">
+            <OpenInquiryButton className="btn bg-white text-ink hover:bg-white/85">
+              Book a walkthrough <Icon name="arrow" />
             </OpenInquiryButton>
-            <Link href="/catalog" className="text-xs font-bold text-accent hover:underline">
-              Browse online wholesale catalog first →
+            <Link href="/catalog" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline">
+              Browse the catalog first
             </Link>
           </div>
-        </div>
-      </section>
+        }
+      />
     </>
   );
 }

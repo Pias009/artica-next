@@ -5,7 +5,9 @@
  *
  *   node --env-file=.env.local scripts/upload-cloudinary.mjs
  *
- * Photos already in the manifest are not uploaded again, so re-running only adds new files.
+ * Photos already in the manifest are left untouched, so re-running only adds new files. The 62 first shots were cut
+ * out on the old cloud (dg0ffut8a) and copied to doulxmmm as finished cutouts (2026-10-28); new photos are cut out on
+ * whichever cloud .env.local names, which needs Cloudinary's AI Background Removal add-on on that account.
  */
 import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile } from "node:fs/promises";
@@ -72,7 +74,9 @@ for (const line of await readdir(SRC)) {
   const files = (await readdir(path.join(SRC, line))).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort();
   for (const f of files) {
     const k = `${line.toLowerCase()}/${path.parse(f).name}`;
-    const id = manifest[k]?.id ?? (await upload(path.join(SRC, line, f), `chime-long/${k}`));
+    // done already: its src may sit on another cloud or already be a finished cutout, so leave it exactly as it is
+    if (manifest[k]) continue;
+    const id = await upload(path.join(SRC, line, f), `chime-long/${k}`);
     const crop = LABELLED.has(k) ? "c_crop,g_south,h_0.75,w_1.0/" : "";
     const src = `https://res.cloudinary.com/${cloud}/image/upload/${crop}${CUTOUT}/${id}`;
     manifest[k] = { id, src, ...(await cutout(src)) };

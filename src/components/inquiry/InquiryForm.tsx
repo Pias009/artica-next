@@ -60,6 +60,9 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
   const formRef = useRef<HTMLFormElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const prefillEmail = useUI((s) => s.prefillEmail);
+  const intent = useUI((s) => s.intent);
+  // one key per inquiry, kept across retries, so the server stores a double click or a resend only once
+  const keyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (prefillEmail && emailRef.current) emailRef.current.value = prefillEmail.value;
@@ -145,10 +148,15 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         const f = e.currentTarget;
         if (!f.checkValidity()) return f.reportValidity();
         const data = new FormData(f);
+        // randomUUID exists only on https and localhost; without it the server makes one (no repeat protection)
+        keyRef.current ??= crypto.randomUUID?.() ?? "";
+        data.set("key", keyRef.current);
+        data.set("source", location.pathname);
         startTransition(() => action(data));
       }}
     >
       <input type="hidden" name="lines" value={JSON.stringify(lines)} />
+      <input type="hidden" name="intent" value={intent} />
       {/* for spam bots only: hidden from people and from screen readers, never focused */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] size-px opacity-0" />
       <fieldset className="grid gap-1.5">

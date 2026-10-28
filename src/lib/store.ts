@@ -6,6 +6,8 @@ import { byId, MOQ_CASES, MOQ_PAIRS, STEP_CASES, type Filter } from "./products"
 
 export type InquiryLine = { id: string; cases: number };
 export type BuyerType = "Retailer" | "Distributor" | "Private label brand";
+/** What the buyer is asking for; the desk's email and the stored inquiry carry it (src/lib/leads/mail.ts). */
+export type Intent = "quote" | "sample" | "visit" | "private_label" | "shipping";
 
 /* ---- UI state: drawer, quick view, rail filter, toast (not persisted) ---- */
 type UIState = {
@@ -15,10 +17,12 @@ type UIState = {
   prefillEmail: { value: string; key: number } | null;
   /** Note text handed over from the sample-request section. */
   prefillNote: { value: string; key: number } | null;
+  /** Set by the button that opened the drawer with a ready-written note; plain "get pricing" buttons leave a quote. */
+  intent: Intent;
   quickView: string | null;
   railFilter: Filter;
   toast: { msg: string; key: number } | null;
-  openDrawer: (type?: BuyerType, email?: string, note?: string) => void;
+  openDrawer: (type?: BuyerType, email?: string, note?: string, intent?: Intent) => void;
   closeDrawer: () => void;
   openQuickView: (id: string) => void;
   closeQuickView: () => void;
@@ -32,16 +36,19 @@ export const useUI = create<UIState>()((set) => ({
   buyerType: "Retailer",
   prefillEmail: null,
   prefillNote: null,
+  intent: "quote",
   quickView: null,
   railFilter: "all",
   toast: null,
-  openDrawer: (type, email, note) =>
+  openDrawer: (type, email, note, intent) =>
     set((s) => ({
       drawerOpen: true,
       quickView: null,
       buyerType: type ?? s.buyerType,
       prefillEmail: email ? { value: email, key: Date.now() } : s.prefillEmail,
       prefillNote: note ? { value: note, key: Date.now() } : s.prefillNote,
+      // the intent travels with its note: a new note without one is a quote, no new note keeps the last
+      intent: intent ?? (note ? "quote" : s.intent),
     })),
   closeDrawer: () => set({ drawerOpen: false }),
   openQuickView: (id) => set({ quickView: id }),

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { ClosingBand } from "@/components/ui/ClosingBand";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { pageMeta } from "@/lib/site";
 
 export const metadata: Metadata = pageMeta({
@@ -13,32 +15,32 @@ export const metadata: Metadata = pageMeta({
 
 const PILLARS = [
   {
-    title: "Tannery Integrity",
+    title: "Tannery integrity",
     subtitle: "LWG Gold Certified",
     desc: "We exclusively source premium 2.0–2.2mm heavy-gauge cowhides and full-grain suedes from Leather Working Group Gold-rated tanneries, ensuring non-toxic vegetable tanning and water recycling.",
   },
   {
-    title: "Sub-Zero Rubber Chemistry",
+    title: "Sub-zero rubber chemistry",
     subtitle: "Flexible to -25°C",
     desc: "Standard commercial boot outsoles harden and become slick below freezing. Our custom vulcanized nitrile compounds retain Shore A 60 elasticity in extreme sub-zero blizzard conditions.",
   },
   {
-    title: "Waterproof Bootie Sealing",
-    subtitle: "4-Hour Immersion Rating",
+    title: "Waterproof bootie sealing",
+    subtitle: "4-hour immersion rating",
     desc: "Unlike topical water-repellent sprays, every Chime Long style is constructed with a sealed hydrophilic inner membrane bootie with heat-welded tape over all needle puncture seams.",
   },
   {
-    title: "Thermal Foil Strobel",
-    subtitle: "Ground Cold Decoupling",
+    title: "Thermal foil strobel",
+    subtitle: "Ground-cold decoupling",
     desc: "Over 70% of conductive heat loss occurs directly through cold pavement. Our soles integrate an aluminum thermal foil strobel board that radiates warmth back into the footbed.",
   },
 ];
 
 const LAB_TESTS = [
-  { test: "SATRA TM144", label: "Ice & Wet Surface Slip Resistance", standard: "Coefficient > 0.42 on wet ice tile" },
-  { test: "ISO 20344 §5.13", label: "Upper Leather Water Penetration", standard: "Zero water ingress after 180 min" },
-  { test: "Bally Penetrometer", label: "Dynamic Sole Flexing in Water", standard: "50,000 flex cycles without leakage" },
-  { test: "ASTM F2413", label: "Cold Insulation Testing (-25°C)", standard: "< 5°C temp drop after 30 min exposure" },
+  { test: "SATRA TM144", label: "Slip resistance on ice and wet floors", standard: "Coefficient > 0.42 on wet ice tile" },
+  { test: "ISO 20344 §5.13", label: "Upper leather water penetration", standard: "Zero water ingress after 180 min" },
+  { test: "Bally Penetrometer", label: "Dynamic sole flexing in water", standard: "50,000 flex cycles without leakage" },
+  { test: "ASTM F2413", label: "Cold insulation at −25°C", standard: "< 5°C temp drop after 30 min exposure" },
 ];
 
 export default function AboutPage() {
@@ -46,125 +48,111 @@ export default function AboutPage() {
     <>
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "About Chime Long" }]}
-        eyebrow="Specialist Footwear Engineering"
-        title="Wholesale footwear, engineered for harsh retail realities."
-        text="Chime Long was founded to eliminate the high return rates and poor durability of conventional fashion footwear. We build footwear that keeps trade buyers and end consumers loyal year after year."
+        eyebrow="Specialist footwear engineering"
+        title="Wholesale footwear, built to sell through."
+        text="Boots that hold up in the weather and look right on the shelf, so fewer pairs come back."
       />
 
-      {/* Story & Philosophy */}
-      <section className="bg-studio relative overflow-hidden rounded-shell border border-line/60 p-[clamp(24px,4vw,50px)] shadow-soft">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      {/* Story & philosophy */}
+      <section aria-labelledby="h-philosophy" className="bg-studio relative overflow-hidden rounded-shell border border-line/60 p-[clamp(24px,4vw,56px)] shadow-soft">
+        <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div>
-            <span className="mono-label text-accent font-bold">OUR PHILOSOPHY</span>
-            <h2 className="type-section text-ink mt-1">
-              Zero compromises between brutal weather protection and store-shelf aesthetics.
+            <p className="eyebrow">Our philosophy</p>
+            <h2 id="h-philosophy" className="type-section mt-3">
+              Zero compromises between weather protection <em>and shelf appeal.</em>
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-ink-2">
+            <p className="mt-5 max-w-[60ch] text-[16px] leading-relaxed text-ink-2">
               For decades, retail footwear buyers faced an unacceptable trade-off: stock clunky, aesthetic-free rubber pac-boots that sat on shelves, or fashionable leather booties that soaked through during the first January blizzard and resulted in customer returns.
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-ink-2">
+            <p className="mt-3 max-w-[60ch] text-[16px] leading-relaxed text-ink-2">
               Chime Long bridges this divide. Our design atelier patterns modern, architectural silhouettes using authentic shearling, oiled full-grain leather, and matte hardware, while our engineering laboratory integrates vulcanized arctic traction and sealed waterproof booties.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/catalog" className="btn btn-dark">
                 View current collection <Icon name="arrow" />
               </Link>
-              <OpenInquiryButton className="btn btn-line">
-                Book a showroom visit
-              </OpenInquiryButton>
+              <OpenInquiryButton className="btn btn-line">Book a showroom visit</OpenInquiryButton>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <dl className="grid grid-cols-2 gap-3">
             {[
               ["85,000 pr", "Monthly seasonal capacity across 4 lines"],
               ["100%", "Pre-shipment batch inspection before sealing"],
               ["120+", "Retail partners stocking Chime Long across NA"],
               ["0.4%", "Industry-lowest defect rate"],
             ].map(([val, label]) => (
-              <div key={label} className="glass-card rounded-card p-4 shadow-xs">
-                <span className="text-2xl font-extrabold text-ink tabular-nums">{val}</span>
-                <span className="block mt-0.5 text-xs text-muted">{label}</span>
+              <div key={label} className="glass-card flex flex-col-reverse justify-end rounded-card p-5 shadow-xs">
+                <dt className="mt-1 text-[14px] text-muted">{label}</dt>
+                <dd className="font-headline text-[clamp(26px,2.4vw,32px)] leading-none font-semibold tracking-[-0.02em] tabular-nums">{val}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </div>
       </section>
 
-      {/* Engineering Pillars */}
-      <section className="mt-sec">
-        <div className="mb-6">
-          <span className="mono-label text-accent font-bold">TECHNICAL STANDARDS</span>
-          <h2 className="type-section mt-1">Four Pillars of Sub-Zero Construction</h2>
-        </div>
-
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Engineering pillars */}
+      <section aria-labelledby="h-pillars" className="mt-sec">
+        <SectionHead id="h-pillars" eyebrow="Technical standards" title={<>Four pillars of <em>sub‑zero construction.</em></>} />
+        <ul className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {PILLARS.map((p) => (
-            <div key={p.title} className="rounded-card border border-line/60 bg-tile p-5 card-lift shadow-xs">
-              <span className="mono-label text-[9.5px] text-accent font-bold">{p.subtitle}</span>
-              <h3 className="mt-1 text-[16px] font-semibold tracking-[-0.01em] text-ink">{p.title}</h3>
-              <p className="mt-3 text-xs leading-relaxed text-ink-2">{p.desc}</p>
-            </div>
+            <li key={p.title} className="rounded-card bg-tile p-6">
+              <p className="type-label text-brand">{p.subtitle}</p>
+              <h3 className="mt-4 text-[16px] font-semibold">{p.title}</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">{p.desc}</p>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      {/* Laboratory Test Standards */}
-      <section className="mt-sec rounded-shell border border-line/60 bg-tile p-6 sm:p-8 shadow-soft">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="mono-label text-accent font-bold">LABORATORY COMPLIANCE</span>
-            <h2 className="type-section mt-1">Certified Testing Protocols</h2>
-          </div>
-          <span className="mono-label text-xs text-muted">THIRD-PARTY SATRA & INTERTEK VERIFIED</span>
-        </div>
-
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Laboratory test standards */}
+      <section aria-labelledby="h-lab" className="mt-sec">
+        <SectionHead
+          id="h-lab"
+          eyebrow="Laboratory compliance"
+          title={<>Certified testing <em>protocols.</em></>}
+          right={<p className="type-label text-muted">Third-party SATRA &amp; Intertek verified</p>}
+        />
+        <dl className="overflow-hidden rounded-card bg-tile">
           {LAB_TESTS.map((t) => (
-            <div key={t.test} className="rounded-card border border-line/60 bg-surface p-4 shadow-xs">
-              <span className="rounded bg-accent/10 px-2 py-0.5 text-[10px] font-mono font-bold text-accent">
-                {t.test}
-              </span>
-              <h4 className="mt-2 text-sm font-bold text-ink">{t.label}</h4>
-              <p className="mt-1.5 text-xs text-muted">{t.standard}</p>
+            <div key={t.test} className="grid gap-1 border-b border-line px-5 py-4 last:border-0 sm:grid-cols-[200px_minmax(0,1fr)_minmax(0,1fr)] sm:items-center sm:gap-6">
+              <dt className="text-[13px] font-semibold text-brand tabular-nums">{t.test}</dt>
+              <dd className="text-[15px] font-semibold">{t.label}</dd>
+              <dd className="text-[14px] text-ink-2">{t.standard}</dd>
             </div>
           ))}
-        </div>
+        </dl>
       </section>
 
-      {/* Sustainability & Ethical Factory Auditing */}
-      <section className="mt-sec rounded-shell border border-line/60 bg-surface p-6 sm:p-8 shadow-soft">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div>
-            <span className="mono-label text-accent font-bold">ETHICAL MANUFACTURING</span>
-            <h3 className="font-headline text-[22px] leading-tight font-semibold tracking-[-0.01em] text-ink mt-1">
-              BSCI & SMETA 4-Pillar Audited Facilities
-            </h3>
-            <p className="mt-2 text-xs leading-relaxed text-ink-2">
-              Our partner factory facilities operate under strict European social compliance guidelines. Fair living wages, safe dust-extracted bonding ventilation, zero forced labor, and continuous recycling of leather cutting scraps into bonded insoles.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            {["BSCI Audited", "SMETA 4-Pillar", "LWG Tannery Gold", "REACH Compliant", "ISO 9001 Certified"].map((badge) => (
-              <span key={badge} className="rounded-full border border-line/70 bg-chip px-3 py-1.5 text-xs font-semibold text-ink">
-                ✓ {badge}
-              </span>
-            ))}
-          </div>
-        </div>
+      {/* Ethical factory auditing */}
+      <section aria-labelledby="h-ethics" className="mt-sec">
+        <SectionHead
+          id="h-ethics"
+          eyebrow="Ethical manufacturing"
+          title={<>BSCI and SMETA <em>audited facilities.</em></>}
+          sub="Our partner factories work to European social compliance guidelines: fair living wages, dust-extracted bonding rooms, zero forced labour, and leather cutting scraps recycled into bonded insoles."
+        />
+        <ul className="flex flex-wrap gap-2.5">
+          {["BSCI audited", "SMETA 4-pillar", "LWG tannery Gold", "REACH compliant", "ISO 9001 certified"].map((badge) => (
+            <li key={badge} className="inline-flex h-11 items-center gap-2 rounded-full bg-tile px-4 text-[14px] font-semibold">
+              <Icon name="check" className="size-4 text-brand" />
+              {badge}
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="mt-sec mb-4 flex flex-col items-center justify-between gap-4 rounded-shell border border-line/60 bg-accent p-8 text-center text-on-accent md:flex-row md:text-left">
-        <div>
-          <span className="mono-label text-kraft text-[10px]">PARTNER WITH CHIME LONG</span>
-          <h2 className="font-headline text-[26px] leading-tight font-semibold tracking-[-0.015em] mt-1">Request wholesale line sheet & samples</h2>
-          <p className="mt-1 text-xs text-white/80">Experience the leather hand-feel and durable construction firsthand.</p>
-        </div>
-        <OpenInquiryButton className="btn bg-surface text-ink hover:bg-white shadow-soft">
-          Request Line Sheet <Icon name="arrow" />
-        </OpenInquiryButton>
-      </section>
+      <ClosingBand
+        id="h-close"
+        eyebrow="Partner with Chime Long"
+        title="Request the wholesale line sheet and samples."
+        text="Feel the leather and the construction in your own hands before you commit."
+        action={
+          <OpenInquiryButton className="btn flex-none bg-white text-ink hover:bg-white/85">
+            Request line sheet <Icon name="arrow" />
+          </OpenInquiryButton>
+        }
+      />
     </>
   );
 }

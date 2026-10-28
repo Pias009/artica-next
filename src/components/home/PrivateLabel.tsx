@@ -85,7 +85,7 @@ export function PrivateLabel() {
             <button
               type="button"
               className="btn btn-dark"
-              onClick={() => openDrawer("Private label brand", undefined, typed ? `Private label brand name: ${brand.trim()}` : undefined)}
+              onClick={() => openDrawer("Private label brand", undefined, typed ? `Private label brand name: ${brand.trim()}` : undefined, "private_label")}
             >
               {typed ? `Get pricing for ${brand.trim()}` : "Get private-label pricing"}
               <Icon name="arrow" className="size-4" />

@@ -53,7 +53,7 @@ export function SampleRequest() {
 
   const request = () => {
     const names = picked.map((id) => `Chime Long ${byId[id].name}`).join(", ");
-    openDrawer(undefined, undefined, `Sample request: ${names}. One pair each, mid-run size.`);
+    openDrawer(undefined, undefined, `Sample request: ${names}. One pair each, mid-run size.`, "sample");
   };
 
   return (

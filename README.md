@@ -67,7 +67,7 @@ until dates are set). `/privacy` and `/terms` are working drafts for the client'
 
 ```
 src/
-  app/            routes, layout, globals.css, actions.ts (submitInquiry server action)
+  app/            root layout, (site)/ public pages, admin/ the admin panel, api/cron, actions.ts (inquiry actions)
   components/
     home/         Hero, ProductFinder, LineTiles, TechGrid, PartnerProgram, ServiceStrip
     product/      ProductCard, AddButton, CatalogView, ProductGallery, BuyBox, FilterControls
@@ -105,10 +105,103 @@ and today's date:
 
 ## Wiring up inquiries
 
-`src/app/actions.ts` validates the form on the server and currently logs the inquiry.
-Replace the `console.info` with your email provider, CRM or database call.
+Design: `docs/design/inquiry-lead-pipeline.md`. Code: `src/app/actions.ts` (the two server actions) and `src/lib/leads/`.
+
+Every inquiry is **stored first, then emailed**:
+1. `submitInquiry` validates the form and stores the inquiry, a snapshot of each line, and two queued emails as one
+   MongoDB document (`leads/inquiries.ts`), so they are saved together or not at all. A repeat of the same submit (double click, retry) returns the first one's
+   reference instead of storing it twice.
+2. Right after the response, `after()` sends the queued emails through Resend (`leads/outbox.ts`): the desk email
+   (reply goes to the buyer, with one-click "mark replied / quoted / won / lost / spam" links) and the buyer's
+   confirmation with their reference (`CL-2026-0142`). Failures back off (1, 2, 4 … 60 min) and retry.
+3. `/api/cron/daily` (`vercel.json`, 08:30 Guangzhou) sends anything still waiting, emails the desk a digest of
+   inquiries over 20 hours without a reply and of stuck emails, and deletes spam marked over 30 days ago.
+
+It degrades in steps, so the site works at every stage of setup:
+
+| Set | What happens |
+|---|---|
+| nothing | inquiries are logged on the server; the buyer sees a demo notice |
+| `RESEND_API_KEY`, `INQUIRY_TO`, `INQUIRY_FROM` | inquiries are emailed to the desk (no storage, no reference) |
+| + `MONGODB_URI` (and optionally `MONGODB_DB`, default `chimelong`) | stored first, buyer gets a reference and a confirmation email, retries. If the database is down the inquiry still goes straight to the desk |
+| + `DESK_SECRET` (32+ random chars) | the desk email gets its status links (`/desk/l/[ref]`) |
+| + `CRON_SECRET` | Vercel can call the cron routes (they refuse everyone without it) |
+| + `RESEND_SEGMENT_ID` | line-sheet signups join that Resend segment (unsubscribe handled by Resend) instead of being emailed to the desk |
+
+Setup:
+
+```bash
+vercel link
+vercel env add MONGODB_URI           # Atlas connection string (Cluster0 → Connect → Drivers)
+vercel env add DESK_SECRET           # openssl rand -base64 32
+vercel env add CRON_SECRET           # openssl rand -base64 32
+vercel env pull .env.local
+npm run db:migrate                   # collections, validator and indexes; safe to run again
+```
+
+Notes:
+- Atlas only accepts connections from IPs on its Network Access list. Vercel functions don't have fixed IPs, so
+  production needs `0.0.0.0/0` there (the database user's password is then the guard), or Vercel's Atlas integration.
+- Preview deployments should use their own database (`MONGODB_DB=chimelong_preview`) and a test `INQUIRY_TO`.
+- Free Resend sends 100 emails a day. Each inquiry is two, so a busy campaign day can hit it: emails then wait in the
+  queue and go out as the limit allows (nothing is lost), but upgrade before a launch.
+- On a Pro plan, also schedule `/api/cron/outbox` every 10 minutes in `vercel.json` for faster retries. Hobby allows
+  daily crons only, so there retries happen on the daily run and whenever a new inquiry comes in.
+- `npm test` runs the desk-link signing and admin cryptography tests.
 
 Set `NEXT_PUBLIC_SITE_URL` in production so Open Graph image URLs resolve.
+
+## Admin panel (`/admin`)
+
+| Route | What |
+|---|---|
+| `/admin` | Dashboard (`src/components/admin/AdminPanel`), full-screen |
+| `/admin/inquiries` | Every inquiry from the database: filter by status, request and text, flags for over 20 hours and failing emails |
+| `/admin/inquiries/[ref]` | One inquiry: lines, note, buyer, emails (with "Send now"), status buttons, history |
+| `/admin/security` | Your sessions (sign out any of them) and the audit log of every sign-in and change |
+| `/admin/login` | Email, password and a 6-digit authenticator code |
+
+**Accounts are made from the command line only** (there is no sign-up page). Each prints a generated password and an
+authenticator key once:
+
+```bash
+npm run db:migrate                                   # once: admin collections and indexes
+npm run admin -- create you@company.com "Your Name"  # add the key to 1Password / Google Authenticator / Authy
+npm run admin -- reset you@company.com               # lost phone or password: new ones, all sessions ended
+npm run admin -- disable you@company.com             # blocks sign-in, ends sessions (enable undoes it)
+npm run admin -- list
+npm run admin -- sign-out-all
+```
+
+Needs `MONGODB_URI` and `ADMIN_ENC_KEY` (`openssl rand -base64 32`; already in `.env.local`). Set the **same**
+`ADMIN_ENC_KEY` in Vercel: authenticator keys are sealed with it, so a different key locks everyone out until `reset`.
+Without either, `/admin/login` says the panel isn't set up and no one can sign in.
+
+**Local testing without signing in:** `ADMIN_DEV_BYPASS=1` in `.env.local` (already set) skips sign-in, but only
+under `npm run dev` and only at `localhost` / `127.0.0.1`. An orange "sign-in skipped" badge shows while it's on, and
+changes are audited as `dev@localhost`. It can't work on Vercel or after `next build`, where the app always runs as
+production; `tests/admin-bypass.test.mjs` checks this. Never add the flag to Vercel's environment.
+
+**Open access on a Vercel deployment (temporary):** set `ADMIN_OPEN_UNTIL` to a date, e.g. `2026-11-05`, in the
+project's environment and redeploy. Sign-in is skipped through that day (UTC), then comes back on its own with no
+redeploy. It works only on Vercel (`VERCEL=1`), and a date more than 31 days ahead is ignored. While it's on,
+**anyone with the address can see buyers' names, emails and orders and change their status**: an orange badge says so
+on every admin page, and changes are audited as `open-access`. Remove the variable to end it early (then redeploy).
+
+How it's protected (`src/lib/admin/auth.ts`, `src/proxy.ts`):
+- **Three factors:** a password (scrypt, N=2^15), a TOTP code, and the email. A code works once, so a code
+  someone sees can't be replayed. Authenticator keys are AES-256-GCM sealed at rest.
+- **Sessions:** a random token in a `__Host-` cookie (HttpOnly, Secure, SameSite=Strict). The database keeps only its
+  SHA-256. Sessions end after 2 idle hours or 12 hours in all, and can be ended from `/admin/security` or the CLI.
+- **Checked twice:** the proxy sends requests without the cookie to sign-in, and every admin page and server action
+  checks the session in the database (`requireAdmin()`). Next.js refuses server actions from other origins.
+- **Brute force:** 5 wrong tries for an email, or 20 from an IP, within 15 minutes lock sign-in for that window.
+  Unknown emails take as long as wrong passwords and get the same message.
+- **Headers on `/admin`:** a strict CSP with a fresh nonce per request (no inline or third-party scripts; the season
+  theme script is allowed by its SHA-256), `no-store`, `frame-ancestors 'none'` and `X-Frame-Options: DENY`, `noindex`,
+  HSTS, `nosniff`, `Referrer-Policy: no-referrer` and a locked-down `Permissions-Policy`.
+- **Audit log:** every sign-in (right, wrong or locked), sign-out, status change and email retry, kept for a year.
+- **Any new write** in the panel must be a server action that starts with `await requireAdmin()` and calls `audit()`.
 
 ## Motion
 

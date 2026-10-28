@@ -21,7 +21,7 @@ const SECTIONS = [
   {
     title: "What we collect",
     body: [
-      "When you send an inquiry: your company name, work email, buyer type, the country you ship to, the styles and quantities you chose, and any note you write.",
+      "When you send an inquiry: your company name, work email, buyer type, the country you ship to, the styles and quantities you chose, what you are asking for (a quote, samples, a visit…) and any note you write. We also note the country you browsed from, the page you sent it from and the season the site showed you, but not your IP address.",
       "When you sign up for line sheets: your work email and the page you signed up on.",
       "Your inquiry list is kept in your own browser (local storage) so it is still there when you come back. It reaches us only when you send it.",
       "Our hosting provider keeps standard server logs (such as IP address and browser type) to run and protect the site.",
@@ -38,7 +38,7 @@ const SECTIONS = [
   {
     title: "Who we share it with",
     body: [
-      "Our email delivery provider (to pass your inquiry to our trade desk), our hosting provider and our image host. They process data only on our instructions.",
+      "Our database provider (to keep your inquiry), our email delivery provider (to pass your inquiry to our trade desk, send you a confirmation and, if you sign up, line sheets), our hosting provider and our image host. They process data only on our instructions.",
       "Freight forwarders and inspection companies, only when you place an order that needs them. We never sell your data.",
     ],
   },
@@ -51,14 +51,14 @@ const SECTIONS = [
   {
     title: "How long we keep it",
     body: [
-      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Line-sheet signups: until you unsubscribe.",
+      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Inquiries we mark as spam: 30 days. Line-sheet signups: until you unsubscribe.",
     ],
   },
   {
     title: "Your rights",
     body: [
       "You can ask to see, correct or delete your data, object to how we use it, or take a copy of it. If you are in the EU or UK you can also complain to your data protection authority.",
-      `Write to ${COMPANY.email.general} and we reply within one month.`,
+      `Write to ${COMPANY.email.general}, quoting your inquiry reference (such as CL-2026-0142) if you have one, and we reply within one month.`,
     ],
   },
   {

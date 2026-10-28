@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMeta({
 
 const CATEGORIES = [
   {
-    name: "Ordering & MOQs",
+    name: "Ordering and MOQs",
     faqs: [
       {
         q: `What is the minimum order quantity (MOQ)?`,
@@ -31,7 +31,7 @@ const CATEGORIES = [
     ],
   },
   {
-    name: "Samples & Prototypes",
+    name: "Samples and prototypes",
     faqs: [
       {
         q: `How long do physical samples take to arrive?`,
@@ -48,7 +48,7 @@ const CATEGORIES = [
     ],
   },
   {
-    name: "Payments & Financial Terms",
+    name: "Payment and financial terms",
     faqs: [
       {
         q: `What are your standard wholesale payment terms?`,
@@ -65,7 +65,7 @@ const CATEGORIES = [
     ],
   },
   {
-    name: "Shipping, Customs & DDP",
+    name: "Shipping, customs and DDP",
     faqs: [
       {
         q: `What does DDP (Delivered Duty Paid) mean for our store?`,
@@ -96,29 +96,24 @@ export default function FaqPage() {
       <JsonLd data={FAQ_SCHEMA} />
       <PageIntro
         crumbs={[{ href: "/", label: "Home" }, { label: "Buyer FAQ" }]}
-        eyebrow="Commercial Knowledge Base & FAQs"
-        title="Wholesale trade terms & FAQ."
-        text="Clear answers regarding MOQ volumes, sample turnarounds, DDP landed pricing, payment terms, and custom production timelines."
+        eyebrow="Buyer FAQ"
+        title="Wholesale buyer FAQ."
+        text="MOQs, samples, payment, shipping and lead times, answered plainly."
       />
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        {/* Main FAQs */}
-        <div className="space-y-8">
-          {CATEGORIES.map((cat) => (
-            <section key={cat.name} className="rounded-shell border border-line/60 bg-tile p-6 sm:p-8 shadow-soft">
-              <span className="mono-label text-accent font-bold">CATEGORY</span>
-              <h2 className="font-headline text-[24px] leading-tight font-semibold tracking-[-0.015em] text-ink mt-1 mb-6 border-b border-line/50 pb-3">
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-14">
+        {/* the answers: one reading column, a category per section */}
+        <div className="grid gap-3.5">
+          {CATEGORIES.map((cat, i) => (
+            <section key={cat.name} aria-labelledby={`h-faq-${i}`} className="rounded-shell bg-tile p-[clamp(24px,3.4vw,44px)]">
+              <h2 id={`h-faq-${i}`} className="font-headline text-[clamp(24px,2.4vw,30px)] leading-tight font-semibold tracking-[-0.015em]">
                 {cat.name}
               </h2>
-              <div className="divide-y divide-line/50">
+              <div className="mt-5 divide-y divide-line border-t border-line">
                 {cat.faqs.map((faq) => (
-                  <div key={faq.q} className="py-4 first:pt-0 last:pb-0">
-                    <h3 className="text-base font-bold text-ink mb-2">
-                      {faq.q}
-                    </h3>
-                    <p className="text-xs leading-relaxed text-ink-2">
-                      {faq.a}
-                    </p>
+                  <div key={faq.q} className="py-5 last:pb-0">
+                    <h3 className="text-[17px] font-semibold tracking-[-0.005em]">{faq.q}</h3>
+                    <p className="mt-2 max-w-[68ch] text-[15px] leading-relaxed text-ink-2">{faq.a}</p>
                   </div>
                 ))}
               </div>
@@ -126,49 +121,42 @@ export default function FaqPage() {
           ))}
         </div>
 
-        {/* Sidebar Assistance */}
-        <aside className="space-y-4">
-          <div className="rounded-shell border border-line/60 bg-studio p-6 shadow-soft">
-            <span className="mono-label text-accent font-bold">TRADE DESK</span>
-            <h3 className="text-[18px] font-semibold tracking-[-0.01em] text-ink mt-1">Have an unlisted question?</h3>
-            <p className="mt-2 text-xs text-ink-2 leading-relaxed">
-              Our international wholesale accounts team responds to commercial inquiries within 24 hours.
-            </p>
-            <div className="mt-4 pt-4 border-t border-line/60 space-y-2 text-xs text-ink">
-              <div className="flex items-center gap-2">
-                <Icon name="mail" className="size-4 text-accent" />
-                <span className="font-semibold">wholesale@articafootwear.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Icon name="phone" className="size-4 text-accent" />
-                <span className="font-semibold">+1 (800) 412-8820 (EST)</span>
-              </div>
+        {/* help and the key numbers, kept in view while reading */}
+        <aside className="grid gap-3.5 lg:sticky lg:top-28">
+          <div data-deco="card" className="rounded-shell bg-studio p-7">
+            <p className="eyebrow">Trade desk</p>
+            <h2 className="mt-3 font-headline text-[24px] leading-tight font-semibold tracking-[-0.01em]">Have an unlisted question?</h2>
+            <p className="mt-2 text-[15px] leading-relaxed text-ink-2">Our wholesale accounts team replies to trade inquiries within 24 hours.</p>
+            <div className="mt-5 grid gap-1 border-t border-line pt-3 text-[14px]">
+              <a href="mailto:wholesale@articafootwear.com" className="inline-flex min-h-10 items-center gap-2.5 font-semibold hover:text-brand">
+                <Icon name="mail" className="size-4 text-muted" />
+                wholesale@articafootwear.com
+              </a>
+              <a href="tel:+18004128820" className="inline-flex min-h-10 items-center gap-2.5 text-ink-2 hover:text-brand">
+                <Icon name="phone" className="size-4 text-muted" />
+                +1 (800) 412-8820 (EST)
+              </a>
             </div>
-            <OpenInquiryButton className="btn btn-dark w-full mt-5">
-              Contact Accounts Team <Icon name="arrow" />
+            <OpenInquiryButton className="btn btn-dark mt-5 w-full">
+              Contact the accounts team <Icon name="arrow" />
             </OpenInquiryButton>
           </div>
 
-          <div className="glass-card rounded-shell p-6 shadow-xs border border-line/60">
-            <span className="mono-label text-[10px] text-muted">QUICK REFERENCE</span>
-            <ul className="mt-3 space-y-2.5 text-xs text-ink-2">
-              <li className="flex justify-between border-b border-line/40 pb-1.5">
-                <span>Standard MOQ</span>
-                <b className="text-ink">{MOQ_PAIRS} pairs (25 cases)</b>
-              </li>
-              <li className="flex justify-between border-b border-line/40 pb-1.5">
-                <span>Case Configuration</span>
-                <b className="text-ink">{PACK} pairs per case</b>
-              </li>
-              <li className="flex justify-between border-b border-line/40 pb-1.5">
-                <span>Sample Dispatch</span>
-                <b className="text-ink">10 business days</b>
-              </li>
-              <li className="flex justify-between">
-                <span>Bulk Production</span>
-                <b className="text-ink">45 business days</b>
-              </li>
-            </ul>
+          <div className="rounded-shell bg-tile p-7">
+            <p className="type-label text-muted">Quick reference</p>
+            <dl className="mt-3 divide-y divide-line text-[14px]">
+              {[
+                ["Standard MOQ", `${MOQ_PAIRS} pairs (${MOQ_CASES} cases)`],
+                ["Case pack", `${PACK} pairs per case`],
+                ["Sample dispatch", "10 business days"],
+                ["Bulk production", "45 business days"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 py-2.5">
+                  <dt className="text-ink-2">{k}</dt>
+                  <dd className="text-right font-semibold">{v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </aside>
       </div>

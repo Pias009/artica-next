@@ -101,12 +101,12 @@ export function RetailMerchandisingBanner() {
           </div>
         </div>
 
-        {/* the looks: two columns drifting past each other, faded out at the top and bottom edge */}
+        {/* the looks: two columns drifting past each other */}
         <div
           data-looks
           aria-label="FW26 looks"
           role="group"
-          className="relative grid h-[min(130vw,560px)] grid-cols-2 gap-3 overflow-hidden px-3 [mask-image:linear-gradient(180deg,transparent,#000_9%,#000_91%,transparent)] sm:gap-4 sm:px-4 lg:h-full lg:pr-4 lg:pl-0"
+          className="relative grid h-[min(130vw,560px)] grid-cols-2 gap-3 overflow-hidden px-3 sm:gap-4 sm:px-4 lg:h-full lg:pr-4 lg:pl-0"
         >
           {COLUMNS.map((col, c) => (
             <ul key={c} data-col className={`flex flex-col gap-3 will-change-transform sm:gap-4 ${c ? "pt-10" : ""}`}>

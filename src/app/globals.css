@@ -371,6 +371,11 @@
   :root {
     color-scheme: light;
   }
+  /* Page content keeps to the same 1440px column as the header, footer and page intro (.wrap). Margins, not a
+     max-width, so a narrower block still starts at the column's left edge; bleed bands and fixed layers opt out. */
+  main > :not(.bleed, .fixed, script) {
+    margin-inline: max(0px, (100% - 1440px) / 2);
+  }
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
@@ -872,6 +877,79 @@ html[data-season] .bg-season-field {
   background:
     radial-gradient(55% 80% at 100% 0%, var(--aurora-a), transparent 70%),
     linear-gradient(135deg, color-mix(in srgb, var(--color-frost) 82%, transparent), color-mix(in srgb, var(--color-ice) 72%, transparent));
+}
+
+/* Admin panel: cards rise in when a view opens; the top style floats; the save bar slides up. */
+@keyframes admin-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+@keyframes admin-float {
+  50% {
+    transform: translateY(-8px) rotate(-2deg);
+  }
+}
+@keyframes admin-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Admin panel: the agent's robot head. */
+@keyframes robot-bob {
+  50% {
+    transform: translateY(-5px) rotate(-2.5deg);
+  }
+}
+@keyframes robot-blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  94% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes robot-look {
+  0%,
+  30%,
+  100% {
+    transform: translateX(0);
+  }
+  40%,
+  55% {
+    transform: translateX(-6px);
+  }
+  65%,
+  85% {
+    transform: translateX(6px);
+  }
+}
+@keyframes robot-talk {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes robot-pulse {
+  50% {
+    transform: scale(1.5);
+    opacity: 0.35;
+  }
+}
+
+/* A freight scene coming in when the mode changes (Shipping page). */
+@keyframes scene-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 /* Seasonal background graphics micro-animations */

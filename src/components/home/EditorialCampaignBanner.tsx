@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
 import { usePickSeason } from "../season/pickSeason";
@@ -131,11 +131,19 @@ export function EditorialCampaignBanner() {
   );
 
   // Keep local banner in sync if the global season changes
-  useEffect(() => {
-    if (isSeason(globalSeason)) {
-      setActiveSeason(globalSeason);
-    }
-  }, [globalSeason]);
+  const [syncedSeason, setSyncedSeason] = useState(globalSeason);
+  if (globalSeason !== syncedSeason) {
+    setSyncedSeason(globalSeason);
+    if (isSeason(globalSeason)) setActiveSeason(globalSeason);
+  }
+
+  // Photos load only once their season is picked, and the outgoing one stays up until the incoming one has loaded,
+  // so the cross-fade never shows an empty frame and visitors who never switch download one photo, not six.
+  const [mounted, setMounted] = useState<SeasonId[]>(() => [activeSeason]);
+  const [loaded, setLoaded] = useState<ReadonlySet<SeasonId>>(() => new Set());
+  const [shown, setShown] = useState<SeasonId>(activeSeason);
+  if (!mounted.includes(activeSeason)) setMounted([...mounted, activeSeason]);
+  if (loaded.has(activeSeason) && shown !== activeSeason) setShown(activeSeason);
 
   const campaign = CAMPAIGNS[activeSeason] ?? CAMPAIGNS.winter;
 
@@ -175,25 +183,28 @@ export function EditorialCampaignBanner() {
       >
         {/* All season banner background images with silky smooth cross-fade */}
         <span data-campaign-drift className="absolute -inset-y-[6%] inset-x-0 block pointer-events-none">
-          {SEASON_IDS.map((id) => {
-            const c = CAMPAIGNS[id];
-            const isCurrent = id === activeSeason;
-            return (
-              <Image
-                key={id}
-                data-campaign-img={isCurrent ? "" : undefined}
-                src={c.image}
-                alt={c.alt}
-                fill
-                sizes="(min-width: 80rem) 1280px, 100vw"
-                priority={id === "winter"}
-                className={clsx(
-                  "object-cover object-[44%_50%] transition-opacity duration-700 ease-in-out",
-                  isCurrent ? "opacity-100" : "opacity-0 pointer-events-none"
-                )}
-              />
-            );
-          })}
+          {/* the scroll zoom sits on this wrapper, so a photo swapped in later is zoomed the same as the first */}
+          <span data-campaign-img className="absolute inset-0 block">
+            {mounted.map((id) => {
+              const c = CAMPAIGNS[id];
+              const isShown = id === shown;
+              return (
+                <Image
+                  key={id}
+                  src={c.image}
+                  alt={isShown ? c.alt : ""}
+                  aria-hidden={isShown ? undefined : true}
+                  fill
+                  sizes="(min-width: 80rem) 1280px, 100vw"
+                  onLoad={() => setLoaded((s) => new Set(s).add(id))}
+                  className={clsx(
+                    "object-cover object-[44%_50%] transition-opacity duration-700 ease-in-out",
+                    isShown ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              );
+            })}
+          </span>
         </span>
 
         {/* Ambient shade overlays so copy and interactive elements stay crisp across all lighting */}
@@ -224,7 +235,7 @@ export function EditorialCampaignBanner() {
                   onClick={() => handleSelectSeason(id)}
                   aria-pressed={isSelected}
                   className={clsx(
-                    "group flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all duration-200",
+                    "group flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold whitespace-nowrap transition-all duration-200",
                     isSelected
                       ? "bg-white text-ink shadow-sm"
                       : "text-white/80 hover:bg-white/20 hover:text-white"

@@ -22,7 +22,7 @@ export function VisitRequest() {
 
   const send = () => {
     const what = kind === "call" ? "Video call factory tour" : "Visit to Guangzhou";
-    openDrawer(undefined, undefined, `${what} request${date ? ` around ${date}` : ""}, ${people} ${people > 1 ? "people" : "person"}.`);
+    openDrawer(undefined, undefined, `${what} request${date ? ` around ${date}` : ""}, ${people} ${people > 1 ? "people" : "person"}.`, "visit");
   };
 
   return (

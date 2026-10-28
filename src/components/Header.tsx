@@ -380,7 +380,7 @@ export function Header() {
                 type="button"
                 onClick={() => openDrawer()}
                 data-inquiry-target
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[linear-gradient(180deg,#34352f,#121314)] pr-1.5 pl-4 text-[14px] font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.22),inset_0_-2px_0_rgb(0_0_0/.35),0_1px_1px_rgb(0_0_0/.25),0_10px_22px_-10px_rgb(18_20_22/.7)] transition-[background,box-shadow,translate] duration-300 ease-soft hover:-translate-y-px hover:bg-[linear-gradient(180deg,#a5479a,var(--color-brand))] active:translate-y-px active:shadow-[inset_0_2px_4px_rgb(0_0_0/.4),0_2px_6px_-2px_rgb(18_20_22/.5)] lg:pl-5"
+                className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full whitespace-nowrap bg-[linear-gradient(180deg,#34352f,#121314)] pr-1.5 pl-4 text-[14px] font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.22),inset_0_-2px_0_rgb(0_0_0/.35),0_1px_1px_rgb(0_0_0/.25),0_10px_22px_-10px_rgb(18_20_22/.7)] transition-[background,box-shadow,translate] duration-300 ease-soft hover:-translate-y-px hover:bg-[linear-gradient(180deg,#a5479a,var(--color-brand))] active:translate-y-px active:shadow-[inset_0_2px_4px_rgb(0_0_0/.4),0_2px_6px_-2px_rgb(18_20_22/.5)] lg:pl-5"
               >
                 <span className="max-lg:sr-only">Inquiry list</span>
                 <Icon name="list" className="size-4 lg:hidden" />

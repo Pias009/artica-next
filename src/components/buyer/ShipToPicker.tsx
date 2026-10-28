@@ -62,7 +62,7 @@ export function ShipToPicker() {
         <p className="mt-2 text-[15px] text-ink-2">{EXPORT_DOCS.join(" · ")}</p>
         <button
           type="button"
-          onClick={() => openDrawer(undefined, undefined, `Shipping to ${country}: please quote ${m.terms[0]}.`)}
+          onClick={() => openDrawer(undefined, undefined, `Shipping to ${country}: please quote ${m.terms[0]}.`, "shipping")}
           className="btn btn-dark mt-8"
         >
           Get a {m.terms[0]} quote to {country} <Icon name="arrow" />

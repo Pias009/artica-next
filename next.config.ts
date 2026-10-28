@@ -1,17 +1,22 @@
 import type { NextConfig } from "next";
+import { seasonScript } from "./src/lib/season";
 
 /** A week fresh, then served from cache while it refreshes in the background for another month. */
 const WEEK_CACHE = "public, max-age=604800, stale-while-revalidate=2592000";
 
 const nextConfig: NextConfig = {
+  // The season theme script's text, made once here and inlined as a string into every bundle. The layout prints it and
+  // proxy.ts hashes it for /admin's CSP: a string literal survives minifying unchanged, while each bundle would minify
+  // the functions it is made from differently (and the hash would stop matching).
+  env: { SEASON_SCRIPT: seasonScript() },
   images: {
     formats: ["image/avif", "image/webp"],
     // 75 is the default; 40 for the hero's blurred backdrop, 90 for its studio boot cutouts
     qualities: [40, 75, 90],
     // optimized product photos rarely change: keep them a week instead of the default 4 hours
     minimumCacheTTL: 604800,
-    // Studio style photos (src/lib/cloudinary-shots.json)
-    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com", pathname: "/dg0ffut8a/image/upload/**", search: "" }],
+    // Studio style photos (src/lib/cloudinary-shots.json), on the doulxmmm cloud
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com", pathname: "/doulxmmm/image/upload/**", search: "" }],
   },
   // Photos and the season art (public/images) keep the same names when replaced, so they are cached for a week, not
   // forever; a returning visitor's repeat views load from the browser.

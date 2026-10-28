@@ -83,9 +83,15 @@ export function paintSeason(data: SeasonData, ids: readonly string[], cookies: t
   }
 }
 
-/** The script tag's body: paintSeason called with its data. */
+/**
+ * The script tag's body: paintSeason called with its data. Built once in next.config.ts and read back from
+ * process.env.SEASON_SCRIPT (see paintScript), so every bundle carries the same bytes.
+ */
 export const seasonScript = () =>
   `(${paintSeason.toString()})(${JSON.stringify(SEASON_DATA)},${JSON.stringify(SEASON_IDS)},${JSON.stringify(SEASON_COOKIE)},${seasonOf.toString()})`;
+
+/** What the layout prints and /admin's CSP allows by hash; the fallback is for code running outside Next (tests). */
+export const paintScript = () => process.env.SEASON_SCRIPT ?? seasonScript();
 
 /* ---- How each season presents itself ---- */
 
