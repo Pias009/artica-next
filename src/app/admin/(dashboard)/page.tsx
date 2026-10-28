@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { AdminPanel } from "@/components/admin/AdminPanel";
-import { requireAdmin } from "@/lib/admin/auth";
+import { adminReady, currentAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 /**
- * The admin dashboard (src/components/admin/AdminPanel), full-screen. Like every admin page it checks the session in
- * the database first; the proxy's cookie check alone never decides.
+ * The admin dashboard (src/components/admin/AdminPanel), full-screen. It opens without signing in: the panel shows
+ * sample data and changes nothing on the site. The pages with real data (/admin/inquiries, /admin/security) and every
+ * server action still check the session. A signed-in admin sees their name on the account menu.
  */
 export default async function AdminHome() {
-  const { admin } = await requireAdmin();
-  return <AdminPanel admin={{ name: admin.name, email: admin.email }} />;
+  const signedIn = adminReady() ? await currentAdmin().catch(() => null) : null;
+  return <AdminPanel admin={signedIn ? { name: signedIn.admin.name, email: signedIn.admin.email } : undefined} />;
 }

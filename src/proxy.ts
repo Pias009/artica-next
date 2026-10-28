@@ -59,7 +59,8 @@ const SEASON_HASH = `'sha256-${createHash("sha256").update(paintScript()).digest
  */
 function admin(req: NextRequest) {
   const dev = process.env.NODE_ENV === "development";
-  const signInPage = req.nextUrl.pathname === "/admin/login";
+  // /admin itself (the dashboard UI, sample data only) opens without signing in; every page with real data still needs it
+  const signInPage = req.nextUrl.pathname === "/admin/login" || req.nextUrl.pathname === "/admin";
   if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !(req.cookies.has(SKIP_COOKIE) && skipAllowed(req.headers.get("host")))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
