@@ -177,16 +177,11 @@ Needs `MONGODB_URI` and `ADMIN_ENC_KEY` (`openssl rand -base64 32`; already in `
 `ADMIN_ENC_KEY` in Vercel: authenticator keys are sealed with it, so a different key locks everyone out until `reset`.
 Without either, `/admin/login` says the panel isn't set up and no one can sign in.
 
-**Local testing without signing in:** `ADMIN_DEV_BYPASS=1` in `.env.local` (already set) skips sign-in, but only
-under `npm run dev` and only at `localhost` / `127.0.0.1`. An orange "sign-in skipped" badge shows while it's on, and
-changes are audited as `dev@localhost`. It can't work on Vercel or after `next build`, where the app always runs as
-production; `tests/admin-bypass.test.mjs` checks this. Never add the flag to Vercel's environment.
-
-**Open access on a Vercel deployment (temporary):** set `ADMIN_OPEN_UNTIL` to a date, e.g. `2026-11-05`, in the
-project's environment and redeploy. Sign-in is skipped through that day (UTC), then comes back on its own with no
-redeploy. It works only on Vercel (`VERCEL=1`), and a date more than 31 days ahead is ignored. While it's on,
-**anyone with the address can see buyers' names, emails and orders and change their status**: an orange badge says so
-on every admin page, and changes are audited as `open-access`. Remove the variable to end it early (then redeploy).
+**Skip sign-in (dev):** the sign-in page shows a "Skip sign-in (dev)" button on `npm run dev` at `localhost`, and
+on **Vercel preview** links (which sit behind Vercel's own login, so keep Deployment Protection on). It opens the
+panel without an account or a database: the dashboard shows sample data, and the inquiry pages ask for `MONGODB_URI`.
+An orange "sign-in skipped" badge shows, and Sign out ends it. The button never appears on production (the live
+site), and a skip cookie is ignored there; `tests/admin-bypass.test.mjs` checks this.
 
 How it's protected (`src/lib/admin/auth.ts`, `src/proxy.ts`):
 - **Three factors:** a password (scrypt, N=2^15), a TOTP code, and the email. A code works once, so a code

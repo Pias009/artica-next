@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { SESSION_COOKIE, signInSkipped } from "./cookie";
+import { SESSION_COOKIE, SKIP_COOKIE, skipAllowed } from "./cookie";
 import { dummyHash, newToken, open, tokenHash, verifyPassword, verifyTotp } from "./crypto";
 import { database, dbReady } from "@/lib/leads/db";
 
@@ -156,8 +156,8 @@ export async function signIn(emailIn: string, password: string, code: string): P
  * components ask. Null when there is no valid session. Moves the idle deadline along at most every 5 minutes.
  */
 export const currentAdmin = cache(async (): Promise<{ admin: Admin; session: Session } | null> => {
-  const skipped = await bypassed();
-  if (skipped) return skipped === "local" ? LOCAL : OPEN;
+  const skip = await skipped();
+  if (skip) return skip === "local" ? LOCAL : PREVIEW;
   if (!adminReady()) return null;
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token || token.length > 100) return null;
@@ -173,11 +173,30 @@ export const currentAdmin = cache(async (): Promise<{ admin: Admin; session: Ses
   return { admin, session };
 });
 
-/**
- * Whether sign-in is skipped for this request: "local" (`next dev` on localhost with ADMIN_DEV_BYPASS=1) or
- * "deployed" (Vercel, while ADMIN_OPEN_UNTIL holds). The rules are in cookie.ts signInSkipped.
- */
-export const bypassed = async () => signInSkipped((await headers()).get("host"));
+/** Whether the sign-in page may offer "Skip sign-in (dev)" here: "local", "preview" or false (cookie.ts skipAllowed). */
+export const skipMode = async () => skipAllowed((await headers()).get("host"));
+
+/** Whether this request is in a skipped sign-in: the skip cookie, on a server where skipping is allowed. */
+export const skipped = cache(async () => {
+  const mode = await skipMode();
+  return mode && (await cookies()).has(SKIP_COOKIE) ? mode : false;
+});
+
+/** The "Skip sign-in (dev)" button. False where skipping isn't allowed (production). Server actions only. */
+export async function skipSignIn() {
+  const mode = await skipMode();
+  if (!mode) return false;
+  (await cookies()).set(SKIP_COOKIE, "1", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: ABSOLUTE / 1000,
+  });
+  const who = mode === "local" ? LOCAL : PREVIEW;
+  if (dbReady()) await audit({ adminId: who.admin._id, email: who.admin.email, action: "sign_in_skipped" });
+  return true;
+}
 
 /** Who you are while sign-in is skipped. Changes are still audited, under these addresses. */
 function standIn(id: string, email: string, name: string): { admin: Admin; session: Session } {
@@ -188,8 +207,8 @@ function standIn(id: string, email: string, name: string): { admin: Admin; sessi
     session: { _id, tokenHash: "", adminId: _id, createdAt: new Date(0), lastSeenAt: new Date(0), expiresAt: never, idleUntil: never, ip: null, country: null, userAgent: "" },
   };
 }
-const LOCAL = standIn("000000000000000000000000", "dev@localhost", "Local dev (sign-in skipped)");
-const OPEN = standIn("000000000000000000000001", "open-access", "Open access (sign-in skipped)");
+const LOCAL = standIn("000000000000000000000000", "dev@localhost", "Dev (sign-in skipped)");
+const PREVIEW = standIn("000000000000000000000001", "dev@preview", "Dev (sign-in skipped)");
 
 /** For every admin page and server action: the admin, or off to the sign-in page. */
 export async function requireAdmin() {
@@ -203,7 +222,8 @@ export async function signOut() {
   const who = await currentAdmin();
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
-  if (token) await sessions().deleteOne({ tokenHash: tokenHash(token) });
+  if (token && dbReady()) await sessions().deleteOne({ tokenHash: tokenHash(token) });
   jar.delete(SESSION_COOKIE);
-  if (who) await audit({ adminId: who.admin._id, email: who.admin.email, action: "sign_out" });
+  jar.delete(SKIP_COOKIE);
+  if (who && dbReady()) await audit({ adminId: who.admin._id, email: who.admin.email, action: "sign_out" });
 }

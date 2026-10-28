@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, signInSkipped } from "@/lib/admin/cookie";
+import { SESSION_COOKIE, SKIP_COOKIE, skipAllowed } from "@/lib/admin/cookie";
 import { isSeason, SEASON_COOKIE, SEASON_DATA, paintScript, seasonOf } from "@/lib/season";
 
 const MONTH = 60 * 60 * 24 * 30;
@@ -60,7 +60,7 @@ const SEASON_HASH = `'sha256-${createHash("sha256").update(paintScript()).digest
 function admin(req: NextRequest) {
   const dev = process.env.NODE_ENV === "development";
   const signInPage = req.nextUrl.pathname === "/admin/login";
-  if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !signInSkipped(req.headers.get("host"))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
+  if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !(req.cookies.has(SKIP_COOKIE) && skipAllowed(req.headers.get("host")))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const csp = [

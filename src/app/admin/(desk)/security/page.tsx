@@ -11,6 +11,7 @@ const ACTION: Record<string, string> = {
   sign_in: "Signed in",
   sign_in_failed: "Sign-in failed",
   sign_in_locked: "Sign-in locked (too many tries)",
+  sign_in_skipped: "Skipped sign-in (dev)",
   sign_out: "Signed out",
   status: "Changed status",
   retry_emails: "Retried emails",
