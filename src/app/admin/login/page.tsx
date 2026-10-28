@@ -28,15 +28,18 @@ export default async function SignInPage() {
           )
         )}
 
-        {/* development only: local `next dev` and Vercel previews (behind Vercel's own login); never the live site */}
+        {/* local dev, Vercel previews, and deployments with no database yet; never where real inquiries live (cookie.ts) */}
         {skip && (
           <form action={skipSignInAction} className={ready ? "mt-5 border-t border-line pt-5" : "mt-6"}>
             <button type="submit" className="btn h-[48px] w-full bg-[#b45309] text-white hover:bg-[#92400e]">
               Skip sign-in (dev)
             </button>
             <p className="mt-2 text-center text-[12px] text-muted">
-              {skip === "local" ? "Only on this computer." : "Only on Vercel preview links."} The live site always asks for sign-in.
-              {!ready && " Live inquiries need MONGODB_URI here; the dashboard shows sample data."}
+              {skip === "local"
+                ? "Only on this computer."
+                : skip === "preview"
+                  ? "Only on Vercel preview links."
+                  : "Only while this deployment has no database: the panel shows sample data. Once MONGODB_URI is set here, sign-in is required."}
             </p>
           </form>
         )}

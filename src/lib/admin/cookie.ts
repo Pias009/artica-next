@@ -10,14 +10,16 @@ export const SKIP_COOKIE = `${HOST}cl_admin_skip`;
 /**
  * Where the sign-in page offers "Skip sign-in (dev)", and why. `host` is the request's Host header.
  *  - "local": `next dev`, addressed to this machine (a dev server reachable from the network still asks for sign-in).
- *  - "preview": a Vercel preview deployment. Those sit behind Vercel's own login (Deployment Protection), so only
- *    people on the Vercel team reach them; keep that protection on.
- * Never on production (the live site) or any other server: the real sign-in is the only way in there.
+ *  - "preview": a Vercel preview deployment, behind Vercel's own login (Deployment Protection); keep that on.
+ *  - "no-data": any other deployment (production included) that has no database yet (no MONGODB_URI), so the panel
+ *    has only sample data to show. The moment MONGODB_URI is set there, real buyers' data is behind /admin and the
+ *    button goes: only the real sign-in opens it.
  */
-export function skipAllowed(host: string | null | undefined): false | "local" | "preview" {
+export function skipAllowed(host: string | null | undefined): false | "local" | "preview" | "no-data" {
   if (process.env.NODE_ENV === "development") {
     const name = (host ?? "").replace(/:\d+$/, "").toLowerCase();
     return name === "localhost" || name === "127.0.0.1" || name === "[::1]" ? "local" : false;
   }
-  return process.env.VERCEL_ENV === "preview" ? "preview" : false;
+  if (process.env.VERCEL_ENV === "preview") return "preview";
+  return process.env.MONGODB_URI ? false : "no-data";
 }
