@@ -4,6 +4,7 @@ import { BuyerTypes } from "./BuyerTypes";
 import { EditorialCampaignBanner } from "./EditorialCampaignBanner";
 import { HeroSpotlight } from "./HeroSpotlight";
 import { HomeReveal } from "./HomeReveal";
+import { HotProducts } from "./HotProducts";
 import { HowItShips } from "./HowItShips";
 import { LineSheetCta } from "./LineSheetCta";
 import { OrderJourney } from "./OrderJourney";
@@ -12,8 +13,8 @@ import { UpClose } from "./UpClose";
 import type { SeasonId } from "@/lib/season";
 
 /**
- * A wholesale buyer's path, one section per question: what's in season (the hero and the season's edit), the whole
- * range, the brand (the campaign), the proof (up close), who it's for, how an order is packed, how long it takes, then
+ * A wholesale buyer's path, one section per question: what's in season (the hero and the season's edit), what buyers
+ * reorder (hot products), the whole range, the brand (the campaign), the proof (up close), who it's for, how an order is packed, how long it takes, then
  * the close (the line sheet). Everything else a buyer may want (samples, order sheet, order calendar, trade lanes,
  * the buyer tools, private label) has its own page, linked from the header, the footer and these sections.
  *
@@ -26,6 +27,7 @@ export function HomePage({ season }: { season: SeasonId }) {
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-aurora" />
       <HeroSpotlight />
       <SeasonShowcase season={season} />
+      <HotProducts />
       <BestSellers />
       <EditorialCampaignBanner />
       <UpClose />

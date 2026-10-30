@@ -19,6 +19,8 @@ import { offTilt, onTilt } from "@/lib/tilt";
  */
 const HOT = ["nord", "mira", "mira-tall", "ember", "maple", "cedar", "raven", "sable"];
 const DECK_SIZE = HOT.length;
+/** Where a grid taller than the window pins: just under the header. */
+const PIN_TOP = 96;
 
 /**
  * The deck for a season: its in-season styles first (best first), topped up from the reorder list. Up to eight fit as
@@ -63,12 +65,16 @@ export function HotProducts() {
         // a right-drifting layer waits shifted half its length, so its cards sit that much further left
         const shift = (c: HTMLElement) => (c.parentElement?.dataset.reverse ? c.parentElement.offsetWidth / 2 : 0);
         const dx = (c: HTMLElement) => el.offsetWidth / 2 - (c.offsetLeft - shift(c) + c.offsetWidth / 2);
-        const dy = (c: HTMLElement) => el.offsetHeight / 2 - (c.offsetTop + c.offsetHeight / 2);
+        // the deck waits in the middle of what's on screen: on a laptop the two-row grid is taller than the window, and
+        // its own middle would leave the deck low and half cut off, under an empty-looking band
+        const tall = () => el.offsetHeight > innerHeight - 120;
+        const deckY = () => (tall() ? Math.min(el.offsetHeight, innerHeight - PIN_TOP) / 2 : el.offsetHeight / 2);
+        const dy = (c: HTMLElement) => deckY() - (c.offsetTop + c.offsetHeight / 2);
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: el,
-            start: () => (el.offsetHeight < innerHeight - 120 ? "center center" : "top 96px"),
+            start: () => (tall() ? `top ${PIN_TOP}px` : "center center"),
             end: "+=125%",
             pin: ref.current?.querySelector("[data-pin]") ?? el,
             scrub: 1.1,
