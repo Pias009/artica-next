@@ -91,11 +91,10 @@ export function LineSheetCta() {
     >
       <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-16 gap-y-12 px-[clamp(20px,4vw,64px)] py-[clamp(48px,7vw,104px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         <div data-sheet-copy>
-          <p className="eyebrow">Line sheet · {products.length} styles</p>
           <h2 id="h-sheet" className="type-section mt-3 max-w-[16ch]">
             Get the full <em>wholesale line sheet.</em>
           </h2>
-          <p className="mt-4 max-w-[46ch] text-[17px] text-ink-2">
+          <p className="mt-4 max-w-[46ch] text-[18px] text-ink-2">
             Every style, size run and case-pack ratio, with tier pricing for
             your volume.
           </p>
@@ -138,7 +137,7 @@ export function LineSheetCta() {
             {POINTS.map((t) => (
               <li
                 key={t}
-                className="flex items-center gap-2 text-[14px] font-medium text-ink-2"
+                className="flex items-center gap-2 text-[15px] font-medium text-ink-2"
               >
                 <Icon name="check" className="size-4 text-glacier" />
                 {t}
@@ -161,7 +160,7 @@ export function LineSheetCta() {
           </div>
           <div data-page className="absolute inset-0">
             <div className="relative size-full origin-bottom-right rotate-[4deg] rounded-[10px] bg-white/85 shadow-float transition-[rotate,translate] duration-700 ease-soft group-hover/stack:translate-x-3 group-hover/stack:rotate-[7deg]">
-              <span className="absolute right-6 bottom-4 text-[11px] font-semibold text-muted tabular-nums">
+              <span className="absolute right-6 bottom-4 text-[13px] font-semibold text-muted tabular-nums">
                 02 / {String(PAGES).padStart(2, "0")}
               </span>
             </div>
@@ -171,21 +170,21 @@ export function LineSheetCta() {
             <div className="relative rounded-[10px] bg-white p-[clamp(16px,3vw,28px)] shadow-[0_40px_60px_-30px_rgb(18_20_22/.35)] transition-[translate] duration-700 ease-soft group-hover/stack:-translate-y-2">
               <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
                 <div>
-                  <p className="text-[11px] font-bold tracking-[0.16em]">
+                  <p className="text-[13px] font-bold">
                     CHIME LONG
                   </p>
                   <p className="mt-1 text-[20px] leading-none font-semibold tracking-[-0.02em]">
                     Wholesale Line sheet
                   </p>
                 </div>
-                <p className="text-right text-[11px] leading-snug text-muted tabular-nums">
+                <p className="text-right text-[13px] leading-snug text-muted tabular-nums">
                   Wholesale · USD
                   <br />
                   01 / {String(PAGES).padStart(2, "0")}
                 </p>
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-4 pt-3 pb-1 text-[10px] font-semibold tracking-[0.08em] text-muted uppercase">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-4 pt-3 pb-1 text-[13px] font-semibold text-muted">
                 <span>Style</span>
                 <span className="w-16 text-right max-sm:hidden">Sizes</span>
                 <span className="w-14 text-right">Case</span>
@@ -208,24 +207,24 @@ export function LineSheetCta() {
                         />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-[14px] leading-tight font-semibold">
+                        <span className="block truncate text-[15px] leading-tight font-semibold">
                           {p.name}
                         </span>
-                        <span className="block truncate text-[12px] text-muted">
+                        <span className="block truncate text-[13px] text-muted">
                           {LINE_LABEL[p.line]} · {p.type}
                         </span>
                       </span>
                     </span>
-                    <span className="w-16 text-right text-[12px] whitespace-nowrap text-ink-2 tabular-nums max-sm:hidden">
+                    <span className="w-16 text-right text-[13px] whitespace-nowrap text-ink-2 tabular-nums max-sm:hidden">
                       {p.sizes.replace(/^US\s*/, "")}
                     </span>
-                    <span className="w-14 text-right text-[12px] font-semibold tabular-nums">
+                    <span className="w-14 text-right text-[13px] font-semibold tabular-nums">
                       {PACK} prs
                     </span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-2 flex items-center justify-between gap-3 rounded-ph bg-tile px-3 py-2.5 text-[12px]">
+              <div className="mt-2 flex items-center justify-between gap-3 rounded-ph bg-tile px-3 py-2.5 text-[13px]">
                 <span className="text-ink-2">
                   + {products.length - ROWS.length} more styles · MOQ {MOQ_PAIRS}{" "}
                   pairs
@@ -237,7 +236,7 @@ export function LineSheetCta() {
                 data-stamp
                 className="absolute -right-3 -bottom-8 sm:-right-7"
               >
-                <span className="grid size-[92px] rotate-[-14deg] place-items-center rounded-full border-2 border-dashed border-brand/60 bg-brand-soft text-center text-[10px] leading-tight font-bold tracking-[0.12em] text-brand-deep shadow-soft">
+                <span className="grid size-[92px] rotate-[-14deg] place-items-center rounded-full border-2 border-dashed border-brand/60 bg-brand-soft text-center text-[13px] leading-tight font-bold text-brand-deep shadow-soft">
                   <span>
                     TRADE
                     <br />

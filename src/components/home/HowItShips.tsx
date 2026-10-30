@@ -190,7 +190,7 @@ export function HowItShips() {
               {s.id === "case" && (
                 <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Pairs per size in one men's case">
                   {CASE_PACK.men.map(([size, n]) => (
-                    <li key={size} data-ratio className="rounded-full bg-tile px-2.5 py-1 text-[12.5px] font-medium tabular-nums">
+                    <li key={size} data-ratio className="rounded-full bg-tile px-2.5 py-1 text-[13px] font-medium tabular-nums">
                       US {size} <span className="text-muted">×{n}</span>
                     </li>
                   ))}

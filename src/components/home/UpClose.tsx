@@ -164,17 +164,16 @@ export function UpClose() {
         {/* Section Header */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-6 md:mb-9">
           <div className="max-w-[640px]">
-            <p className="eyebrow">Up close · Chime Long Nord</p>
             <h2 id="h-close" className="type-section mt-3">
               Look closer. <em>Every stitch</em> inspected.
             </h2>
-            <p className="mt-2.5 text-[15px] leading-relaxed text-ink-2 md:text-[16.5px]">
+            <p className="mt-2.5 text-[15px] leading-relaxed text-ink-2 md:text-[16px]">
               Tap a point on the boot to zoom in, or switch on the loupe to see the leather grain up close.
             </p>
           </div>
 
           {/* Stepper Arrow Nav */}
-          <div className="flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 p-1.5 shadow-soft backdrop-blur-md">
+          <div className="flex items-center gap-2 rounded-full border border-ink/10 bg-white/90 p-1.5 shadow-soft backdrop-blur-sm">
             <button
               type="button"
               onClick={() => activeStep !== null && focusStep(Math.max(0, activeStep - 1))}
@@ -184,7 +183,7 @@ export function UpClose() {
             >
               <Icon name="arrow" className="size-3.5 rotate-180" />
             </button>
-            <span className="px-2 text-[12.5px] font-bold tracking-wider text-ink tabular-nums">
+            <span className="px-2 text-[13px] font-boldr text-ink tabular-nums">
               {activeStep === null ? "--" : `0${activeStep + 1}`} <span className="text-muted font-normal">/</span> 04
             </span>
             <button
@@ -204,7 +203,7 @@ export function UpClose() {
           {/* LEFT: Interactive Step Cards */}
           <div className="flex flex-col justify-center">
             {/* Progress Bar */}
-            <div className="mb-4 flex items-center justify-between text-[12px] font-bold tracking-wider uppercase text-muted">
+            <div className="mb-4 flex items-center justify-between text-[13px] font-boldr text-muted">
               <span>The details</span>
               <span className="text-brand tabular-nums">
                 {activeStep === null ? "Full view" : `${activeStep + 1} / ${STEPS.length}`}
@@ -237,7 +236,7 @@ export function UpClose() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <span
-                          className={`flex size-6 items-center justify-center rounded-full text-[12px] font-bold transition-all ${
+                          className={`flex size-6 items-center justify-center rounded-full text-[13px] font-bold transition-all ${
                             isActive
                               ? "bg-brand text-white shadow-xs scale-105"
                               : "bg-ink/8 text-ink-2 group-hover:bg-ink/15"
@@ -254,7 +253,7 @@ export function UpClose() {
                         </h3>
                       </div>
                       <span
-                        className={`rounded-md px-2 py-0.5 text-[12px] font-bold tracking-wider uppercase transition-colors ${
+                        className={`rounded-md px-2 py-0.5 text-[13px] font-boldr transition-colors ${
                           isActive ? "bg-brand/15 text-brand" : "bg-ink/6 text-muted"
                         }`}
                       >
@@ -262,7 +261,7 @@ export function UpClose() {
                       </span>
                     </div>
 
-                    <p className="mt-1.5 pl-8.5 text-[13.5px] leading-relaxed text-ink-2">
+                    <p className="mt-1.5 pl-8.5 text-[13px] leading-relaxed text-ink-2">
                       {s.text}
                     </p>
 
@@ -273,11 +272,11 @@ export function UpClose() {
                       }`}
                     >
                       <div className="flex flex-wrap items-center gap-2 border-t border-brand/15 pt-2">
-                        <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-brand">
+                        <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand">
                           <Icon name={s.icon} className="size-3.5" />
                           {s.spec}
                         </span>
-                        <span className="text-[12px] text-muted">· {s.benefit}</span>
+                        <span className="text-[13px] text-muted">· {s.benefit}</span>
                       </div>
                     </div>
 
@@ -298,7 +297,7 @@ export function UpClose() {
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <QuickViewButton
                 id={P.id}
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/15 bg-white px-5 text-[12.5px] font-bold text-ink shadow-soft transition-all hover:border-ink/40 hover:bg-white hover:shadow-md active:scale-98"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/15 bg-white px-5 text-[13px] font-bold text-ink shadow-soft transition-all hover:border-ink/40 hover:bg-white hover:shadow-md active:scale-98"
               >
                 <Icon name="search" className="size-3.5" />
                 <span>See all Nord specs</span>
@@ -326,10 +325,10 @@ export function UpClose() {
               }`}
             >
               {/* Engineering Corner Grid Crosshairs */}
-              <span className="pointer-events-none absolute top-3.5 left-4 text-[11px] font-mono text-ink/25">+</span>
-              <span className="pointer-events-none absolute top-3.5 right-4 text-[11px] font-mono text-ink/25">+</span>
-              <span className="pointer-events-none absolute bottom-3.5 left-4 text-[11px] font-mono text-ink/25">+</span>
-              <span className="pointer-events-none absolute bottom-3.5 right-4 text-[11px] font-mono text-ink/25">+</span>
+              <span className="pointer-events-none absolute top-3.5 left-4 text-[13px] font-mono text-ink/25">+</span>
+              <span className="pointer-events-none absolute top-3.5 right-4 text-[13px] font-mono text-ink/25">+</span>
+              <span className="pointer-events-none absolute bottom-3.5 left-4 text-[13px] font-mono text-ink/25">+</span>
+              <span className="pointer-events-none absolute bottom-3.5 right-4 text-[13px] font-mono text-ink/25">+</span>
 
               {/* Ambient radial lighting glow */}
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(152,64,128,0.06),transparent_70%)]" />
@@ -337,12 +336,12 @@ export function UpClose() {
               {/* TOP HUD CONTROLS */}
               <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2.5">
                 {/* Angle Toggle */}
-                <div className="flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 p-1 shadow-soft backdrop-blur-md">
+                <div className="flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 p-1 shadow-soft backdrop-blur-sm">
                   <button
                     type="button"
                     onClick={() => setViewAngle("outer")}
                     aria-pressed={viewAngle === "outer"}
-                    className={`rounded-full px-3 py-1 text-[12px] font-bold tracking-wide transition-all ${
+                    className={`rounded-full px-3 py-1 text-[13px] font-bold transition-all ${
                       viewAngle === "outer"
                         ? "bg-ink text-white shadow-xs"
                         : "text-ink-2 hover:text-ink"
@@ -358,7 +357,7 @@ export function UpClose() {
                       resetToOverview();
                     }}
                     aria-pressed={viewAngle === "zip"}
-                    className={`rounded-full px-3 py-1 text-[12px] font-bold tracking-wide transition-all ${
+                    className={`rounded-full px-3 py-1 text-[13px] font-bold transition-all ${
                       viewAngle === "zip"
                         ? "bg-ink text-white shadow-xs"
                         : "text-ink-2 hover:text-ink"
@@ -377,7 +376,7 @@ export function UpClose() {
                       if (!loupeActive) resetToOverview();
                       setLoupeActive(!loupeActive);
                     }}
-                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11.5px] font-bold tracking-wide transition-all duration-300 ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-all duration-300 ${
                       loupeActive
                         ? "bg-brand text-white shadow-[0_6px_20px_rgba(152,64,128,0.45)] ring-2 ring-brand/40 scale-102"
                         : "border border-ink/10 bg-white/90 text-ink shadow-soft hover:bg-white hover:border-brand/40 hover:text-brand hover:shadow-md"
@@ -390,7 +389,7 @@ export function UpClose() {
                   <button
                     type="button"
                     onClick={resetToOverview}
-                    className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 px-2.5 py-1.5 text-[12px] font-semibold text-ink-2 shadow-soft backdrop-blur-md transition-all hover:bg-white hover:text-ink hover:shadow-xs"
+                    className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white/85 px-2.5 py-1.5 text-[13px] font-semibold text-ink-2 shadow-soft backdrop-blur-sm transition-all hover:bg-white hover:text-ink hover:shadow-xs"
                     title="Reset to full view"
                   >
                     <span>1× Overview</span>
@@ -450,12 +449,12 @@ export function UpClose() {
                                   : "border-ink/20 bg-white/95 text-ink hover:border-brand hover:text-brand"
                               }`}
                             >
-                              <span className="text-[10px] font-bold">0{i + 1}</span>
+                              <span className="text-[13px] font-bold">0{i + 1}</span>
                             </span>
 
                             {/* name tag, kept on the inner side of hotspots near an edge */}
                             <span
-                              className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[12px] font-bold shadow-soft transition-all duration-200 ${s.x > 62 ? "right-0" : s.x < 38 ? "left-0" : "left-1/2 -translate-x-1/2"} ${
+                              className={`pointer-events-none absolute -top-7 whitespace-nowrap rounded-md px-2 py-0.5 text-[13px] font-bold shadow-soft transition-all duration-200 ${s.x > 62 ? "right-0" : s.x < 38 ? "left-0" : "left-1/2 -translate-x-1/2"} ${
                                 isSelected
                                   ? "bg-brand text-white opacity-100 -translate-y-1"
                                   : "bg-ink/90 text-white opacity-0 group-hover:opacity-100 group-hover:-translate-y-1"
@@ -497,7 +496,7 @@ export function UpClose() {
                   <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/15 to-white/35" />
 
                   {/* Lens Spec Badge */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-ink/90 px-2.5 py-0.5 text-[9.5px] font-bold tracking-wider text-white uppercase backdrop-blur-md shadow-xs">
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-ink/90 px-2.5 py-0.5 text-[13px] font-boldr text-white backdrop-blur-sm shadow-xs">
                     3.6× Macro
                   </div>
                 </div>
@@ -505,21 +504,21 @@ export function UpClose() {
 
               {/* BOTTOM HUD SPEC CAPSULE */}
               <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2.5">
-                <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/90 bg-white/90 px-3.5 py-1.5 shadow-soft backdrop-blur-md">
+                <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/90 bg-white/90 px-3.5 py-1.5 shadow-soft backdrop-blur-sm">
                   <span className="relative flex size-2">
                     <span className="absolute inline-flex size-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
                     <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
                   </span>
-                  <span className="text-[12px] font-bold text-ink">
+                  <span className="text-[13px] font-bold text-ink">
                     {current ? current.title : "Full view"}
                   </span>
                   <span className="text-black/15">·</span>
-                  <span className="text-[11.5px] font-medium text-ink-2 max-sm:hidden">
+                  <span className="text-[13px] font-medium text-ink-2 max-sm:hidden">
                     {current ? current.spec : "Tap a point to zoom in"}
                   </span>
                 </div>
 
-                <div className="pointer-events-auto rounded-full border border-ink/8 bg-white/80 px-3 py-1 text-[12px] font-bold text-ink-2 shadow-xs backdrop-blur-md">
+                <div className="pointer-events-auto rounded-full border border-ink/8 bg-white/80 px-3 py-1 text-[13px] font-bold text-ink-2 shadow-xs backdrop-blur-sm">
                   Rated −25°C
                 </div>
               </div>
@@ -534,7 +533,7 @@ export function UpClose() {
                     type="button"
                     onClick={() => focusStep(i)}
                     aria-pressed={activeStep === i}
-                    className={`rounded-full px-2.5 py-1 text-[12px] font-semibold transition-all ${
+                    className={`rounded-full px-2.5 py-1 text-[13px] font-semibold transition-all ${
                       activeStep === i
                         ? "bg-brand text-white shadow-xs"
                         : "bg-white/80 text-ink-2 hover:bg-white hover:text-ink"
@@ -545,7 +544,7 @@ export function UpClose() {
                 ))}
               </div>
 
-              <span className="text-[12px] font-medium text-muted">
+              <span className="text-[13px] font-medium text-muted">
                 Move cursor over boot to inspect
               </span>
             </div>

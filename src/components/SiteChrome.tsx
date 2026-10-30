@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { KaiLauncher } from "./assistant/KaiLauncher";
 import { Fab } from "./Fab";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
@@ -75,6 +76,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         <Footer />
       </div>
       <Fab />
+      <KaiLauncher />
       <SeasonPreview />
       <QuickView />
       <InquiryDrawer />

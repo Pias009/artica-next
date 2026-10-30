@@ -4,7 +4,8 @@ import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { audit, requireAdmin, sessions, signIn, signOut, skipSignIn } from "@/lib/admin/auth";
-import { retryEmails } from "@/lib/admin/inquiries";
+import { inquiryDetail, retryEmails } from "@/lib/admin/inquiries";
+import { draftReply, type ReplyDraft } from "@/lib/assistant/reply";
 import { isDeskStatus } from "@/lib/leads/desk";
 import { setStatus } from "@/lib/leads/inquiries";
 
@@ -68,4 +69,15 @@ export async function endOtherSessionsAction() {
   const { deletedCount } = await sessions().deleteMany({ adminId: admin._id, _id: { $ne: session._id } });
   await audit({ adminId: admin._id, email: admin.email, action: "end_other_sessions", detail: `${deletedCount} ended` });
   revalidatePath("/admin/security");
+}
+
+/** "Draft a reply with Kai" on an inquiry: a first draft for the desk to check, price and send. */
+export async function draftReplyAction(ref: string): Promise<ReplyDraft | null> {
+  const { admin } = await requireAdmin();
+  if (!REF.test(ref)) return null;
+  const i = await inquiryDetail(ref);
+  if (!i) return null;
+  const draft = await draftReply(i);
+  await audit({ adminId: admin._id, email: admin.email, action: "reply_drafted", ref, detail: draft.source });
+  return draft;
 }

@@ -216,15 +216,15 @@ export function EditorialCampaignBanner() {
         {/* Top Floating Bar: Season Switcher & Campaign Badges */}
         <div className="absolute inset-x-4 top-4 z-20 flex flex-wrap items-center justify-between gap-3 sm:inset-x-8 sm:top-7 lg:inset-x-12">
           {/* Active campaign indicator */}
-          <div className="flex items-center gap-2 rounded-full bg-black/40 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-xl ring-1 ring-white/20">
+          <div className="flex items-center gap-2 rounded-full bg-black/40 px-3.5 py-1.5 text-[13px] font-semibold text-white backdrop-blur-sm ring-1 ring-white/20">
             <span className="size-2 rounded-full bg-brand animate-pulse" />
-            <span className="tracking-wide uppercase text-[11px] font-bold text-white/90">
+            <span className=" text-[13px] font-bold text-white/90">
               {campaign.seasonTag} · Model UGC Lookbook
             </span>
           </div>
 
           {/* Quick Season Navigation Pills */}
-          <nav aria-label="Seasonal campaign switcher" className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-full bg-black/45 backdrop-blur-xl ring-1 ring-white/20 max-w-full">
+          <nav aria-label="Seasonal campaign switcher" className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-full bg-black/45 backdrop-blur-sm ring-1 ring-white/20 max-w-full">
             {SEASON_IDS.map((id) => {
               const c = CAMPAIGNS[id];
               const isSelected = id === activeSeason;
@@ -235,7 +235,7 @@ export function EditorialCampaignBanner() {
                   onClick={() => handleSelectSeason(id)}
                   aria-pressed={isSelected}
                   className={clsx(
-                    "group flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold whitespace-nowrap transition-all duration-200",
+                    "group flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-semibold whitespace-nowrap transition-all duration-200",
                     isSelected
                       ? "bg-white text-ink shadow-sm"
                       : "text-white/80 hover:bg-white/20 hover:text-white"
@@ -252,9 +252,6 @@ export function EditorialCampaignBanner() {
         {/* Bottom Content: Headline, Actions & Worn Shoes */}
         <div className="absolute inset-x-5 bottom-5 z-20 flex flex-col gap-6 sm:inset-x-8 sm:bottom-8 lg:inset-x-12 lg:bottom-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-[580px] text-white">
-            <p className="eyebrow text-white/85! before:bg-white/60! tracking-wider uppercase text-xs">
-              {campaign.eyebrow}
-            </p>
             <h2 id="h-campaign" className="type-section mt-2.5 text-white!">
               {campaign.headlineLead}
               <em
@@ -270,7 +267,7 @@ export function EditorialCampaignBanner() {
 
             <OpenInquiryButton
               buyerType="Retailer"
-              className="group mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[14px] font-semibold text-ink transition-colors hover:bg-brand hover:text-white"
+              className="group mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-semibold text-ink transition-colors hover:bg-brand hover:text-white"
             >
               Get wholesale pricing{" "}
               <Icon
@@ -282,7 +279,7 @@ export function EditorialCampaignBanner() {
 
           {/* Season pairs worn in this shot */}
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-white/75 sm:text-right">
+            <span className="text-[13px] font-boldr text-white/75 sm:text-right">
               Modeled in this {campaign.label.toLowerCase()} shot
             </span>
             <ul aria-label="Worn in this shot" className="flex flex-wrap gap-2.5">
@@ -292,7 +289,7 @@ export function EditorialCampaignBanner() {
                     type="button"
                     onClick={() => openQuickView(p.id)}
                     aria-label={`Chime Long ${p.name}: view details`}
-                    className="group flex items-center gap-3 rounded-full bg-white/15 py-1.5 pr-4 pl-1.5 text-left text-white ring-1 ring-white/35 backdrop-blur-xl transition-all hover:bg-white/25 hover:ring-white/50"
+                    className="group flex items-center gap-3 rounded-full bg-white/15 py-1.5 pr-4 pl-1.5 text-left text-white ring-1 ring-white/35 backdrop-blur-sm transition-all hover:bg-white/25 hover:ring-white/50"
                   >
                     <span className="relative size-12 shrink-0 overflow-hidden rounded-full bg-white/90">
                       <Image
@@ -304,8 +301,8 @@ export function EditorialCampaignBanner() {
                       />
                     </span>
                     <span className="min-w-0">
-                      <b className="block text-[14px] leading-tight font-semibold">{p.name}</b>
-                      <span className="block text-[12px] text-white/80">{p.sizes}</span>
+                      <b className="block text-[15px] leading-tight font-semibold">{p.name}</b>
+                      <span className="block text-[13px] text-white/80">{p.sizes}</span>
                     </span>
                     <Icon
                       name="arrow"

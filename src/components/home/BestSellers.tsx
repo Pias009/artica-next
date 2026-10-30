@@ -187,11 +187,11 @@ function RankRow({
         </span>
         <span className="min-w-0">
           <span className="block truncate text-[16px] font-semibold tracking-[-0.01em]">Chime Long {p.name}</span>
-          <span className="block truncate text-[14px] text-muted">
+          <span className="block truncate text-[15px] text-muted">
             {p.type} · {LINE_LABEL[p.line]}
           </span>
           {inCart && (
-            <span className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] font-semibold text-glacier">
+            <span className="mt-0.5 inline-flex items-center gap-1 text-[13px] font-semibold text-glacier">
               <Icon name="check" className="size-3" /> In your list
             </span>
           )}
@@ -292,7 +292,7 @@ function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) 
         <h3 id={`row-${line}`} className="min-w-0 font-headline text-[clamp(26px,2.4vw,34px)] leading-none font-semibold tracking-[-0.015em]">
           {label}
           {/* the count sits beside the line name on wide screens and under it on phones, never broken mid-phrase */}
-          <span className="mt-1.5 block font-sans text-[14px] font-normal tracking-normal whitespace-nowrap text-muted sm:mt-0 sm:ml-2.5 sm:inline sm:text-[15px]">
+          <span className="mt-1.5 block font-sans text-[15px] font-normal tracking-normal whitespace-nowrap text-muted sm:mt-0 sm:ml-2.5 sm:inline sm:text-[15px]">
             {inLine(line).length} styles · {styles.length} {styles.length > 1 ? "categories" : "category"}
           </span>
         </h3>
@@ -311,7 +311,7 @@ function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) 
                 <Icon name="arrow" className={clsx("size-4", d === -1 && "rotate-180")} />
               </button>
             ))}
-          <Link href={`/catalog?line=${line}`} className="btn btn-line h-11 px-5 text-[14px]">
+          <Link href={`/catalog?line=${line}`} className="btn btn-line h-11 px-5 text-[15px]">
             View all {label.toLowerCase()}
           </Link>
         </div>
@@ -341,8 +341,8 @@ function LineRow({ line, from }: { line: ProductLine; from: "left" | "right" }) 
             className="group relative flex h-[90cqw] flex-col justify-between overflow-hidden rounded-card bg-tile p-6 transition-colors hover:bg-chip-hover sm:h-[55cqw] md:h-[37.5cqw] lg:h-[23.75cqw]"
           >
             <span className="relative z-[2]">
-              <span className="block text-[22px] leading-tight font-semibold tracking-[-0.02em]">View all {label.toLowerCase()}</span>
-              <span className="mt-1 block text-[14px] text-muted">Every {label.toLowerCase()} style in the catalog</span>
+              <span className="block text-[20px] leading-tight font-semibold tracking-[-0.02em]">View all {label.toLowerCase()}</span>
+              <span className="mt-1 block text-[15px] text-muted">Every {label.toLowerCase()} style in the catalog</span>
             </span>
             <span aria-hidden="true" className="absolute inset-x-[6%] top-[30%] bottom-[18%] flex items-end justify-center gap-[3%]">
               {styles.map((x) => (

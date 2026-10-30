@@ -21,42 +21,42 @@ export type HeroSeasonCopy = {
 
 export const HERO_SEASON_COPY: Record<SeasonId, HeroSeasonCopy> = {
   winter: {
-    eyebrowBadge: "Winter Wholesale Edit",
+    eyebrowBadge: "Winter wholesale edit",
     headlineLead: "Factory-direct winter footwear, ",
     headlineAccent: "built down to −25°C.",
     description: "Insulated snow boots, shearling liners, and Arctic grip hikers from our Guangzhou factory. Tested for sub-zero retail shelves.",
     benefits: ["−25°C thermal cold-room tested", "Arctic high-traction rubber lugs", `From ${MOQ_PAIRS} pairs per style`],
   },
   spring: {
-    eyebrowBadge: "Spring Wholesale Edit",
+    eyebrowBadge: "Spring wholesale edit",
     headlineLead: "Fresh spring footwear, ",
     headlineAccent: "ready for the warm-up.",
     description: "Lightweight canvas sneakers, soft leather flats, and cushioned loafers. Crafted with breathable linings and low MOQs.",
     benefits: ["Ultra-light breathable builds", "Flexible memory insoles", `From ${MOQ_PAIRS} pairs per style`],
   },
   summer: {
-    eyebrowBadge: "Summer Wholesale Edit",
+    eyebrowBadge: "Summer wholesale edit",
     headlineLead: "Summer-season styles, ",
     headlineAccent: "made for the warm rush.",
     description: "Cork-footbed slides, ergonomic sandals, and lightweight slip-ons by the case. UV-resistant materials and fast container turnaround.",
     benefits: ["Ergonomic arch-support footbeds", "Fast-dry water-resistant straps", `Ready to pack in ${PACK}-pair cases`],
   },
   rainy: {
-    eyebrowBadge: "Monsoon Wholesale Edit",
+    eyebrowBadge: "Monsoon wholesale edit",
     headlineLead: "Storm-tested waterproof footwear, ",
     headlineAccent: "built for wet streets.",
     description: "Seam-sealed water-resistant boots and closed-toe sport sandals that shrug off heavy rains. Hydrophobic leathers with deep drainage treads.",
     benefits: ["Seam-sealed waterproof membrane", "High-grip wet pavement traction", `From ${MOQ_PAIRS} pairs per style`],
   },
   autumn: {
-    eyebrowBadge: "Autumn Wholesale Edit",
+    eyebrowBadge: "Autumn wholesale edit",
     headlineLead: "Crisp autumn footwear, ",
     headlineAccent: "ready for the first cold snap.",
     description: "Full-grain leather Chelsea boots, rich suede ankle boots, and durable hikers. Weather-treated finishes with cushioned Goodyear welts.",
     benefits: ["Weather-treated oiled leather", "Reinforced welt construction", `From ${MOQ_PAIRS} pairs per style`],
   },
   holiday: {
-    eyebrowBadge: "Holiday Wholesale Edit",
+    eyebrowBadge: "Holiday wholesale edit",
     headlineLead: "Gift-ready footwear, ",
     headlineAccent: "for peak holiday weeks.",
     description: "High-shine patent boots, velvet pumps, and plush shearling slippers by the case. Complete with retail-ready presentation packaging.",
@@ -72,12 +72,6 @@ const CARDS: { line: ProductLine; slug: string; block: string; kinds: string }[]
   { line: "women", slug: "maple", block: "#f6e4e6", kinds: "Ankle, chelsea and tall boots" },
   { line: "men", slug: "nord", block: "#e2eaf2", kinds: "Leather lace-up boots" },
   { line: "kids", slug: "blossom", block: "#e5efdd", kinds: "Snow boots and hikers" },
-];
-
-const LINKS = [
-  { href: "/shipping", label: "Shipping" },
-  { href: "/private-label", label: "Private label" },
-  { href: "/faq", label: "FAQ" },
 ];
 
 const AUTOPLAY_MS = 5000;
@@ -236,30 +230,10 @@ export function HeroSpotlight() {
         )}
       </div>
 
-      {/* side links, set vertically like a magazine spine */}
-      <nav aria-label="Buying information" className="absolute top-1/2 left-[clamp(10px,1.6vw,28px)] z-[3] -translate-y-1/2 max-lg:hidden">
-        <ul className="flex flex-col items-center gap-7">
-          {LINKS.map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="group relative block py-2 text-[12px] font-semibold tracking-[0.16em] text-muted uppercase transition-all duration-300 [writing-mode:vertical-rl] rotate-180 hover:text-ink hover:-translate-x-0.5"
-              >
-                <span className="relative z-[1]">{l.label}</span>
-                <span
-                  aria-hidden="true"
-                  className="absolute right-0 bottom-0 top-0 w-0.5 bg-brand scale-y-0 transition-transform duration-300 origin-bottom group-hover:scale-y-100"
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="wrap relative grid grid-cols-[minmax(0,1fr)] gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6 lg:pl-[clamp(48px,6vw,104px)]">
+      <div className="wrap relative grid grid-cols-[minmax(0,1fr)] gap-y-4 px-(--shell-pad) pt-[clamp(20px,4vh,60px)] lg:min-h-[min(calc(100svh-112px-140px),700px)] lg:grid-cols-[minmax(0,5.2fr)_minmax(0,6.8fr)] lg:gap-y-6">
         {/* the promise */}
         <div className="relative z-[2] self-center max-lg:text-center lg:-translate-y-10">
-          <p data-hero-in="eyebrow" className="eyebrow">
+          <p data-hero-in="eyebrow" className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3.5 py-1.5 text-[13px] font-semibold text-ink-2 shadow-soft">
             <Icon name={theme.icon} className="size-4! text-season" />
             {copy.eyebrowBadge}
           </p>
@@ -270,15 +244,15 @@ export function HeroSpotlight() {
             {copy.headlineLead}
             <em className="font-medium text-brand">{copy.headlineAccent}</em>
           </h1>
-          <p data-hero-in="copy" className="mt-5 max-w-[28rem] text-[15.5px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[16.5px]">
+          <p data-hero-in="copy" className="mt-5 max-w-[28rem] text-[16px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[18px]">
             {copy.description}
           </p>
           <div data-hero-in="cta" className="mt-8 flex flex-wrap items-center gap-3 max-lg:justify-center">
-            <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[14px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
+            <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[15px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
               Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>
-            <a href="#hot" className="glass inline-flex h-12 items-center rounded-full px-6 text-[14px] font-semibold text-ink transition-[translate] duration-300 ease-soft hover:-translate-y-0.5">
-              See what&rsquo;s hot
+            <a href="#styles" className="inline-flex h-12 items-center rounded-full bg-white px-6 text-[15px] font-semibold text-ink ring-1 ring-ink/15 transition-[box-shadow] duration-300 ease-soft hover:ring-ink/40">
+              Browse the range
             </a>
           </div>
           {/* Season-specific benefit highlights */}
@@ -310,12 +284,12 @@ export function HeroSpotlight() {
                 : `translate(${(tilt.x * -10).toFixed(1)}px, ${(tilt.y * -10).toFixed(1)}px)`,
             }}
           >
-            <div className="flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-[hero-float-soft_4.8s_ease-in-out_infinite] motion-reduce:animate-none">
+            <div className="flex items-center gap-2 rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 shadow-[0_12px_28px_-8px_rgb(18_20_22/.12),0_0_0_1px_rgb(18_20_22/.04),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-sm animate-[hero-float-soft_4.8s_ease-in-out_infinite] motion-reduce:animate-none">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full rounded-full bg-brand/60 opacity-75 animate-ping" />
                 <span className="relative inline-flex size-2 rounded-full bg-brand" />
               </span>
-              <span className="text-[12px] font-bold tracking-[0.06em] text-ink uppercase">
+              <span className="text-[13px] font-bold text-ink">
                 {theme.edit} · in production now
               </span>
             </div>
@@ -382,33 +356,18 @@ export function HeroSpotlight() {
                       aria-label={`Show ${x.p.name}`}
                       className={`group relative grid size-11 place-items-center rounded-full border-2 transition-all duration-300 lg:size-12 ${
                         on
-                          ? "scale-115 border-brand shadow-[0_0_0_4px_rgb(152_64_128/.25),0_16px_32px_-4px_rgb(152_64_128/.35)]"
+                          ? "scale-115 border-brand shadow-float"
                           : "border-white shadow-soft hover:scale-115 hover:border-ink/40 hover:shadow-float"
                       }`}
                       style={{
                         background: x.tint,
-                        boxShadow: on
-                          ? `0 0 0 4px ${x.tint}55, 0 0 22px ${x.tint}88, 0 14px 28px -4px rgba(0,0,0,0.3)`
-                          : undefined,
                       }}
                     >
-                      {on && (
-                        <>
-                          <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute -inset-2 rounded-full border border-brand/40 animate-ping opacity-60 motion-reduce:hidden"
-                          />
-                          <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute -inset-1 rounded-full border border-white/60 animate-pulse opacity-75"
-                          />
-                        </>
-                      )}
                       <span className="relative block size-[84%] transition-transform duration-300 group-hover:scale-110">
                         <Image src={x.p.outer.src} alt="" fill sizes="48px" className="-scale-x-100 object-contain drop-shadow-[0_2px_4px_rgb(0_0_0/.2)]" />
                       </span>
                       {/* Name tooltip */}
-                      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-ink/90 backdrop-blur-md px-2 py-0.5 text-[12px] font-semibold text-white whitespace-nowrap opacity-0 shadow-soft transition-all duration-200 group-hover:opacity-100 group-hover:-translate-y-1">
+                      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-ink px-2 py-0.5 text-[13px] font-semibold text-white whitespace-nowrap opacity-0 shadow-soft transition-all duration-200 group-hover:opacity-100 group-hover:-translate-y-1">
                         {x.p.name}
                       </span>
                     </button>
@@ -456,23 +415,23 @@ export function HeroSpotlight() {
               type="button"
               onClick={() => go(cur - 1)}
               aria-label="Previous style"
-              className="group grid size-10 place-items-center rounded-full border border-ink/10 bg-white/80 text-ink shadow-[0_8px_20px_-6px_rgb(18_20_22/.12)] backdrop-blur-xl transition-all duration-300 hover:border-brand hover:text-brand hover:scale-110 hover:bg-white active:scale-95"
+              className="group grid size-11 place-items-center rounded-full border border-ink/10 bg-white text-ink shadow-soft transition-colors duration-300 hover:border-ink/40"
             >
               <Icon name="arrow" className="size-3.5 rotate-180 transition-transform duration-200 group-hover:-translate-x-0.5" />
             </button>
 
             <div
               key={`info-${cur}`}
-              className="relative flex items-center gap-3.5 overflow-hidden rounded-full border border-white/85 bg-white/85 px-4 py-2 shadow-[0_16px_36px_-10px_rgb(18_20_22/.16),0_0_0_1px_rgb(18_20_22/.05),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-xl animate-rise-in motion-reduce:animate-none"
+              className="relative flex items-center gap-3.5 overflow-hidden rounded-full border border-white/85 bg-white/85 px-4 py-2 shadow-[0_16px_36px_-10px_rgb(18_20_22/.16),0_0_0_1px_rgb(18_20_22/.05),inset_0_1px_1px_rgb(255_255_255/.9)] backdrop-blur-sm animate-rise-in motion-reduce:animate-none"
               aria-live="polite"
             >
               <div className="flex flex-col text-left">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[12px] font-bold tracking-[0.16em] text-muted uppercase">0{cur + 1}/0{spots.length}</span>
+                  <span className="text-[13px] font-bold text-muted">0{cur + 1}/0{spots.length}</span>
                   <span className="size-1 rounded-full bg-ink/20" />
-                  <span className="text-[15px] font-extrabold tracking-[-0.01em] text-ink uppercase animate-rise-in">{s.p.name}</span>
+                  <span className="text-[16px] font-semibold text-ink animate-rise-in">{s.p.name}</span>
                 </div>
-                <span className="text-[11.5px] text-muted whitespace-nowrap">
+                <span className="text-[13px] text-muted whitespace-nowrap">
                   {LINE_LABEL[s.p.line]} · {categoryOf(s.p)} · <strong className="font-semibold text-ink-2">{MOQ_PAIRS} pairs</strong>
                 </span>
               </div>
@@ -487,7 +446,7 @@ export function HeroSpotlight() {
                     aria-label={`Jump to style ${i + 1}`}
                     className={`h-1.5 rounded-full transition-all duration-400 ${
                       i === cur
-                        ? "w-6 bg-brand shadow-[0_0_8px_rgb(152_64_128/.6)]"
+                        ? "w-6 bg-brand"
                         : "w-1.5 bg-ink/20 hover:bg-ink/40 hover:scale-125"
                     }`}
                   />
@@ -497,15 +456,11 @@ export function HeroSpotlight() {
               <button
                 type="button"
                 onClick={() => openQuickView(s.p.id)}
-                className="group/btn pointer-events-auto relative overflow-hidden inline-flex h-7 items-center gap-1 rounded-full bg-brand px-3 text-[12px] font-bold tracking-[0.08em] text-white uppercase shadow-[0_6px_14px_-5px_rgb(152_64_128/.6)] transition-all hover:bg-brand-deep hover:scale-105 active:scale-95"
+                className="group/btn hit-44 pointer-events-auto relative inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand"
               >
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[button-sheen_4s_ease-in-out_infinite] motion-reduce:hidden"
-                />
                 <span className="relative z-[1] flex items-center gap-1">
                   <span>View</span>
-                  <Icon name="arrow" className="size-2.5 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
+                  <Icon name="arrow" className="size-3 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
                 </span>
               </button>
             </div>
@@ -514,7 +469,7 @@ export function HeroSpotlight() {
               type="button"
               onClick={() => go(cur + 1)}
               aria-label="Next style"
-              className="group grid size-10 place-items-center rounded-full bg-ink text-white shadow-[0_8px_20px_-6px_rgb(18_20_22/.25)] transition-all duration-300 hover:bg-accent-hover hover:scale-110 active:scale-95"
+              className="group grid size-11 place-items-center rounded-full bg-ink text-white shadow-soft transition-colors duration-300 hover:bg-accent-hover"
             >
               <Icon name="arrow" className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
             </button>
@@ -530,7 +485,7 @@ export function HeroSpotlight() {
       </div>
 
       {/* the three ways in with 3D depth and micro-interactions */}
-      <nav aria-label="Shop by line" className="wrap relative z-[2] px-(--shell-pad) pt-8 pb-[clamp(20px,4vh,40px)] lg:pl-[clamp(48px,6vw,104px)]">
+      <nav aria-label="Shop by line" className="wrap relative z-[2] px-(--shell-pad) pt-8 pb-[clamp(20px,4vh,40px)]">
         <ul className="scrollbar-none flex snap-x gap-4 overflow-x-auto lg:grid lg:grid-cols-3 lg:gap-6">
           {cards.map((c, idx) => {
             const p = c.p;
@@ -563,8 +518,8 @@ export function HeroSpotlight() {
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center px-4">
                     <span className="font-headline text-[20px] leading-tight font-semibold transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
-                    <span className="mt-0.5 truncate text-[12.5px] text-muted">{c.kinds}</span>
-                    <span className="mt-2 flex items-center justify-between text-[12.5px] font-semibold">
+                    <span className="mt-0.5 truncate text-[13px] text-muted">{c.kinds}</span>
+                    <span className="mt-2 flex items-center justify-between text-[13px] font-semibold">
                       <span>
                         {inLine(c.line).length} styles · {PACK}/case
                       </span>

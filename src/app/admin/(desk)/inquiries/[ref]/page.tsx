@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { ReplyDraft } from "./ReplyDraft";
 import { StatusBadge } from "../../StatusBadge";
 import { retryEmailsAction, setStatusAction } from "../../../actions";
 import { requireAdmin } from "@/lib/admin/auth";
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/admin/inquiries/[
 }
 
 const MAIL_LABEL: Record<MailKind, string> = { notify_desk: "To the desk", confirm_buyer: "Buyer's confirmation" };
-const ACTION_LABEL: Record<string, string> = { status: "Marked", retry_emails: "Retried emails" };
+const ACTION_LABEL: Record<string, string> = { status: "Marked", retry_emails: "Retried emails", reply_drafted: "Drafted a reply with Kai" };
 
 export default async function InquiryPage({ params }: PageProps<"/admin/inquiries/[ref]">) {
   await requireAdmin();
@@ -83,6 +84,10 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
               <p className="text-[14px] text-ink-2">None chosen: they asked for the full line sheet.</p>
             )}
             <p className="mt-3 text-[12px] text-muted">Styles as they were when sent; the catalog may have changed since.</p>
+          </Card>
+
+          <Card title="Reply with Kai">
+            <ReplyDraft inquiryRef={i.ref} email={i.email} />
           </Card>
 
           <Card title="Note">

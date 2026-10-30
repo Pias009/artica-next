@@ -90,6 +90,11 @@ try {
     // a year of history
     { key: { at: 1 }, name: "expire", expireAfterSeconds: 365 * 24 * 60 * 60 },
   ]);
+  // the assistant's rate limit (src/lib/assistant/limit.ts): counts by address, gone after a day
+  await db.collection("assistant_hits").createIndexes([
+    { key: { key: 1, at: 1 }, name: "key_at" },
+    { key: { at: 1 }, name: "expire", expireAfterSeconds: 24 * 60 * 60 },
+  ]);
   console.log(`Database "${dbName}" ready: inquiries (validator + ${made.length} indexes), counters, admins, admin_sessions, admin_attempts, admin_audit`);
 } finally {
   await client.close();

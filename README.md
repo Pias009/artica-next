@@ -151,6 +151,19 @@ Notes:
 
 Set `NEXT_PUBLIC_SITE_URL` in production so Open Graph image URLs resolve.
 
+## Kai, the trade assistant
+
+A chat assistant on every page (button bottom-right, a one-time invitation after 15 seconds) and at `/assistant`.
+It recommends styles by country and season, says what's selling, answers MOQ, samples, payment, shipping, privacy
+and how-to-order questions, and prepares inquiries the buyer sends with one click. In the admin it drafts replies to
+inquiries. Design: `docs/design/assistant.md`.
+
+- **With an AI model:** set `AI_GATEWAY_API_KEY` (vercel.com → AI Gateway). The default model is Grok
+  (`spacexai/grok-4.20-non-reasoning`), falling back to open-weight DeepSeek and GLM. Change it with `ASSISTANT_MODEL`.
+- **Without one:** Kai answers with its offline engine from the same data (English only, no free conversation).
+- Facts come from the site's own data (products, seasons, `src/lib/faq.ts`, `buyer-desk.ts`), so editing those
+  updates Kai. Behaviour rules live in `src/lib/assistant/persona.ts`.
+
 ## Admin panel (`/admin`)
 
 | Route | What |

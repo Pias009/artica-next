@@ -47,7 +47,7 @@ export function SeasonSwitcher() {
         aria-expanded={open}
         aria-controls={`${uid}-menu`}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-white/12 px-3 text-[12.5px] font-semibold text-white transition-colors hover:bg-white/20"
+        className="hit-44 relative inline-flex min-h-8 items-center gap-1.5 rounded-full bg-white/12 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-white/20"
       >
         <Icon name={season.icon} className="size-3.5!" />
         {season.name}

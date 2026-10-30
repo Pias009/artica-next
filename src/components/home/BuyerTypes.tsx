@@ -291,7 +291,7 @@ export function BuyerTypes() {
               </span>
               <span className="min-w-0">
                 <span className="block text-[16px] font-semibold whitespace-nowrap lg:whitespace-normal">{x.tab}</span>
-                <span className="hidden text-[13.5px] opacity-70 lg:block">{x.headline}</span>
+                <span className="hidden text-[13px] opacity-70 lg:block">{x.headline}</span>
               </span>
             </button>
           ))}
@@ -303,7 +303,7 @@ export function BuyerTypes() {
             <div className="size-full max-h-[440px]">
               <Scene key={p.key} />
             </div>
-            <span data-swap className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-[12.5px] font-semibold">
+            <span data-swap className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold">
               {p.tab}
             </span>
           </div>
@@ -318,13 +318,13 @@ export function BuyerTypes() {
             </div>
             <dl data-swap className="mt-5 grid gap-2.5">
               {p.facts.map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[92px_minmax(0,1fr)] gap-3 text-[14.5px]">
+                <div key={k} className="grid grid-cols-[92px_minmax(0,1fr)] gap-3 text-[15px]">
                   <dt className="text-muted">{k}</dt>
                   <dd className="font-medium">{v}</dd>
                 </div>
               ))}
             </dl>
-            <ul data-swap className="mt-5 grid gap-2 border-t border-line pt-5 text-[14.5px]">
+            <ul data-swap className="mt-5 grid gap-2 border-t border-line pt-5 text-[15px]">
               {p.perks.map((t) => (
                 <li key={t} className="flex items-center gap-2.5">
                   <Icon name="check" className="size-4 flex-none text-glacier" />
@@ -354,9 +354,9 @@ export function BuyerTypes() {
                 <Icon name="arrow" className="hidden size-4 text-muted lg:block" />
               )}
             </div>
-            <p className="mt-4 text-[17px] font-semibold">{o.title}</p>
-            <p className="mt-0.5 text-[22px] font-semibold tracking-[-0.02em] text-glacier tabular-nums">{o.qty}</p>
-            <p className="mt-1.5 text-[14px] text-ink-2">{o.text}</p>
+            <p className="mt-4 text-[18px] font-semibold">{o.title}</p>
+            <p className="mt-0.5 text-[20px] font-semibold tracking-[-0.02em] text-glacier tabular-nums">{o.qty}</p>
+            <p className="mt-1.5 text-[15px] text-ink-2">{o.text}</p>
           </li>
         ))}
       </ol>

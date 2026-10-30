@@ -15,6 +15,7 @@ const ACTION: Record<string, string> = {
   sign_out: "Signed out",
   status: "Changed status",
   retry_emails: "Retried emails",
+  reply_drafted: "Drafted a reply with Kai",
   end_session: "Ended a session",
   end_other_sessions: "Ended other sessions",
 };
