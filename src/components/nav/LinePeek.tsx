@@ -96,7 +96,7 @@ export function LinePeek({ line }: { line: ProductLine }) {
         {/* one wholesale nudge, stretching over whatever slots a small line leaves empty */}
         <li className={clsx("animate-rise-in [animation-delay:210ms]", PROMO_SPAN[Math.min(3, tiles.length)])}>
           <Link
-            href="/inquiry"
+            href="/#samples"
             className={clsx(
               "group relative flex flex-col justify-between overflow-hidden rounded-card bg-brand p-4 text-white transition-colors hover:bg-brand-deep",
               cats.length < 3 ? "h-full min-h-[180px]" : ratio,
