@@ -12,7 +12,8 @@ import type { SeasonId } from "../season";
  * hold a conversation or speak other languages, but it never invents anything and its cards look the same.
  */
 
-export type LocalReply = { text: string; tools: { name: string; input: object; output: unknown }[] };
+/** `confident: false` marks a guess (closest matches, nothing matched): worth asking the model when it's available. */
+export type LocalReply = { text: string; tools: { name: string; input: object; output: unknown }[]; confident?: boolean };
 
 const has = (t: string, re: RegExp) => re.test(t);
 const lineIn = (t: string): ProductLine | undefined =>
@@ -143,6 +144,7 @@ export function localReply(message: string, ctx: { season?: SeasonId; country?: 
     const r = run("findProducts", { query, line, season }, () => findProducts({ query, line, season }));
     if (r.styles.length)
       return {
+        confident: !r.closest,
         text: `${r.closest ? "Nothing matches all of that exactly; these come closest" : "These match"}, in order of what suits ${named.name} this season. Each ships from ${MOQ_CASES} cases per colour. Want shipping details to ${named.name}, or an inquiry drafted?`,
         tools,
       };
@@ -164,6 +166,7 @@ export function localReply(message: string, ctx: { season?: SeasonId; country?: 
   const r = run("findProducts", { query: message.slice(0, 200), line }, () => findProducts({ query: message, line, season: ctx.season }));
   if (r.styles.length) {
     return {
+      confident: !r.closest,
       text: `${r.closest ? "Nothing matches all of that exactly; these come closest" : `Here ${r.styles.length > 1 ? `are ${r.styles.length} styles` : "is a style"} that match${r.count > r.styles.length ? ` (of ${r.count})` : ""}`}. Each ships from ${MOQ_CASES} cases (${MOQ_PAIRS} pairs) per colour. Want one added to an inquiry, or details on any of them?`,
       tools,
     };
@@ -171,5 +174,29 @@ export function localReply(message: string, ctx: { season?: SeasonId; country?: 
   tools.length = 0;
   run("offTopic", {}, () => offTopic({ season: ctx.season }));
   // a shoe we don't make reads differently from a question that isn't about shoes at all
-  return { text: has(t, SHOE_WORDS) ? "Sorry, I couldn't find that in our range. Here's where I can help:" : OFF_TOPIC_REPLY, tools };
+  return { text: has(t, SHOE_WORDS) ? "Sorry, I couldn't find that in our range. Here's where I can help:" : OFF_TOPIC_REPLY, tools, confident: false };
+}
+
+/* ---- Local first: what never needs the AI model ---- */
+
+/** Letters outside Latin script: a buyer writing in their own language, which the model handles far better. */
+const NON_LATIN = /[^\u0000-\u024F\u1E00-\u1EFF\s\d\p{P}\p{S}]/u;
+/** Short messages that lean on what was said before ("show me more", "what about Germany?"). */
+const FOLLOW_UP = /\b(it|its|that|this|those|these|them|ones?|more|cheaper|other|another|same|which one|why|how about|what about|instead|also|too|again|previous|above)\b/;
+
+/**
+ * The offline answer, when it's as good as the model's would be: a short, single question in Latin script that
+ * doesn't lean on earlier turns, and that the offline engine answered with certainty. Rude, risky or rule-changing
+ * messages are always answered here, however they're written: spending tokens on them helps no one. Null: ask the
+ * model. This is where most of Kai's token savings come from.
+ */
+export function localFirst(message: string, turns: number, ctx: Parameters<typeof localReply>[1]): LocalReply | null {
+  const m = message.trim();
+  const simple = m.length <= 160 && !NON_LATIN.test(m) && (m.match(/\?/g)?.length ?? 0) <= 1 && !(turns > 1 && m.length < 80 && FOLLOW_UP.test(m.toLowerCase()));
+  if (!simple) {
+    const c = conductReply(m, SHOE_WORDS);
+    return c?.redirect && c.text !== OFF_TOPIC_REPLY ? localReply(m, ctx) : null;
+  }
+  const r = localReply(m, ctx);
+  return r.confident === false ? null : r;
 }

@@ -158,8 +158,14 @@ It recommends styles by country and season, says what's selling, answers MOQ, sa
 and how-to-order questions, and prepares inquiries the buyer sends with one click. In the admin it drafts replies to
 inquiries. Design: `docs/design/assistant.md`.
 
-- **With an AI model:** set `AI_GATEWAY_API_KEY` (vercel.com → AI Gateway). The default model is Grok
-  (`spacexai/grok-4.20-non-reasoning`), falling back to open-weight DeepSeek and GLM. Change it with `ASSISTANT_MODEL`.
+- **With an AI model:** set `GOOGLE_GENERATIVE_AI_API_KEY` (Google AI Studio). Kai uses Gemini
+  (`gemini-3.5-flash`, falling back to `gemini-3.5-flash-lite` when it's busy; change with `ASSISTANT_GEMINI_MODELS`).
+  Or set `AI_GATEWAY_API_KEY` to use any model through the Vercel AI Gateway (`ASSISTANT_MODEL`).
+- **Token use:** most messages (greetings, terms, shipping, quantities, product and season questions) are answered
+  by the offline engine for free; only open, multi-part, follow-up or non-English questions reach the model, which
+  gets compact tool results, the last 8 messages and minimal thinking. Caps per minute/day (`ASSISTANT_RPM`,
+  `ASSISTANT_RPD`, `ASSISTANT_TPD`, defaults 10 / 1000 / 2,000,000) and pauses after a provider limit keep it under
+  quota: past them Kai answers offline, never with an error. Today's use: `assistant_usage` in the database.
 - **Without one:** Kai answers with its offline engine from the same data (English only, no free conversation).
 - Facts come from the site's own data (products, seasons, `src/lib/faq.ts`, `buyer-desk.ts`), so editing those
   updates Kai. Behaviour rules live in `src/lib/assistant/persona.ts`.

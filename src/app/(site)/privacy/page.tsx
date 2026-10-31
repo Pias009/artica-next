@@ -30,7 +30,7 @@ const SECTIONS = [
   {
     title: "The trade assistant (Kai)",
     body: [
-      "Kai, the chat assistant on this site, is an AI model. What you type is sent to our AI provider, through Vercel's AI Gateway, to write the answer.",
+      "Kai, the chat assistant on this site, is an AI model. What you type is sent to our AI provider (Google's Gemini API) to write the answer.",
       "We don't keep chat conversations. The conversation stays in your browser tab until you close it. If you send an inquiry from the chat, it reaches us like any other inquiry, marked as prepared with Kai.",
       "To keep the service fair we count how many messages each address sends for up to a day. Please don't share sensitive personal information in the chat.",
     ],

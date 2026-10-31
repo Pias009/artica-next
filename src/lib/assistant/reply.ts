@@ -1,7 +1,8 @@
 import "server-only";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { aiReady, gatewayOptions, MODEL } from "./model";
+import { backOff, modelAllowed, record, spend } from "./budget";
+import { aiReady, kaiModel } from "./model";
 import { ASSISTANT } from "./persona";
 import { productDetails, shippingInfo } from "./skills";
 import type { InquiryDoc } from "../leads/db";
@@ -58,18 +59,24 @@ function facts(i: InquiryDoc) {
  */
 export async function draftReply(i: InquiryDoc): Promise<ReplyDraft> {
   const f = facts(i);
-  if (aiReady()) {
+  // the template is free; the model is used only while the day's budget allows (budget.ts)
+  if (aiReady() && (await modelAllowed())) {
     try {
-      const { output } = await generateText({
-        model: MODEL,
+      const { model, providerOptions } = kaiModel();
+      spend();
+      const { output, steps, totalUsage } = await generateText({
+        model,
         instructions: `You draft replies for the Chime Long wholesale footwear trade desk (Guangzhou). Write to the buyer in the language of their note if it isn't English, else English. Warm, concise, businesslike: under 200 words. Use only the facts given. Never write a price, discount or delivery date: put [tier price], [FOB price] or [date] placeholders where the desk fills them in. Confirm the styles and quantities, answer what the note asks, offer samples, and ask at most two clarifying questions that would let the desk quote (e.g. trade terms DDP/FOB, target delivery month, size curve). Sign off as "Chime Long trade desk". The summary is for the desk, not the buyer. You are ${ASSISTANT.name}.`,
         prompt: JSON.stringify(f),
         output: Output.object({ schema: SCHEMA }),
-        maxOutputTokens: 900,
-        providerOptions: gatewayOptions,
+        maxOutputTokens: 700,
+        providerOptions,
+        maxRetries: 0,
       });
+      await record(steps.length, (totalUsage.inputTokens ?? 0) + (totalUsage.outputTokens ?? 0));
       return { ...output, source: "ai" };
     } catch (e) {
+      backOff(e);
       console.error("[assistant] reply draft fell back to the template", e);
     }
   }

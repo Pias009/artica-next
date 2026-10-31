@@ -1,13 +1,22 @@
 import "server-only";
 import { tool, type InferUITools, type UIMessage } from "ai";
 import { z } from "zod";
-import { aboutCompany, draftInquiry, findProducts, offTopic, planOrder, policies, POLICY_TOPICS, productDetails, seasonAdvice, shippingInfo, topSellers } from "./skills";
+import { aboutCompany, draftInquiry, findProducts, offTopic, planOrder, policies, POLICY_TOPICS, productDetails, seasonAdvice, shippingInfo, topSellers, type Card } from "./skills";
 import { SEASON_IDS, type SeasonId } from "../season";
 
 /**
  * Kai's tools: the skills (skills.ts) with input schemas the model fills in. All read-only; draftInquiry only checks
  * a draft, the buyer sends it. `requested` is the most-asked-for styles, read from the database by the route.
  */
+/*
+ * What the model reads back from a tool is kept short: the buyer sees full product cards, the model only needs names
+ * and the facts it may repeat. Every earlier tool result is sent again on each turn, so this is most of the input
+ * tokens in a long chat.
+ */
+const brief = (c: Card) => `${c.name} (${c.url}): ${c.type}, ${c.color}, ${c.line}${c.badge ? `, ${c.badge}` : ""}${c.seasons.length ? `, suits ${c.seasons.join("/")}` : ""}`;
+const text = (value: string) => ({ type: "text" as const, value });
+const cards = (label: string, list: Card[]) => `${label} (shown to the buyer as cards): ${list.length ? list.map(brief).join("; ") : "none"}`;
+
 export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ id: string; inquiries: number }[]> }) {
   const line = z.enum(["men", "women", "kids"]).optional().describe("Product line, if the buyer named one");
   return {
@@ -22,11 +31,18 @@ export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ i
         limit: z.number().int().min(1).max(8).optional(),
       }),
       execute: (input) => findProducts(input),
+      toModelOutput: ({ output }) => text(cards(`${output.closest ? "Closest matches, nothing exact" : "Matches"}, ${output.count} in all`, output.styles)),
     }),
     productDetails: tool({
       description: "Full details of one style by name or slug: description, materials, sizes, case pack, MOQ, and styles that go with it.",
       inputSchema: z.object({ style: z.string().max(80) }),
       execute: (input) => productDetails(input),
+      toModelOutput: ({ output }) =>
+        text(
+          output.found
+            ? `${brief(output)}. ${output.description} Materials: ${output.materials.join("; ")}. Sizes ${output.sizeRange}. ${output.casePack}. MOQ ${output.moq}.${output.rating ? ` Rated ${output.rating}.` : ""} ${cards("Goes with", output.goesWith)}`
+            : cards("Not found; suggestions", output.suggestions),
+        ),
     }),
     seasonAdvice: tool({
       description: "What sells in a country now (or in a given month): its season, the best styles for it, and the order-by dates to have stock on the shelf in time.",
@@ -35,11 +51,19 @@ export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ i
         month: z.number().int().min(1).max(12).optional().describe("1–12, if they ask about a future month"),
       }),
       execute: (input) => seasonAdvice(input),
+      toModelOutput: ({ output: o }) =>
+        text(
+          `${o.country}, ${o.month}: ${o.season} (${o.edit}). ${o.whatSells} ${cards("Picks", o.picks)}. Order calendar: ${o.orderCalendar.map((p) => `${p.name} (${p.markets}): order by ${p.orderBy}, on shelf ${p.onShelf}`).join("; ")}. ${o.leadTimes}`,
+        ),
     }),
     topSellers: tool({
       description: "The styles to put forward now: trade-desk favourites (Top reorder, Trending), the season's leaders and the most-requested styles. Says what each list is based on.",
       inputSchema: z.object({ line }),
       execute: async ({ line }) => topSellers({ line, season: ctx.season, requested: await ctx.requested() }),
+      toModelOutput: ({ output: o }) =>
+        text(
+          `Based on: ${o.basis.join("; ")}. ${o.mostRequested.length ? `Most requested: ${o.mostRequested.map((c) => `${c.name} (${c.inquiries} inquiries)`).join(", ")}. ` : ""}${cards("Trade-desk favourites", o.marked)}. ${cards("Season leaders", o.inSeason)}`,
+        ),
     }),
     shippingInfo: tool({
       description: "Shipping to a country: port, transit time, trade terms (DDP/FOB/EXW), import rules and documents.",
@@ -70,6 +94,7 @@ export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ i
         "Use when the buyer asks about something unrelated to wholesale footwear, buying, products, materials, sizes, seasons, inquiries, shipping, payment, terms or the company (e.g. jokes, weather, politics, coding, homework, other products). Shows them buttons to get back on track. Write only one short, polite sentence declining; the buttons do the rest.",
       inputSchema: z.object({}),
       execute: () => offTopic({ season: ctx.season }),
+      toModelOutput: () => text("Buttons back to buying are shown under your reply. Write one short, polite sentence only."),
     }),
     draftInquiry: tool({
       description: "Prepare an inquiry for the buyer to review and send: styles with cases each (minimum 25). It does not send anything.",
@@ -80,6 +105,10 @@ export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ i
         country: z.string().max(60).optional().describe("Where it ships"),
       }),
       execute: (input) => draftInquiry(input),
+      toModelOutput: ({ output: d }) =>
+        text(
+          `Draft shown to the buyer to review and send themselves: ${d.lines.map((l) => `${l.name} ${l.cases} cases`).join(", ") || "no styles (full line sheet)"}; ${d.pairs} pairs.${d.unknown.length ? ` Not in the range: ${d.unknown.join(", ")}.` : ""} Nothing has been sent.`,
+        ),
     }),
   };
 }

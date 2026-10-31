@@ -85,6 +85,20 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
   const lastUserText = lastUser ? textOf(lastUser) : "";
   const lastId = messages[messages.length - 1]?.id;
 
+  // an AI reply that fails part-way (connection, a sudden quota) is answered offline instead, once, without the buyer
+  // having to ask; the buttons in the error box stay for the rare case that fails too
+  const retried = useRef(false);
+  useEffect(() => {
+    if (status === "ready" && !error) retried.current = false;
+  }, [status, error]);
+  useEffect(() => {
+    if (!error || retried.current || /429|a lot of messages/.test(error.message) || !lastUser) return;
+    retried.current = true;
+    clearError();
+    setMessages(messages.slice(0, messages.lastIndexOf(lastUser)));
+    void sendMessage({ text: lastUserText }, { body: { offline: true } });
+  }, [error, lastUser, lastUserText, messages, clearError, setMessages, sendMessage]);
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div ref={scroller} role="log" aria-live="polite" aria-label={`Conversation with ${ASSISTANT.name}`} className={clsx("min-h-0 flex-1 overflow-y-auto overscroll-contain", wide ? "px-1 py-4" : "px-4 py-4")}>

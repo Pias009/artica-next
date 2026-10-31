@@ -7,7 +7,7 @@ Kai is a sales assistant for wholesale buyers. It recommends styles by market an
 ## The protocol
 
 ```
- Buyer ─▶ pop-up / /assistant ─▶ POST /api/assistant ─┬─ AI model (AI Gateway: Grok → DeepSeek → GLM)
+ Buyer ─▶ pop-up / /assistant ─▶ POST /api/assistant ─┬─ AI model (Gemini 3.5 Flash → Flash-Lite; or the AI Gateway)
                                                       │     └─ calls tools ─┐
                                                       └─ offline engine ────┤   (no model configured,
                                                                             ▼    or the buyer asks after an error)
@@ -29,7 +29,7 @@ Kai isn't fine-tuned. It is grounded instead: tools over live data, plus behavio
 - **Facts:** edit the data (products, `faq.ts`, `buyer-desk.ts`, `products.ts` terms). Kai picks it up.
 - **Behaviour:** edit `instructions()` in `persona.ts` (tone, selling approach, what to ask).
 - **New abilities:** add a skill in `skills.ts`, a tool for it in `tools.ts`, a card in `KaiChat.tsx` if it has a visual, and (optionally) a rule in `local.ts`.
-- **Model:** set `ASSISTANT_MODEL` to any [AI Gateway model](https://vercel.com/ai-gateway/models) with tool use. Open-weight options include `deepseek/deepseek-v4.1-flash`, `zai/glm-5.3-flash` and `moonshotai/kimi-k3`.
+- **Model:** Gemini via `GOOGLE_GENERATIVE_AI_API_KEY` (models in `ASSISTANT_GEMINI_MODELS`), or set `ASSISTANT_MODEL` to any [AI Gateway model](https://vercel.com/ai-gateway/models) with tool use. Open-weight options include `deepseek/deepseek-v4.1-flash`, `zai/glm-5.3-flash` and `moonshotai/kimi-k3`.
 
 ## Configuration
 
@@ -53,6 +53,12 @@ Without a key, Kai runs the **offline engine** (`local.ts`). It reads the messag
   - Mild words count only when aimed at Kai, so "stupid question, but…" still gets a normal answer.
 - **Off-topic replies:** one short, polite sentence ("Sorry, that's outside what I can help with. I'm here for wholesale footwear.") plus the `offTopic` options. Some options ask Kai (what sells this season, choosing styles, MOQ and prices, how to order); others open a page (pricing, catalog, shipping, FAQ, contact). The same goes for rude, hostile, personal and rule-changing messages. A shoe we don't make gets "I couldn't find that in our range" instead. Real buying questions never get these options: 29 test messages, including near-misses like "any news on new arrivals?", "do you use cookies?" and becoming a distributor.
 - **Tested:** 49 messages, including normal buyer questions that must not be caught by these rules; all handled as intended.
+
+## Token budget (spend only what a reply needs)
+1. **Local first** (`localFirst` in `local.ts`): a short, single question in Latin script that doesn't lean on earlier turns, and that the offline engine answers with certainty, never reaches the model. That covers greetings, thanks, identity, off-topic, terms, shipping, quantities, product and season questions. Abusive or risky messages are always answered offline. Zero tokens.
+2. **Lean calls:** tool results go to the model as one-line summaries (`toModelOutput` in `tools.ts`) while the buyer sees full cards. Only the last 8 messages are sent. Thinking is minimal, at most 4 steps and 600 output tokens. The fixed instructions come first, so Gemini's implicit cache can reuse them.
+3. **Limits** (`budget.ts`): caps per minute and per day on calls and tokens; a pause after the provider's 429 (a minute, or an hour for a daily quota) or 503 (20 s); the busy model falls back to the next one (`model.ts`). Past any limit Kai answers offline. If a model reply fails part-way, the chat asks for the offline answer by itself.
+4. **Measured:** in testing, model replies took about 3,000 tokens per call, while the simple questions cost nothing.
 
 ## Safety and cost
 - **Rate limit:** 20 messages per 10 minutes and 200 a day per address (`limit.ts`), counted in MongoDB `assistant_hits` (deleted after a day), or in memory without a database.

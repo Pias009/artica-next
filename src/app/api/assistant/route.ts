@@ -1,8 +1,9 @@
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, isStepCount, smoothStream, streamText, toUIMessageStream, validateUIMessages } from "ai";
 import { cookies, headers } from "next/headers";
 import { allow } from "@/lib/assistant/limit";
-import { localReply } from "@/lib/assistant/local";
-import { aiReady, gatewayOptions, MODEL } from "@/lib/assistant/model";
+import { backOff, modelAllowed, record, spend } from "@/lib/assistant/budget";
+import { localFirst, localReply, type LocalReply } from "@/lib/assistant/local";
+import { aiReady, kaiModel } from "@/lib/assistant/model";
 import { instructions } from "@/lib/assistant/persona";
 import { country, visitorSeason } from "@/lib/assistant/skills";
 import { makeTools, type KaiMessage } from "@/lib/assistant/tools";
@@ -13,12 +14,18 @@ import { SEASON_COOKIE } from "@/lib/season";
 export const maxDuration = 60;
 
 const MAX_MESSAGES = 20;
+/** The model sees only the latest turns: older ones cost tokens on every reply and rarely change the answer. */
+const MODEL_TURNS = 8;
 const MAX_TEXT = 2000;
 
 /**
  * Kai's chat endpoint (useChat on the site posts here). Validates and trims the conversation, rate-limits per
- * address, and answers with the AI model and its tools, or with the offline engine when no model is configured (or
- * the client asks for it after an AI error). Nothing is stored: the conversation lives in the visitor's browser.
+ * address, then answers, spending model tokens only when they're needed:
+ *   1. the offline engine, when it can answer as well as the model (localFirst: most messages, zero tokens);
+ *   2. the AI model (Gemini, with a fallback model), if the budget allows (budget.ts);
+ *   3. the offline engine again, when there's no model, the budget is spent, the provider is pausing us, or the
+ *      client asks after an AI error.
+ * Nothing is stored: the conversation lives in the visitor's browser.
  */
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as { messages?: unknown; page?: unknown; list?: unknown; offline?: unknown } | null;
@@ -52,11 +59,46 @@ export async function POST(req: Request) {
   const last = messages[messages.length - 1];
   if (last.role !== "user") return new Response("Bad request", { status: 400 });
 
-  if (!aiReady() || body.offline === true) {
-    const text = last.parts.flatMap((p) => (p.type === "text" ? [p.text] : [])).join(" ");
-    const reply = localReply(text, { season, country: where, requested: dbReady() ? await requested() : [] });
+  const text = last.parts.flatMap((p) => (p.type === "text" ? [p.text] : [])).join(" ");
+  const ctx = { season, country: where, requested: dbReady() ? await requested() : [] };
+  const turns = messages.filter((m) => m.role === "user").length;
+  const local = !aiReady() || body.offline === true ? localReply(text, ctx) : (localFirst(text, turns, ctx) ?? ((await modelAllowed()) ? null : localReply(text, ctx)));
+  if (local) return offline(local);
+
+  const { model, providerOptions } = kaiModel();
+  spend();
+  const result = streamText({
+    model,
+    instructions: instructions({ country: where, season, page, list }),
+    messages: await convertToModelMessages(messages.slice(-MODEL_TURNS), { tools, ignoreIncompleteToolCalls: true }),
+    tools,
+    stopWhen: isStepCount(4),
+    maxOutputTokens: 600,
+    temperature: 0.4,
+    // the fallback model (model.ts) handles a busy provider; retrying the same one only adds waiting
+    maxRetries: 0,
+    providerOptions,
+    // even word-sized pieces, so replies flow in smoothly instead of in bursts
+    experimental_transform: smoothStream({ chunking: "word", delayInMs: 12 }),
+    onEnd: ({ steps, totalUsage }) => record(steps.length, (totalUsage.inputTokens ?? 0) + (totalUsage.outputTokens ?? 0)),
+    onError: ({ error }) => backOff(error),
+  });
+  return createUIMessageStreamResponse({
+    headers: { "x-kai-source": "model" },
+    stream: toUIMessageStream({
+      stream: result.stream,
+      onError: (e) => {
+        console.error("[assistant] model error", e);
+        backOff(e);
+        return "Kai couldn't reach its AI model just now.";
+      },
+    }),
+  });
+}
+
+/** An offline answer, streamed word by word like the model's, so both read and animate the same way. */
+function offline(reply: LocalReply) {
     const stream = createUIMessageStream<KaiMessage>({
-      // word by word, like the model streams, so both read and animate the same way
       async execute({ writer }) {
         writer.write({ type: "start" });
         writer.write({ type: "text-start", id: "t" });
@@ -73,29 +115,7 @@ export async function POST(req: Request) {
         writer.write({ type: "finish" });
       },
     });
-    return createUIMessageStreamResponse({ stream });
-  }
-
-  const result = streamText({
-    model: MODEL,
-    instructions: instructions({ country: where, season, page, list }),
-    messages: await convertToModelMessages(messages, { tools, ignoreIncompleteToolCalls: true }),
-    tools,
-    stopWhen: isStepCount(6),
-    maxOutputTokens: 900,
-    providerOptions: gatewayOptions,
-    // even word-sized pieces, so replies flow in smoothly instead of in bursts
-    experimental_transform: smoothStream({ chunking: "word", delayInMs: 12 }),
-  });
-  return createUIMessageStreamResponse({
-    stream: toUIMessageStream({
-      stream: result.stream,
-      onError: (e) => {
-        console.error("[assistant] model error", e);
-        return "Kai couldn't reach its AI model just now.";
-      },
-    }),
-  });
+    return createUIMessageStreamResponse({ stream, headers: { "x-kai-source": "offline" } });
 }
 
 /** The styles buyers asked for most in the last 90 days (spam left out). */

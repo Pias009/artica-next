@@ -12,6 +12,7 @@
     "admin": "node --env-file-if-exists=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin.mjs"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.109",
     "@ai-sdk/react": "^4.0.161",
     "@gsap/react": "^2.1.2",
     "@types/three": "^0.186.0",
