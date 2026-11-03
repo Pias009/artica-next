@@ -95,6 +95,13 @@ try {
     { key: { key: 1, at: 1 }, name: "key_at" },
     { key: { at: 1 }, name: "expire", expireAfterSeconds: 24 * 60 * 60 },
   ]);
+  // the visitor log (src/lib/analytics/visits.ts): 90 days, no IP addresses
+  await db.collection("visits").createIndexes([
+    { key: { at: 1 }, name: "expire", expireAfterSeconds: 90 * 24 * 60 * 60 },
+    { key: { sid: 1, at: 1 }, name: "sid_at" },
+    { key: { kind: 1, at: -1 }, name: "kind_at" },
+  ]);
+  // the admin panel's site edits (src/lib/content): one document, nothing to index
   console.log(`Database "${dbName}" ready: inquiries (validator + ${made.length} indexes), counters, admins, admin_sessions, admin_attempts, admin_audit`);
 } finally {
   await client.close();

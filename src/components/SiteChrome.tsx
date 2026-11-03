@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { KaiLauncher } from "./assistant/KaiLauncher";
 import { Fab } from "./Fab";
 import { Footer } from "./Footer";
@@ -10,6 +10,7 @@ import { SeasonBackground } from "./season/SeasonBackground";
 import { SeasonPreview } from "./season/SeasonPreview";
 import { StoreHydrator } from "./StoreHydrator";
 import { Toast } from "./Toast";
+import { Track } from "./Track";
 import { COMPANY, SOCIAL } from "@/lib/company";
 import { absoluteUrl, DESCRIPTION, ORG_ID, SITE_NAME } from "@/lib/site";
 
@@ -78,6 +79,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <Fab />
       <KaiLauncher />
       <SeasonPreview />
+      {/* the visitor log for the admin panel; useSearchParams needs a boundary on prerendered pages */}
+      <Suspense fallback={null}>
+        <Track />
+      </Suspense>
       <QuickView />
       <InquiryDrawer />
       <Toast />

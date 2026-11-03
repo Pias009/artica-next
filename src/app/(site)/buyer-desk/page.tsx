@@ -1,12 +1,12 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { IntroImage } from "@/components/buyer/IntroImage";
 import { SeasonCards } from "@/components/buyer/SeasonCards";
 import { BuyerDesk } from "@/components/home/BuyerDesk";
 import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Buyer desk: wholesale ordering tools",
   description: "Size conversions, order dates, container loads, import rules by country, quality checks and ways to verify Chime Long before you order.",
   path: "/buyer-desk",

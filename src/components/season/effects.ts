@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { controlOn } from "@/lib/content/live";
 
 /**
  * Whether the season scenes (snow, rain, leaves, birds…) move. On unless the visitor switched them off in the season
@@ -10,6 +11,8 @@ const KEY = "cl-effects";
 const EVENT = "cl-effects";
 
 const read = () => {
+  // switched off for everyone in the admin panel (Dashboard → Site controls)
+  if (!controlOn("effects")) return false;
   try {
     return localStorage.getItem(KEY) !== "off";
   } catch {

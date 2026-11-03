@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { loadContent } from "@/lib/content/store";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TechGrid } from "@/components/home/TechGrid";
@@ -23,6 +24,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  await loadContent();
   const p = getProduct((await params).slug);
   if (!p) return {};
   return pageMeta({ title: styleTitle(p), description: styleDescription(p), path: `/products/${p.slug}`, image: p.outer.src });
@@ -79,6 +81,8 @@ const ASSURANCE: [IconName, string, string][] = [
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
+  // the admin panel's edits: a hidden style is not found, a renamed one shows its new name
+  await loadContent();
   const p = getProduct(slug);
   if (!p) notFound();
 

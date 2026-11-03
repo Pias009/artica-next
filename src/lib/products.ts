@@ -5,6 +5,9 @@
 
 import { kidsPhotoStyles, womenPhotoStyles, type PhotoStyle } from "./catalog-photos";
 import shots from "./cloudinary-shots.json";
+import { onLive } from "./content/live";
+import type { ProductEdit } from "./content/model";
+import type { SeasonId } from "./season";
 
 export type ProductLine = "men" | "women" | "kids";
 export type Filter = ProductLine | "waterproof" | "insulated" | "all";
@@ -35,6 +38,9 @@ export type Product = {
   scene: Scene;
   /** "−25°C" style rating shown in the spotlight, if any. */
   rating?: string;
+  /** Set from the admin panel (content/model.ts): listed first, and pinned to these seasons. */
+  featured?: boolean;
+  pinnedSeasons?: SeasonId[];
 };
 
 /** Wholesale terms shared by every style. */
@@ -255,6 +261,7 @@ export const products: Product[] = [
 ];
 
 export const byId: Record<string, Product> = Object.fromEntries(products.map((p) => [p.id, p]));
+/** A style shown on the site, by its address; hidden styles are not found. */
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 export const inLine = (line: ProductLine) => products.filter((p) => p.line === line);
 
@@ -292,7 +299,38 @@ const GROUPS = new Map<string, Product[]>();
 for (const p of products) GROUPS.set(groupKey(p), [...(GROUPS.get(groupKey(p)) ?? []), p]);
 
 /** Every shoe in p's category and line, p included, in catalogue order. */
-export const groupOf = (p: Product) => GROUPS.get(groupKey(p)) ?? [p];
+export const groupOf = (p: Product) => GROUPS.get(groupKey(p))?.filter((x) => x === p || products.includes(x)) ?? [p];
+/* ---------- edits from the admin panel ---------- */
+
+/** Every style, hidden ones included (the admin panel lists them all). `products` is what the site shows. */
+export const allProducts: Product[] = [...products];
+const BASE = new Map(products.map((p) => [p.id, { name: p.name, desc: p.desc, badge: p.badge }]));
+/** A style's name and description as built, before any admin edit. */
+export const builtIn = (id: string) => BASE.get(id);
+
+/**
+ * Applies the admin panel's product edits to the catalogue in place, so every list, page and tool that reads
+ * `products` sees them: hidden styles leave the list, featured ones move to the front, new names and descriptions
+ * replace the built-in ones. Idempotent: it starts from the built-in values each time. Run on the server by
+ * content/store.ts and in the browser below, from the edits printed into the page.
+ */
+export function applyProductEdits(edits: Record<string, ProductEdit>) {
+  for (const p of allProducts) {
+    const base = BASE.get(p.id)!;
+    const e = edits[p.id] ?? {};
+    p.name = e.name?.trim() || base.name;
+    p.desc = e.desc?.trim() || base.desc;
+    p.badge = e.badge === "none" ? undefined : (e.badge ?? base.badge);
+    p.featured = !!e.featured;
+    p.pinnedSeasons = e.seasons?.length ? e.seasons : undefined;
+  }
+  const shown = allProducts.filter((p) => edits[p.id]?.live !== false);
+  // featured first, otherwise catalogue order
+  shown.sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || allProducts.indexOf(a) - allProducts.indexOf(b));
+  products.splice(0, products.length, ...shown);
+}
+onLive((c) => applyProductEdits(c.products));
+
 /** One shoe per category, keeping the first of each in list order (so a filter's best match fronts its category). */
 export function collapse(list: Product[]) {
   const seen = new Set<string>();

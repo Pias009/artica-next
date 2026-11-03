@@ -14,7 +14,12 @@ const HOUR = 3_600_000;
 /** The site promises tier pricing within 24 hours; the panel flags inquiries from 20 hours on. */
 export const DUE_HOURS = 20;
 
-export type ListQuery = { status: Status | "all" | "overdue"; intent: Intent | "all"; q: string; page: number };
+export type ListQuery = {
+  status: Status | "all" | "overdue";
+  intent: Intent | "all";
+  q: string;
+  page: number;
+};
 
 /** Turns the address bar's search params into a safe query: unknown values fall back to "all", text is capped. */
 export function parseQuery(sp: Record<string, string | string[] | undefined>): ListQuery {
@@ -34,7 +39,11 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 function filterFor(q: ListQuery): Filter<InquiryDoc> {
   const f: Filter<InquiryDoc> = {};
-  if (q.status === "overdue") Object.assign(f, { status: "new", createdAt: { $lt: new Date(Date.now() - DUE_HOURS * HOUR) } });
+  if (q.status === "overdue")
+    Object.assign(f, {
+      status: "new",
+      createdAt: { $lt: new Date(Date.now() - DUE_HOURS * HOUR) },
+    });
   else if (q.status !== "all") f.status = q.status;
   if (q.intent !== "all") f.intent = q.intent;
   if (q.q) {
@@ -73,7 +82,11 @@ export async function listInquiries(q: ListQuery) {
             createdAt: 1,
             firstReplyAt: 1,
             lineCount: { $size: "$lines" },
-            mailFailing: { $or: MAIL_KINDS.map((k) => ({ $and: [{ $eq: [`$mail.${k}.sentAt`, null] }, { $gt: [`$mail.${k}.attempts`, 0] }] })) },
+            mailFailing: {
+              $or: MAIL_KINDS.map((k) => ({
+                $and: [{ $eq: [`$mail.${k}.sentAt`, null] }, { $gt: [`$mail.${k}.attempts`, 0] }],
+              })),
+            },
           },
         },
       ])
@@ -87,16 +100,51 @@ export async function dashboard() {
   const now = Date.now();
   const [facets, failing] = await Promise.all([
     inquiries()
-      .aggregate<{ byStatus: { _id: Status; n: number }[]; week: { n: number }[]; overdue: { n: number }[]; reply: { hours: number | null }[] }>([
+      .aggregate<{
+        byStatus: { _id: Status; n: number }[];
+        week: { n: number }[];
+        overdue: { n: number }[];
+        reply: { hours: number | null }[];
+      }>([
         {
           $facet: {
             byStatus: [{ $group: { _id: "$status", n: { $sum: 1 } } }],
-            week: [{ $match: { createdAt: { $gte: new Date(now - 7 * 24 * HOUR) } } }, { $count: "n" }],
-            overdue: [{ $match: { status: "new", createdAt: { $lt: new Date(now - DUE_HOURS * HOUR) } } }, { $count: "n" }],
+            week: [
+              {
+                $match: { createdAt: { $gte: new Date(now - 7 * 24 * HOUR) } },
+              },
+              { $count: "n" },
+            ],
+            overdue: [
+              {
+                $match: {
+                  status: "new",
+                  createdAt: { $lt: new Date(now - DUE_HOURS * HOUR) },
+                },
+              },
+              { $count: "n" },
+            ],
             // median time to first reply over the last 30 days
             reply: [
-              { $match: { createdAt: { $gte: new Date(now - 30 * 24 * HOUR) }, firstReplyAt: { $ne: null } } },
-              { $group: { _id: null, hours: { $median: { input: { $divide: [{ $subtract: ["$firstReplyAt", "$createdAt"] }, HOUR] }, method: "approximate" } } } },
+              {
+                $match: {
+                  createdAt: { $gte: new Date(now - 30 * 24 * HOUR) },
+                  firstReplyAt: { $ne: null },
+                },
+              },
+              {
+                $group: {
+                  _id: null,
+                  hours: {
+                    $median: {
+                      input: {
+                        $divide: [{ $subtract: ["$firstReplyAt", "$createdAt"] }, HOUR],
+                      },
+                      method: "approximate",
+                    },
+                  },
+                },
+              },
             ],
           },
         },

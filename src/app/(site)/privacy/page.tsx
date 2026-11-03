@@ -1,10 +1,10 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { LegalText } from "@/components/LegalText";
 import { PageIntro } from "@/components/PageIntro";
 import { COMPANY } from "@/lib/company";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Privacy policy",
   description: "What Chime Long collects when you send an inquiry or sign up for line sheets, why, and your rights.",
   path: "/privacy",
@@ -33,6 +33,20 @@ const SECTIONS = [
       "Kai, the chat assistant on this site, is an AI model. What you type is sent to our AI provider (Google's Gemini API) to write the answer.",
       "We don't keep chat conversations. The conversation stays in your browser tab until you close it. If you send an inquiry from the chat, it reaches us like any other inquiry, marked as prepared with Kai.",
       "To keep the service fair we count how many messages each address sends for up to a day. Please don't share sensitive personal information in the chat.",
+    ],
+  },
+  {
+    title: "Visit statistics",
+    body: [
+      "We count visits to improve the site: the page, the time, the country, the kind of device, the site you came from and searches you make on this site. We set no cookie for this and store nothing on your device.",
+      "We don't keep your IP address. A visit is joined up with an anonymous code made from your address and browser and a secret that changes every day, so you can't be followed from one day to the next. Browsers that send Global Privacy Control or Do Not Track aren't counted. These records are deleted after 90 days.",
+    ],
+  },
+  {
+    title: "The business planner",
+    body: [
+      "What you enter in the business planner (country, stage, budget, prices, styles) is kept in your own browser and in the page address, so you can come back to it or share the link. We don't receive it.",
+      "If you use Kai's planning desk, your country, stage, budget and customer lines go with your messages so Kai can answer for your plan. If you send the plan to the trade desk, it reaches us as an inquiry like any other.",
     ],
   },
   {

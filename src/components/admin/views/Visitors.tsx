@@ -1,58 +1,63 @@
 "use client";
 
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { EXITS, FUNNEL, KEYWORDS, SITE_SEARCHES, SOURCES, VISITORS, type View, type Visitor } from "../data";
+import { type View } from "../data";
+import { ago, usePanel } from "../panel-data";
 import { AdminIcon, Card, CardHead, CountUp, Meter, useEntered } from "../ui";
+import type { PanelVisitors } from "@/lib/admin/panel";
 
-/** Pages a live visitor might open next, so the live list keeps moving. */
-const NEXT = ["/catalog", "/products/nord", "/products/mira-tall", "/shipping", "/faq", "/size-guide", "/private-label", "/inquiry"];
-const SOURCE_TONE = ["bg-ink", "bg-ink/70", "bg-brand", "bg-ink/45", "bg-brand/55", "bg-ink/20"];
+type Visitor = PanelVisitors["people"][number];
+const SOURCE_TONE = ["bg-ink", "bg-ink/70", "bg-brand", "bg-ink/45", "bg-brand/55", "bg-ink/20", "bg-ink/10", "bg-brand/30"];
+const EMPTY: PanelVisitors = {
+  sessions: 0,
+  live: 0,
+  pagesPerVisit: 0,
+  onePage: 0,
+  topPages: [],
+  people: [],
+  funnel: [],
+  exits: [],
+  sources: [],
+  devices: [],
+  hours: Array(24).fill(0),
+  searches: [],
+  pageViews: {},
+};
 
 /**
- * Visitor footprints: who is on the site now and the trail each one leaves, where they come from (and what they
- * searched for), where the buying path loses people, which pages they leave from and what they look for on the site.
+ * Visitor footprints from the site's own visitor log (lib/analytics/visits.ts): who is on the site now and the trail
+ * each visit leaves, where visits come from, where the buying path loses people, which pages they leave from and what
+ * they look for. Refreshes itself every 30 seconds while open.
  */
 export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
-  const [visitors, setVisitors] = useState(VISITORS);
-  const [selected, setSelected] = useState("v1");
+  const panel = usePanel();
+  const data = panel.visitors ?? EMPTY;
+  const visitors = data.people;
+  const [selected, setSelected] = useState<string | null>(null);
   const on = useEntered();
   const current = visitors.find((v) => v.id === selected) ?? visitors[0];
-  const live = visitors.filter((v) => v.live).length;
+  const router = useRouter();
+  const PEAK = Math.max(1, ...data.hours);
 
-  // live visitors keep moving: every few seconds one of them opens another page
+  // the live list keeps itself current: fresh figures from the server every 30 seconds
   useEffect(() => {
-    let tick = 0;
-    const id = setInterval(() => {
-      tick++;
-      setVisitors((all) => {
-        const movers = all.filter((v) => v.live);
-        const who = movers[tick % movers.length];
-        return all.map((v) => {
-          if (v !== who) return v;
-          const last = v.trail[v.trail.length - 1];
-          const [m, s] = last.at.split(":").map(Number);
-          const t = m * 60 + s + 35 + ((tick * 17) % 50);
-          const page = NEXT[(tick * 3 + v.trail.length) % NEXT.length];
-          const step = { page: page === last.page ? "/catalog" : page, at: `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}` };
-          return { ...v, trail: [...v.trail, step].slice(-6) };
-        });
-      });
-    }, 3500);
+    const id = setInterval(() => router.refresh(), 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [router]);
 
-  const max = FUNNEL[0].n;
+  const max = Math.max(1, data.funnel[0]?.n ?? 0);
 
   return (
     <div className="grid gap-4 lg:grid-cols-12">
       {/* the headline numbers */}
       {(
         [
-          ["Visitors today", 1284, "", "+12% on last Thursday", false],
-          ["On the site now", live, "", "updating live", true],
-          ["Pages per visit", 3.4, "", "median 3", false],
-          ["Leave after one page", 34, "%", "down from 39%", false],
+          ["Visits, last 7 days", data.sessions, "", "each visit counted once a day", false],
+          ["On the site now", data.live, "", "active in the last 5 minutes", true],
+          ["Pages per visit", Math.round(data.pagesPerVisit * 10) / 10, "", "last 7 days", false],
+          ["Leave after one page", data.onePage, "%", "last 7 days", false],
         ] as const
       ).map(([label, n, suffix, sub, dark], k) => (
         <Card key={label} i={k} tone={dark ? "dark" : "glass"} className="lg:col-span-3">
@@ -67,7 +72,14 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
 
       {/* live footprints */}
       <Card i={4} className="lg:col-span-7">
-        <CardHead title="Footprints" sub="Every visitor's trail through the site; pick one to follow it" right={<span className="text-[12.5px] text-ink/50">anonymous</span>} />
+        <CardHead
+          title="Footprints"
+          sub="Visits in the last two hours and their trail; pick one to follow it"
+          right={<span className="text-[12.5px] text-ink/50">anonymous</span>}
+        />
+        {!visitors.length && (
+          <p className="mt-4 text-[14px] text-ink/55">{panel.ready ? "No visits in the last two hours." : "No database connected: nothing is logged."}</p>
+        )}
         <ul className="mt-4 grid gap-2">
           {visitors.map((v) => (
             <li key={v.id}>
@@ -87,7 +99,7 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
                   </span>
                   <span className={clsx("flex items-center gap-1.5 text-[12px] font-semibold", v.live ? "text-emerald-600" : "text-danger")}>
                     <span className={clsx("size-1.5 rounded-full", v.live ? "bg-emerald-500 motion-safe:animate-pulse" : "bg-danger")} />
-                    {v.live ? "On the site" : `Left from ${v.left}`}
+                    {v.live ? "On the site" : `Left from ${v.left ?? "–"} · ${ago(v.lastSeen)}`}
                   </span>
                 </span>
                 <Trail v={v} />
@@ -99,41 +111,57 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
 
       {/* one visitor, followed */}
       <Card i={5} tone="dark" className="lg:col-span-5">
-        <CardHead dark title="Following one visitor" sub={`${current.flag} ${current.country} · ${current.device}`} />
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
-          <div className="rounded-2xl bg-white/8 p-3">
-            <dt className="text-white/55">Came from</dt>
-            <dd className="mt-0.5 font-semibold">{current.source}</dd>
-          </div>
-          <div className="rounded-2xl bg-white/8 p-3">
-            <dt className="text-white/55">Searched for</dt>
-            <dd className="mt-0.5 font-semibold">{current.searched ? `“${current.searched}”` : "Not known"}</dd>
-          </div>
-        </dl>
-        <ol key={current.id} className="relative mt-5 grid gap-4 pl-6">
-          <span aria-hidden="true" className="absolute top-2 bottom-2 left-[5px] w-px bg-white/20" />
-          {current.trail.map((s, i) => {
-            const last = i === current.trail.length - 1;
-            return (
-              <li key={s.page + s.at} className="relative motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]" style={{ animationDelay: `${i * 70}ms` }}>
-                <span className={clsx("absolute top-1.5 -left-6 size-[11px] rounded-full ring-4 ring-[#3a3c3f]", last ? (current.live ? "bg-emerald-400" : "bg-danger") : "bg-white")} />
-                <p className="text-[14px] font-semibold">{s.page}</p>
-                <p className="text-[12px] text-white/55">
-                  {i === 0 ? "Landed" : "Opened"} at {s.at}
-                  {last && (current.live ? " · here now" : " · left the site")}
-                </p>
-              </li>
-            );
-          })}
-        </ol>
+        {!current ? (
+          <CardHead dark title="Following one visitor" sub="Pick a visit when one comes in" />
+        ) : (
+          <>
+            <CardHead dark title="Following one visitor" sub={`${current.flag} ${current.country} · ${current.device}`} />
+            <dl className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
+              <div className="rounded-2xl bg-white/8 p-3">
+                <dt className="text-white/55">Came from</dt>
+                <dd className="mt-0.5 font-semibold">{current.source}</dd>
+              </div>
+              <div className="rounded-2xl bg-white/8 p-3">
+                <dt className="text-white/55">Searched for</dt>
+                <dd className="mt-0.5 font-semibold">{current.searched ? `“${current.searched}”` : "Not known"}</dd>
+              </div>
+            </dl>
+            <ol key={current.id} className="relative mt-5 grid gap-4 pl-6">
+              <span aria-hidden="true" className="absolute top-2 bottom-2 left-[5px] w-px bg-white/20" />
+              {current.trail.map((s, i) => {
+                const last = i === current.trail.length - 1;
+                return (
+                  <li
+                    key={s.page + s.at}
+                    className="relative motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]"
+                    style={{ animationDelay: `${i * 70}ms` }}
+                  >
+                    <span
+                      className={clsx(
+                        "absolute top-1.5 -left-6 size-[11px] rounded-full ring-4 ring-[#3a3c3f]",
+                        last ? (current.live ? "bg-emerald-400" : "bg-danger") : "bg-white",
+                      )}
+                    />
+                    <p className="text-[14px] font-semibold">{s.page}</p>
+                    <p className="text-[12px] text-white/55">
+                      {i === 0 ? "Landed" : "Opened"} at {s.at}
+                      {last && (current.live ? " · here now" : " · left the site")}
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
+          </>
+        )}
       </Card>
 
       {/* where the path loses people */}
       <Card i={6} className="lg:col-span-7">
         <CardHead title="Where they drop out" sub="This week's visitors, step by step along the buying path" />
         <ol className="mt-5 grid gap-3">
-          {FUNNEL.map((f, i) => {
-            const drop = i ? Math.round((1 - f.n / FUNNEL[i - 1].n) * 100) : 0;
+          {data.funnel.map((f, i) => {
+            const prev = data.funnel[i - 1]?.n ?? 0;
+            const drop = i && prev ? Math.max(0, Math.round((1 - f.n / prev) * 100)) : 0;
             return (
               <li key={f.step}>
                 {i > 0 && (
@@ -147,8 +175,15 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
                 </div>
                 <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-ink/[0.06]">
                   <div
-                    className={clsx("h-full origin-left rounded-full transition-transform duration-[1100ms] ease-[cubic-bezier(.22,1,.36,1)]", i === FUNNEL.length - 1 ? "bg-brand" : "bg-ink")}
-                    style={{ width: `${Math.max(2, (f.n / max) * 100)}%`, transform: `scaleX(${on ? 1 : 0})`, transitionDelay: `${i * 90}ms` }}
+                    className={clsx(
+                      "h-full origin-left rounded-full transition-transform duration-[1100ms] ease-[cubic-bezier(.22,1,.36,1)]",
+                      i === data.funnel.length - 1 ? "bg-brand" : "bg-ink",
+                    )}
+                    style={{
+                      width: `${Math.max(2, (f.n / max) * 100)}%`,
+                      transform: `scaleX(${on ? 1 : 0})`,
+                      transitionDelay: `${i * 90}ms`,
+                    }}
                   />
                 </div>
               </li>
@@ -157,27 +192,64 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
         </ol>
       </Card>
 
-      <Card i={7} className="lg:col-span-5">
+      <Card i={7} className="flex flex-col lg:col-span-5">
         <CardHead title="Exit pages" sub="The last page before people leave, and how often it's the last" />
         <ul className="mt-5 grid gap-4">
-          {EXITS.map((e) => (
+          {!data.exits.length && <li className="text-[13.5px] text-ink/55">No visits logged yet.</li>}
+          {data.exits.map((e) => (
             <li key={e.page}>
               <Meter label={`${e.page} · ${e.exits} exits`} value={e.rate} />
             </li>
           ))}
         </ul>
+        <div className="mt-auto pt-6">
+          <div className="flex items-baseline justify-between text-[12.5px] text-ink/55">
+            <span className="font-semibold text-ink">Busiest hours</span>
+            <span>
+              Guangzhou time
+              {data.hours.some(Boolean) && ` · peak ${data.hours.indexOf(PEAK)}:00`}
+            </span>
+          </div>
+          <div aria-hidden="true" className="mt-2 flex h-14 items-end gap-[3px]">
+            {data.hours.map((n, h) => (
+              <span
+                key={h}
+                className={clsx("flex-1 origin-bottom rounded-t-[3px] transition-transform duration-700", n && n === PEAK ? "bg-ink" : "bg-ink/20")}
+                style={{
+                  height: `${(n / PEAK) * 100}%`,
+                  transform: `scaleY(${on ? 1 : 0})`,
+                  transitionDelay: `${h * 15}ms`,
+                }}
+              />
+            ))}
+          </div>
+          <div className="mt-1 flex justify-between text-[11.5px] text-ink/45 tabular-nums">
+            <span>0:00</span>
+            <span>6:00</span>
+            <span>12:00</span>
+            <span>18:00</span>
+            <span>23:00</span>
+          </div>
+        </div>
       </Card>
 
       {/* where they come from, and what they look for */}
       <Card i={8} className="lg:col-span-4">
         <CardHead title="Where they come from" />
         <div className="mt-5 flex h-3 overflow-hidden rounded-full">
-          {SOURCES.map((s, i) => (
-            <span key={s.name} className={clsx("h-full origin-left transition-transform duration-1000", SOURCE_TONE[i])} style={{ width: `${s.share}%`, transform: `scaleX(${on ? 1 : 0})` }} />
+          {data.sources.map((s, i) => (
+            <span
+              key={s.name}
+              className={clsx("h-full origin-left transition-transform duration-1000", SOURCE_TONE[i])}
+              style={{
+                width: `${s.share}%`,
+                transform: `scaleX(${on ? 1 : 0})`,
+              }}
+            />
           ))}
         </div>
         <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[13px]">
-          {SOURCES.map((s, i) => (
+          {data.sources.map((s, i) => (
             <li key={s.name} className="flex items-center gap-2">
               <span className={clsx("size-2.5 rounded-full", SOURCE_TONE[i])} />
               <span className="flex-1">{s.name}</span>
@@ -185,24 +257,42 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
             </li>
           ))}
         </ul>
-      </Card>
-
-      <Card i={9} className="lg:col-span-4">
-        <CardHead title="What they searched to find you" sub="Search-engine words, this month" />
-        <ul className="mt-4 grid gap-2.5">
-          {KEYWORDS.map((k) => (
-            <li key={k.q} className="flex items-center justify-between gap-3 rounded-2xl bg-white/60 px-3.5 py-2.5 text-[13.5px]">
-              <span className="truncate">“{k.q}”</span>
-              <span className="font-semibold tabular-nums">{k.n}</span>
+        <h3 className="mt-7 text-[13px] font-semibold">On what</h3>
+        <ul className="mt-3 grid gap-3">
+          {data.devices.map((d) => (
+            <li key={d.name}>
+              <Meter label={d.name} value={d.share} />
             </li>
           ))}
         </ul>
       </Card>
 
-      <Card i={10} tone="dark" className="lg:col-span-4">
-        <CardHead dark title="Searches on the site" sub="What visitors typed into search" />
+      <Card i={9} className="lg:col-span-4">
+        <CardHead title="Most viewed pages" sub="Page views, last 7 days" />
         <ul className="mt-4 grid gap-2.5">
-          {SITE_SEARCHES.map((s) => (
+          {!data.topPages.length && <li className="text-[13.5px] text-ink/55">No views logged yet.</li>}
+          {data.topPages.map((k) => (
+            <li key={k.page}>
+              <a
+                href={k.page}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between gap-3 rounded-2xl bg-white/60 px-3.5 py-2.5 text-[13.5px] hover:bg-white"
+              >
+                <span className="truncate">{k.page}</span>
+                <span className="font-semibold tabular-nums">{k.n.toLocaleString("en-US")}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-[12px] text-ink/50">Search engines no longer pass on the words people searched; see them in Google Search Console.</p>
+      </Card>
+
+      <Card i={10} tone="dark" className="lg:col-span-4">
+        <CardHead dark title="Searches on the site" sub="What visitors typed into search, last 7 days" />
+        <ul className="mt-4 grid gap-2.5">
+          {!data.searches.length && <li className="text-[13.5px] text-white/60">No searches yet.</li>}
+          {data.searches.map((s) => (
             <li key={s.q} className="flex items-center justify-between gap-3 rounded-2xl bg-white/8 px-3.5 py-2.5 text-[13.5px]">
               <span className="truncate">“{s.q}”</span>
               <span className="flex items-center gap-2">
@@ -213,14 +303,19 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
           ))}
         </ul>
         {onGo && (
-          <button type="button" onClick={() => onGo("agent")} className="mt-4 flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-ink transition-transform hover:scale-[1.03]">
-            <AdminIcon name="sparkle" className="size-4" /> Let the agent fill the gaps
+          <button
+            type="button"
+            onClick={() => onGo("products")}
+            className="mt-4 flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-ink transition-transform hover:scale-[1.03]"
+          >
+            <AdminIcon name="sparkle" className="size-4" /> Review the catalogue
           </button>
         )}
       </Card>
 
       <p className="px-2 text-[12.5px] text-ink/50 lg:col-span-12">
-        Sample data for the layout. Live footprints need a tracking script and, under the privacy policy, a consent banner first: visitors are counted only once they agree.
+        From the site&apos;s own visitor log: no cookies, nothing stored on visitors&apos; devices, no IP addresses kept; a visit&apos;s id changes every day,
+        and browsers that ask not to be tracked aren&apos;t. Kept 90 days.
       </p>
     </div>
   );

@@ -71,7 +71,10 @@ export function CountUp({ value, decimals = 0, suffix = "", className }: { value
   }, [value]);
   return (
     <span className={clsx("tabular-nums", className)}>
-      {n.toLocaleString("en-US", { maximumFractionDigits: decimals, minimumFractionDigits: decimals })}
+      {n.toLocaleString("en-US", {
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+      })}
       {suffix}
     </span>
   );
@@ -122,7 +125,10 @@ export function Meter({ label, value, max = 100, dark, suffix = "%" }: { label: 
       </div>
       <div className={clsx("mt-1.5 h-1.5 overflow-hidden rounded-full", dark ? "bg-white/15" : "bg-ink/10")}>
         <div
-          className={clsx("h-full origin-left rounded-full transition-transform duration-[1100ms] ease-[cubic-bezier(.22,1,.36,1)]", dark ? "bg-white" : "bg-ink")}
+          className={clsx(
+            "h-full origin-left rounded-full transition-transform duration-[1100ms] ease-[cubic-bezier(.22,1,.36,1)]",
+            dark ? "bg-white" : "bg-ink",
+          )}
           style={{ transform: `scaleX(${on ? value / max : 0})` }}
         />
       </div>
@@ -133,21 +139,35 @@ export function Meter({ label, value, max = 100, dark, suffix = "%" }: { label: 
 /** The week as standing pins: a thin stem with a knob, tallest day highlighted. */
 export function PinBars({ data }: { data: { day: string; n: number }[] }) {
   const on = useEntered();
-  const max = Math.max(...data.map((d) => d.n));
+  // never 0: an empty week draws flat bars instead of dividing by zero
+  const max = Math.max(1, ...data.map((d) => d.n));
   return (
     <div className="flex h-full min-h-36 items-end justify-between gap-2" role="img" aria-label={data.map((d) => `${d.day} ${d.n}`).join(", ")}>
       {data.map((d, i) => {
-        const top = d.n === max;
+        const top = d.n > 0 && d.n === max;
         return (
           <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
             <div className="relative flex w-full flex-1 items-end justify-center">
               <div
-                className={clsx("w-[3px] origin-bottom rounded-full transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]", top ? "bg-ink" : "bg-white shadow-[0_0_0_1px_rgb(18_20_22/.06)]")}
-                style={{ height: `${(d.n / max) * 100}%`, transform: `scaleY(${on ? 1 : 0})`, transitionDelay: `${i * 50}ms` }}
+                className={clsx(
+                  "w-[3px] origin-bottom rounded-full transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]",
+                  top ? "bg-ink" : "bg-white shadow-[0_0_0_1px_rgb(18_20_22/.06)]",
+                )}
+                style={{
+                  height: `${(d.n / max) * 100}%`,
+                  transform: `scaleY(${on ? 1 : 0})`,
+                  transitionDelay: `${i * 50}ms`,
+                }}
               />
               <span
-                className={clsx("absolute size-2.5 rounded-full ring-2 transition-[bottom] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]", top ? "bg-ink ring-white" : "bg-white ring-ink/10")}
-                style={{ bottom: on ? `calc(${(d.n / max) * 100}% - 5px)` : "-5px", transitionDelay: `${i * 50}ms` }}
+                className={clsx(
+                  "absolute size-2.5 rounded-full ring-2 transition-[bottom] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]",
+                  top ? "bg-ink ring-white" : "bg-white ring-ink/10",
+                )}
+                style={{
+                  bottom: on ? `calc(${(d.n / max) * 100}% - 5px)` : "-5px",
+                  transitionDelay: `${i * 50}ms`,
+                }}
               />
             </div>
             <span className={clsx("text-[12px]", top ? "font-semibold" : "text-ink/55")}>{d.day}</span>
@@ -159,15 +179,30 @@ export function PinBars({ data }: { data: { day: string; n: number }[] }) {
 }
 
 /** A smooth line through the values, drawn in on mount. Optional filled area underneath. */
-export function LineChart({ values, labels, dark, area, height = 120, second }: { values: number[]; labels?: string[]; dark?: boolean; area?: boolean; height?: number; second?: number[] }) {
+export function LineChart({
+  values,
+  labels,
+  dark,
+  area,
+  height = 120,
+  second,
+}: {
+  values: number[];
+  labels?: string[];
+  dark?: boolean;
+  area?: boolean;
+  height?: number;
+  second?: number[];
+}) {
   const id = useId();
   const on = useEntered();
   const W = 300;
   const H = height;
   const all = [...values, ...(second ?? [])];
-  const min = Math.min(...all) * 0.9;
-  const max = Math.max(...all) * 1.05;
-  const pts = (vs: number[]) => vs.map((v, i) => [(i / (vs.length - 1)) * W, H - ((v - min) / (max - min)) * H] as const);
+  const min = Math.min(0, ...all) * 0.9;
+  // a flat or empty series still draws (no division by zero)
+  const max = Math.max(min + 1, Math.max(...all, 0) * 1.05);
+  const pts = (vs: number[]) => vs.map((v, i) => [(i / Math.max(1, vs.length - 1)) * W, H - ((v - min) / (max - min)) * H] as const);
   const smooth = (p: readonly (readonly [number, number])[]) =>
     p.reduce((d, [x, y], i) => {
       if (!i) return `M${x},${y}`;
@@ -186,7 +221,13 @@ export function LineChart({ values, labels, dark, area, height = 120, second }: 
             <stop offset="1" stopColor={dark ? "#fff" : "#121416"} stopOpacity="0" />
           </linearGradient>
         </defs>
-        {area && <path d={`${line} L${W},${H} L0,${H} Z`} fill={`url(#${id})`} className={clsx("transition-opacity delay-300 duration-700", on ? "opacity-100" : "opacity-0")} />}
+        {area && (
+          <path
+            d={`${line} L${W},${H} L0,${H} Z`}
+            fill={`url(#${id})`}
+            className={clsx("transition-opacity delay-300 duration-700", on ? "opacity-100" : "opacity-0")}
+          />
+        )}
         {second && (
           <path
             d={smooth(pts(second))}
@@ -246,14 +287,37 @@ export function Toggle({ checked, onChange, label, dark }: { checked: boolean; o
 }
 
 /** A row of choices, one selected; the highlight slides between them. */
-export function Segmented<T extends string>({ value, options, onChange, label }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string }) {
-  const i = Math.max(0, options.findIndex((o) => o.id === value));
+export function Segmented<T extends string>({
+  value,
+  options,
+  onChange,
+  label,
+}: {
+  value: T;
+  options: { id: T; label: string }[];
+  onChange: (v: T) => void;
+  label: string;
+}) {
+  const i = Math.max(
+    0,
+    options.findIndex((o) => o.id === value),
+  );
   return (
-    <div role="group" aria-label={label} className="relative inline-grid rounded-full bg-ink/[0.06] p-1" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+    <div
+      role="group"
+      aria-label={label}
+      className="relative inline-grid rounded-full bg-ink/[0.06] p-1"
+      style={{
+        gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+      }}
+    >
       <span
         aria-hidden="true"
         className="absolute inset-y-1 left-1 rounded-full bg-white shadow-[0_1px_3px_rgb(18_20_22/.15)] transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]"
-        style={{ width: `calc((100% - 8px) / ${options.length})`, transform: `translateX(${i * 100}%)` }}
+        style={{
+          width: `calc((100% - 8px) / ${options.length})`,
+          transform: `translateX(${i * 100}%)`,
+        }}
       />
       {options.map((o) => (
         <button
@@ -261,7 +325,10 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
           type="button"
           aria-pressed={o.id === value}
           onClick={() => onChange(o.id)}
-          className={clsx("relative min-h-9 rounded-full px-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors", o.id === value ? "text-ink" : "text-ink/55 hover:text-ink")}
+          className={clsx(
+            "relative min-h-9 rounded-full px-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors",
+            o.id === value ? "text-ink" : "text-ink/55 hover:text-ink",
+          )}
         >
           {o.label}
         </button>
@@ -271,20 +338,45 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
 }
 
 /** A text field with a visible label and an optional character budget. */
-export function Field({ label, value, onChange, max, multiline, placeholder }: { label: string; value: string; onChange: (v: string) => void; max?: number; multiline?: boolean; placeholder?: string }) {
+export function Field({
+  label,
+  value,
+  onChange,
+  max,
+  multiline,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  max?: number;
+  multiline?: boolean;
+  placeholder?: string;
+}) {
   const id = useId();
   const over = max != null && value.length > max;
-  const cls = "w-full rounded-2xl bg-white/80 px-4 py-3 text-[14.5px] ring-1 ring-ink/10 outline-none transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-ink";
+  const cls =
+    "w-full rounded-2xl bg-white/80 px-4 py-3 text-[14.5px] ring-1 ring-ink/10 outline-none transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-ink";
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
         <label htmlFor={id} className="text-[12.5px] font-semibold text-ink/70">
           {label}
         </label>
-        {max != null && <span className={clsx("text-[12px] tabular-nums", over ? "font-semibold text-danger" : "text-ink/45")}>{`${value.length}/${max}`}</span>}
+        {max != null && (
+          <span className={clsx("text-[12px] tabular-nums", over ? "font-semibold text-danger" : "text-ink/45")}>{`${value.length}/${max}`}</span>
+        )}
       </div>
       {multiline ? (
-        <textarea id={id} rows={4} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={clsx(cls, "resize-none")} aria-invalid={over || undefined} />
+        <textarea
+          id={id}
+          rows={4}
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className={clsx(cls, "resize-none")}
+          aria-invalid={over || undefined}
+        />
       ) : (
         <input id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={cls} aria-invalid={over || undefined} />
       )}
@@ -302,6 +394,8 @@ const ICONS = {
   bell: "M6 16V11a6 6 0 1112 0v5l2 2H4zM10 20a2 2 0 004 0",
   eye: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 15a3 3 0 100-6 3 3 0 000 6z",
   eyeOff: "M3 3l18 18M10.6 5.1A10.6 10.6 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4M6.6 6.6A17 17 0 002 12s3.6 7 10 7a10 10 0 005.4-1.6M9.9 9.9a3 3 0 004.2 4.2",
+  grid: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
+  list: "M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01",
   grip: "M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01",
   up: "M12 19V5M6 11l6-6 6 6",
   down: "M12 5v14M6 13l6 6 6-6",
@@ -313,7 +407,13 @@ export type AdminIconName = keyof typeof ICONS;
 
 export function AdminIcon({ name, className }: { name: AdminIconName; className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={clsx("fill-none stroke-current stroke-[1.7]", className ?? "size-5")} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={clsx("fill-none stroke-current stroke-[1.7]", className ?? "size-5")}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d={ICONS[name]} />
     </svg>
   );
@@ -366,28 +466,89 @@ export function useStream(text: string | null, run = 0, onDone?: (text: string) 
 }
 
 /** Appears when a view has unsaved edits: discard them, or publish. */
-export function SaveBar({ count, onDiscard, onSave }: { count: number; onDiscard: () => void; onSave: () => void }) {
-  if (!count) return null;
+export function SaveBar({
+  count,
+  onDiscard,
+  onSave,
+  pending = false,
+  error,
+}: {
+  count: number;
+  onDiscard: () => void;
+  onSave: () => void;
+  pending?: boolean;
+  error?: string | null;
+}) {
+  if (!count && !error) return null;
   return (
-    <div role="status" className="fixed inset-x-0 bottom-28 z-40 flex justify-center px-4 motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]">
-      <div className="flex items-center gap-3 rounded-full bg-ink py-2 pr-2 pl-5 text-[13.5px] text-white shadow-[0_20px_40px_-16px_rgb(18_20_22/.6)]">
-        <span>
-          {count} unsaved {count === 1 ? "change" : "changes"}
-        </span>
-        <button type="button" onClick={onDiscard} className="min-h-9 rounded-full px-3.5 font-semibold text-white/70 transition-colors hover:text-white">
-          Discard
-        </button>
-        <button type="button" onClick={onSave} className="min-h-9 rounded-full bg-white px-4 font-semibold text-ink transition-transform hover:scale-[1.03] active:scale-[.98]">
-          Publish
-        </button>
-      </div>
+    <div
+      role="status"
+      className="fixed inset-x-0 bottom-28 z-40 flex flex-col items-center gap-2 px-4 motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]"
+    >
+      {error && <p className="max-w-[min(560px,100%)] rounded-2xl bg-danger px-4 py-2 text-center text-[13px] font-medium text-white shadow-lg">{error}</p>}
+      {count > 0 && (
+        <div className="flex items-center gap-3 rounded-full bg-ink py-2 pr-2 pl-5 text-[13.5px] text-white shadow-[0_20px_40px_-16px_rgb(18_20_22/.6)]">
+          <span>
+            {count} unsaved {count === 1 ? "change" : "changes"}
+          </span>
+          <button
+            type="button"
+            onClick={onDiscard}
+            disabled={pending}
+            className="min-h-9 rounded-full px-3.5 font-semibold text-white/70 transition-colors hover:text-white disabled:opacity-50"
+          >
+            Discard
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={pending}
+            className="min-h-9 rounded-full bg-white px-4 font-semibold text-ink transition-transform hover:scale-[1.03] active:scale-[.98] disabled:opacity-60"
+          >
+            {pending ? "Publishing…" : "Publish"}
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+const FLASH = "admin-flash";
+/** A short confirmation at the bottom of the screen ("Published"), from anywhere in the panel. */
+export const flash = (text: string) => window.dispatchEvent(new CustomEvent(FLASH, { detail: text }));
+export function Flash() {
+  const [text, setText] = useState<string | null>(null);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const on = (e: Event) => {
+      setText((e as CustomEvent<string>).detail);
+      clearTimeout(t);
+      t = setTimeout(() => setText(null), 3200);
+    };
+    window.addEventListener(FLASH, on);
+    return () => (window.removeEventListener(FLASH, on), clearTimeout(t));
+  }, []);
+  if (!text) return null;
+  return (
+    <p
+      role="status"
+      className="fixed inset-x-0 bottom-28 z-40 mx-auto w-fit max-w-[90vw] rounded-full bg-[#2f8f5b] px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg motion-safe:animate-[admin-in_.35s_cubic-bezier(.22,1,.36,1)_both]"
+    >
+      {text}
+    </p>
   );
 }
 
 /** A placeholder line while the assistant is thinking. */
 export function Shimmer({ className }: { className?: string }) {
-  return <span className={clsx("block h-3 rounded-full bg-[linear-gradient(90deg,rgb(18_20_22/.06),rgb(18_20_22/.14),rgb(18_20_22/.06))] bg-[length:200%_100%] motion-safe:animate-[admin-shimmer_1.2s_linear_infinite]", className)} />;
+  return (
+    <span
+      className={clsx(
+        "block h-3 rounded-full bg-[linear-gradient(90deg,rgb(18_20_22/.06),rgb(18_20_22/.14),rgb(18_20_22/.06))] bg-[length:200%_100%] motion-safe:animate-[admin-shimmer_1.2s_linear_infinite]",
+        className,
+      )}
+    />
+  );
 }
 
 /** A panel that slides in from the right (a native modal dialog: focus stays inside, Escape closes it). */

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, SKIP_COOKIE, skipAllowed } from "@/lib/admin/cookie";
+import { routing } from "@/lib/content/routing";
 import { isSeason, SEASON_COOKIE, SEASON_DATA, paintScript, seasonOf } from "@/lib/season";
 
 const MONTH = 60 * 60 * 24 * 30;
@@ -14,9 +15,12 @@ const COOKIE = { path: "/", sameSite: "lax", maxAge: MONTH } as const;
  * Cloudflare), the cookie from an earlier visit. Season: `?season=summer` or a pick saved by the season switcher
  * (`?season=auto` clears it), else the season in that country today.
  */
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const url = req.nextUrl;
   if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return admin(req);
+  // the admin panel's page and season settings (content/routing.ts, cached for 30 s)
+  const site = await routing();
+  if (site.hidden.has(url.pathname.replace(/\/$/, ""))) return NextResponse.rewrite(new URL("/__unpublished", req.url), { status: 404 });
   const asked = url.searchParams.get("country")?.toUpperCase();
   const country =
     (asked && /^[A-Z]{2}$/.test(asked) ? asked : null) ??
@@ -29,7 +33,7 @@ export function proxy(req: NextRequest) {
   const home = url.pathname === "/";
   const askedSeason = home ? url.searchParams.get("season") : null;
   const pick = askedSeason === "auto" ? undefined : isSeason(askedSeason) ? askedSeason : req.cookies.get(SEASON_COOKIE.pick)?.value;
-  const season = isSeason(pick) ? pick : seasonOf(country, new Date(), SEASON_DATA);
+  const season = isSeason(pick) ? pick : site.seasons.auto ? seasonOf(country, new Date(), SEASON_DATA) : site.seasons.fallback;
 
   // the page rendering now sees the season too (a first visit has no cookie yet)
   req.cookies.set(SEASON_COOKIE.season, season);
@@ -59,8 +63,8 @@ const SEASON_HASH = `'sha256-${createHash("sha256").update(paintScript()).digest
  */
 function admin(req: NextRequest) {
   const dev = process.env.NODE_ENV === "development";
-  // /admin itself (the dashboard UI, sample data only) opens without signing in; every page with real data still needs it
-  const signInPage = req.nextUrl.pathname === "/admin/login" || req.nextUrl.pathname === "/admin";
+  // every admin page shows real data and needs a session (or the dev skip, where it's allowed); only sign-in is open
+  const signInPage = req.nextUrl.pathname === "/admin/login";
   if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !(req.cookies.has(SKIP_COOKIE) && skipAllowed(req.headers.get("host")))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");

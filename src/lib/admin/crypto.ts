@@ -27,7 +27,12 @@ export async function verifyPassword(password: string, stored: string) {
   const [kind, logN, r, p, salt, hash] = stored.split("$");
   if (kind !== "scrypt" || !hash) return false;
   const want = Buffer.from(hash, "base64url");
-  const got = await derive(password, Buffer.from(salt, "base64url"), { N: 2 ** Number(logN), r: Number(r), p: Number(p), maxmem: SCRYPT.maxmem });
+  const got = await derive(password, Buffer.from(salt, "base64url"), {
+    N: 2 ** Number(logN),
+    r: Number(r),
+    p: Number(p),
+    maxmem: SCRYPT.maxmem,
+  });
   return got.length === want.length && timingSafeEqual(got, want);
 }
 

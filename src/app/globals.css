@@ -1306,3 +1306,10 @@ html[data-effects="off"] [data-deco]::after {
     scale: 0.92;
   }
 }
+
+/* The business planner prints as a clean plan: no site bar, footer, chat or floating buttons. */
+@media print {
+  body:has([data-plan]) :is(header[data-deco="bar"], footer, .fixed) {
+    display: none !important;
+  }
+}

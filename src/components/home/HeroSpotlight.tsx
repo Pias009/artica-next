@@ -16,51 +16,44 @@ export type HeroSeasonCopy = {
   headlineLead: string;
   headlineAccent: string;
   description: string;
-  benefits: [string, string, string];
 };
 
 export const HERO_SEASON_COPY: Record<SeasonId, HeroSeasonCopy> = {
   winter: {
     eyebrowBadge: "Winter wholesale edit",
-    headlineLead: "Factory-direct winter footwear, ",
-    headlineAccent: "built down to −25°C.",
-    description: "Insulated snow boots, shearling liners, and Arctic grip hikers from our Guangzhou factory. Tested for sub-zero retail shelves.",
-    benefits: ["−25°C thermal cold-room tested", "Arctic high-traction rubber lugs", `From ${MOQ_PAIRS} pairs per style`],
+    headlineLead: "Winter footwear, ",
+    headlineAccent: "built for −25°C.",
+    description: "Insulated snow boots and hikers, factory-direct from Guangzhou.",
   },
   spring: {
     eyebrowBadge: "Spring wholesale edit",
-    headlineLead: "Fresh spring footwear, ",
-    headlineAccent: "ready for the warm-up.",
-    description: "Lightweight canvas sneakers, soft leather flats, and cushioned loafers. Crafted with breathable linings and low MOQs.",
-    benefits: ["Ultra-light breathable builds", "Flexible memory insoles", `From ${MOQ_PAIRS} pairs per style`],
+    headlineLead: "Spring footwear, ",
+    headlineAccent: "light on its feet.",
+    description: "Breathable sneakers, soft flats and loafers at low MOQs.",
   },
   summer: {
     eyebrowBadge: "Summer wholesale edit",
-    headlineLead: "Summer-season styles, ",
-    headlineAccent: "made for the warm rush.",
-    description: "Cork-footbed slides, ergonomic sandals, and lightweight slip-ons by the case. UV-resistant materials and fast container turnaround.",
-    benefits: ["Ergonomic arch-support footbeds", "Fast-dry water-resistant straps", `Ready to pack in ${PACK}-pair cases`],
+    headlineLead: "Summer styles, ",
+    headlineAccent: "made for the heat.",
+    description: "Slides, sandals and slip-ons, packed by the case.",
   },
   rainy: {
     eyebrowBadge: "Monsoon wholesale edit",
-    headlineLead: "Storm-tested waterproof footwear, ",
+    headlineLead: "Waterproof footwear, ",
     headlineAccent: "built for wet streets.",
-    description: "Seam-sealed water-resistant boots and closed-toe sport sandals that shrug off heavy rains. Hydrophobic leathers with deep drainage treads.",
-    benefits: ["Seam-sealed waterproof membrane", "High-grip wet pavement traction", `From ${MOQ_PAIRS} pairs per style`],
+    description: "Seam-sealed boots and sandals with deep-grip treads.",
   },
   autumn: {
     eyebrowBadge: "Autumn wholesale edit",
-    headlineLead: "Crisp autumn footwear, ",
-    headlineAccent: "ready for the first cold snap.",
-    description: "Full-grain leather Chelsea boots, rich suede ankle boots, and durable hikers. Weather-treated finishes with cushioned Goodyear welts.",
-    benefits: ["Weather-treated oiled leather", "Reinforced welt construction", `From ${MOQ_PAIRS} pairs per style`],
+    headlineLead: "Autumn footwear, ",
+    headlineAccent: "ready for the cold snap.",
+    description: "Leather Chelsea boots, suede ankle boots and hikers.",
   },
   holiday: {
     eyebrowBadge: "Holiday wholesale edit",
     headlineLead: "Gift-ready footwear, ",
-    headlineAccent: "for peak holiday weeks.",
-    description: "High-shine patent boots, velvet pumps, and plush shearling slippers by the case. Complete with retail-ready presentation packaging.",
-    benefits: ["Retail-ready gift packaging", "Rush air-freight available", `From ${MOQ_PAIRS} pairs per style`],
+    headlineAccent: "for peak season.",
+    description: "Patent boots, velvet pumps and shearling slippers, gift-boxed.",
   },
 };
 
@@ -239,15 +232,15 @@ export function HeroSpotlight() {
           </p>
           <h1
             id="hero-title"
-            className="mt-4 font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink lg:text-[clamp(44px,4.4vw,74px)]"
+            className="mt-5 max-w-[14ch] font-headline text-[clamp(38px,9.4vw,46px)] leading-[1.04] font-semibold tracking-[-0.02em] text-balance text-ink max-lg:mx-auto lg:text-[clamp(44px,4.6vw,72px)]"
           >
             {copy.headlineLead}
             <em className="font-medium text-brand">{copy.headlineAccent}</em>
           </h1>
-          <p data-hero-in="copy" className="mt-5 max-w-[28rem] text-[16px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[18px]">
+          <p data-hero-in="copy" className="mt-5 max-w-[26rem] text-[16px] leading-[1.6] text-ink-2 max-lg:mx-auto lg:text-[18px]">
             {copy.description}
           </p>
-          <div data-hero-in="cta" className="mt-8 flex flex-wrap items-center gap-3 max-lg:justify-center">
+          <div data-hero-in="cta" className="mt-9 flex flex-wrap items-center gap-3 max-lg:justify-center">
             <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[15px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
               Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>
@@ -255,18 +248,9 @@ export function HeroSpotlight() {
               Browse the range
             </a>
           </div>
-          {/* Season-specific benefit highlights */}
-          <ul data-hero-in="copy" className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted max-lg:justify-center">
-            {copy.benefits.map((b, idx) => (
-              <li key={idx} className="inline-flex items-center gap-1.5">
-                <Icon name="check" className="size-3.5 text-brand shrink-0" />
-                <span>{b}</span>
-                {idx < copy.benefits.length - 1 && (
-                  <span aria-hidden="true" className="ml-1 text-ink/20">·</span>
-                )}
-              </li>
-            ))}
-          </ul>
+          <p data-hero-in="copy" className="mt-4 text-[13px] text-muted">
+            From {MOQ_PAIRS} pairs per style · {PACK}-pair cases
+          </p>
         </div>
 
         {/* the stage with spatial mouse tilt */}

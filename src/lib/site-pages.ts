@@ -24,6 +24,7 @@ export const SITE_PAGES: Page[] = [
   { path: "/ship-to", name: "Shipping by country", summary: "Port, transit time, trade terms and import rules for each market.", section: "Wholesale terms", priority: 0.7, changeFrequency: "monthly" },
   { path: "/buyer-desk", name: "Buyer desk", summary: "All the planning tools for a wholesale order in one place.", section: "Buyer tools", priority: 0.7, changeFrequency: "monthly" },
   { path: "/size-guide", name: "Shoe size guide", summary: "US, EU, UK and cm sizes for men, women and kids, and the sizes in each case.", section: "Buyer tools", priority: 0.6, changeFrequency: "yearly" },
+  { path: "/business-plan", name: "Business planner", summary: "Plan a season from China: the order-by date for your market, what to buy, landed cost, margin and the cash it needs.", section: "Buyer tools", priority: 0.7, changeFrequency: "monthly" },
   { path: "/order-calendar", name: "Order calendar", summary: "When to request samples and confirm bulk so stock lands before the season.", section: "Buyer tools", priority: 0.6, changeFrequency: "monthly" },
   { path: "/container-planner", name: "Container planner", summary: "Cases to pairs, pallets, volume and the container that fits.", section: "Buyer tools", priority: 0.6, changeFrequency: "yearly" },
   { path: "/quality", name: "Quality and documents", summary: "How each order is checked and which test reports buyers can request.", section: "Company", priority: 0.6, changeFrequency: "monthly" },

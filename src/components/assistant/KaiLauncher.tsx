@@ -1,5 +1,6 @@
 "use client";
 
+import { deskOn } from "@/lib/content/live";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,7 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { useShownSeason } from "../season/live";
 import "./kai.css";
-import { KaiAvatar, KaiChat } from "./KaiChat";
+import { useKai } from "./kai";
+import { KaiAvatar, KaiChat, KaiModeTabs } from "./KaiChat";
 import { ASSISTANT } from "@/lib/assistant/persona";
 import { SEASONS } from "@/lib/season";
 
@@ -21,7 +23,11 @@ const NUDGE_AFTER = 15_000;
 export function KaiLauncher() {
   const pathname = usePathname();
   const season = useShownSeason();
-  const [open, setOpen] = useState(false);
+  const open = useKai((s) => s.open);
+  const setOpen = useKai((s) => s.setOpen);
+  const picked = useKai((s) => s.mode);
+  // a desk switched off in the admin panel (AI agent) isn't offered
+  const mode = deskOn(picked) ? picked : picked === "plan" ? "trade" : "plan";
   const [nudge, setNudge] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const hidden = pathname === "/assistant";
@@ -63,9 +69,9 @@ export function KaiLauncher() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, setOpen]);
 
-  if (hidden) return null;
+  if (hidden || (!deskOn("trade") && !deskOn("plan"))) return null;
   const show = () => {
     setNudge(false);
     setOpen(true);
@@ -118,7 +124,7 @@ export function KaiLauncher() {
               <p className="text-[15px] leading-tight font-semibold">{ASSISTANT.name}</p>
               <p className="flex items-center gap-1.5 text-[12px] text-ink-2">
                 <span aria-hidden="true" className="size-1.5 rounded-full bg-[#2f9e6b] shadow-[0_0_0_3px_rgb(47_158_107/0.18)]" />
-                Trade assistant · AI
+                {mode === "plan" ? "Planning desk" : "Trade assistant"} · AI
               </p>
             </div>
             <Link href="/assistant" onClick={() => setOpen(false)} aria-label="Open the full chat page" title="Full page" className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-white/60 md:size-10">
@@ -128,8 +134,9 @@ export function KaiLauncher() {
               <Icon name="close" className="size-4" />
             </button>
           </header>
+          <KaiModeTabs className="mx-4 mt-3" />
           <div className="min-h-0 flex-1">
-            <KaiChat autoFocus />
+            <KaiChat key={mode} mode={mode} autoFocus />
           </div>
         </section>
       )}

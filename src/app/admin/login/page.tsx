@@ -39,7 +39,7 @@ export default async function SignInPage() {
                 ? "Only on this computer."
                 : skip === "preview"
                   ? "Only on Vercel preview links."
-                  : "Only while this deployment has no database: the panel shows sample data. Once MONGODB_URI is set here, sign-in is required."}
+                  : "Only while this deployment has no database: there's nothing to show or save yet. Once MONGODB_URI is set here, sign-in is required."}
             </p>
           </form>
         )}

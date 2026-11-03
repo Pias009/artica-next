@@ -54,8 +54,9 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
 
       {stats.emailsStuck > 0 && (
         <p role="alert" className="mt-4 rounded-card bg-blush px-4 py-3 text-[13.5px] text-danger">
-          {stats.emailsStuck} email{stats.emailsStuck > 1 ? "s haven't" : " hasn't"} gone out. Inquiries with a failing email are marked below; open one to
-          retry. Check RESEND_API_KEY, the sender domain and the daily limit.
+          {stats.emailsStuck} email
+          {stats.emailsStuck > 1 ? "s haven't" : " hasn't"} gone out. Inquiries with a failing email are marked below; open one to retry. Check RESEND_API_KEY,
+          the sender domain and the daily limit.
         </p>
       )}
 
@@ -78,7 +79,13 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
 
       <form action="/admin/inquiries" className="mt-3 flex flex-wrap gap-2">
         {q.status !== "all" && <input type="hidden" name="status" value={q.status} />}
-        <input name="q" defaultValue={q.q} placeholder="Search ref, company, email or country" aria-label="Search" className="field min-w-0 flex-1 basis-64 bg-white" />
+        <input
+          name="q"
+          defaultValue={q.q}
+          placeholder="Search ref, company, email or country"
+          aria-label="Search"
+          className="field min-w-0 flex-1 basis-64 bg-white"
+        />
         <select name="intent" defaultValue={q.intent} aria-label="What they asked for" className="field w-auto bg-white">
           <option value="all">Any request</option>
           {INTENTS.map((i) => (

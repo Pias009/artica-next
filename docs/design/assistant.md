@@ -4,6 +4,17 @@
 
 Kai is a sales assistant for wholesale buyers. It recommends styles by market and season, says what's selling, answers terms and policy questions (MOQ, samples, payment, shipping, privacy, how to order), and prepares inquiries the buyer sends with one click. In the admin, it drafts replies to inquiries.
 
+## Two desks
+
+Kai has two desks, picked with tabs in the panel and on `/assistant` (`?desk=plan` opens the second). Each desk keeps its own conversation (`kai-chat` and `kai-plan` in sessionStorage):
+
+| Desk | For | Tools the model may use (`MODE_TOOLS`) | Offline engine |
+|---|---|---|---|
+| **Trade help** | Styles, what sells, MOQ, samples, payment, shipping, inquiries | the trade skills below | `local.ts` |
+| **Business plan** | When to order, what to order for a budget, landed cost, margin, cash | `planSeason`, `suggestOrder`, `estimateLanding` (`plan-skills.ts`, over `src/lib/planner`), plus product, shipping, policy, about, off-topic and draft tools | `plan-local.ts` |
+
+The planning desk gets its own instructions (`PLAN` in `persona.ts`): timing first, never a season the stock can't reach, the buyer's prices or labelled examples only, no duty rates, forecasts or financial advice. The client sends what the visitor entered in `/business-plan` (country, stage, first order, budget, lines; checked field by field in the route), so answers fit their plan. Any page can open a desk with `useKai.getState().show("plan", "question")`. The numbers are the same code as the planner page, so chat and page always agree. Tested offline: timing, budget plans, landed cost, MOQ, off-topic and rude messages.
+
 ## The protocol
 
 ```

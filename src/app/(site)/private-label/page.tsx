@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
@@ -6,9 +7,8 @@ import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { MOQ_PAIRS, PRIVATE_LABEL_MIN } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Private label and OEM footwear manufacturing",
   description: "Bespoke footwear development for private-label retailers and brands. MOQ from 600 pairs, custom outsoles, leathers, hardware and packaging.",
   path: "/private-label",

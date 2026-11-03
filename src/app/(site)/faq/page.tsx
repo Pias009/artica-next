@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
@@ -5,9 +6,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { FAQ } from "@/lib/faq";
 import { MOQ_CASES, MOQ_PAIRS, PACK } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Wholesale footwear FAQ: MOQ, samples, payment",
   description: `Answers for wholesale footwear buyers: ${MOQ_PAIRS}-pair MOQ, samples, payment terms, Net 30, letters of credit, DDP and FOB shipping, and defects.`,
   path: "/faq",

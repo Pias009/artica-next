@@ -41,7 +41,14 @@ export async function setStatusAction(form: FormData) {
   const status = String(form.get("status") ?? "");
   if (!REF.test(ref) || !isDeskStatus(status)) return;
   const done = await setStatus(ref, status);
-  if (done) await audit({ adminId: admin._id, email: admin.email, action: "status", ref, detail: status });
+  if (done)
+    await audit({
+      adminId: admin._id,
+      email: admin.email,
+      action: "status",
+      ref,
+      detail: status,
+    });
   revalidatePath("/admin", "layout");
 }
 
@@ -50,7 +57,13 @@ export async function retryEmailsAction(form: FormData) {
   const ref = String(form.get("ref") ?? "");
   if (!REF.test(ref)) return;
   const r = await retryEmails(ref);
-  await audit({ adminId: admin._id, email: admin.email, action: "retry_emails", ref, detail: `sent ${r.sent}, failed ${r.failed}` });
+  await audit({
+    adminId: admin._id,
+    email: admin.email,
+    action: "retry_emails",
+    ref,
+    detail: `sent ${r.sent}, failed ${r.failed}`,
+  });
   revalidatePath(`/admin/inquiries/${ref}`);
 }
 
@@ -59,15 +72,32 @@ export async function endSessionAction(form: FormData) {
   const { admin, session } = await requireAdmin();
   const id = String(form.get("id") ?? "");
   if (!ObjectId.isValid(id) || id === session._id.toHexString()) return;
-  const { deletedCount } = await sessions().deleteOne({ _id: new ObjectId(id), adminId: admin._id });
-  if (deletedCount) await audit({ adminId: admin._id, email: admin.email, action: "end_session", detail: id });
+  const { deletedCount } = await sessions().deleteOne({
+    _id: new ObjectId(id),
+    adminId: admin._id,
+  });
+  if (deletedCount)
+    await audit({
+      adminId: admin._id,
+      email: admin.email,
+      action: "end_session",
+      detail: id,
+    });
   revalidatePath("/admin/security");
 }
 
 export async function endOtherSessionsAction() {
   const { admin, session } = await requireAdmin();
-  const { deletedCount } = await sessions().deleteMany({ adminId: admin._id, _id: { $ne: session._id } });
-  await audit({ adminId: admin._id, email: admin.email, action: "end_other_sessions", detail: `${deletedCount} ended` });
+  const { deletedCount } = await sessions().deleteMany({
+    adminId: admin._id,
+    _id: { $ne: session._id },
+  });
+  await audit({
+    adminId: admin._id,
+    email: admin.email,
+    action: "end_other_sessions",
+    detail: `${deletedCount} ended`,
+  });
   revalidatePath("/admin/security");
 }
 
@@ -78,6 +108,12 @@ export async function draftReplyAction(ref: string): Promise<ReplyDraft | null> 
   const i = await inquiryDetail(ref);
   if (!i) return null;
   const draft = await draftReply(i);
-  await audit({ adminId: admin._id, email: admin.email, action: "reply_drafted", ref, detail: draft.source });
+  await audit({
+    adminId: admin._id,
+    email: admin.email,
+    action: "reply_drafted",
+    ref,
+    detail: draft.source,
+  });
   return draft;
 }

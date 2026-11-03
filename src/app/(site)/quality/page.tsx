@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { IntroImage } from "@/components/buyer/IntroImage";
 import { Icon } from "@/components/Icon";
@@ -5,9 +6,8 @@ import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { DOCUMENTS, QUALITY_STEPS } from "@/lib/buyer-desk";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Footwear quality control and test reports",
   description: "How every pair of Chime Long wholesale footwear is checked, from materials to final inspection, and the test reports buyers can request.",
   path: "/quality",

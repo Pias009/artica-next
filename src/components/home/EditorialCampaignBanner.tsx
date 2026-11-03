@@ -1,5 +1,6 @@
 "use client";
 
+import { campaignLive, controlOn } from "@/lib/content/live";
 import clsx from "clsx";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
@@ -175,6 +176,8 @@ export function EditorialCampaignBanner() {
     { scope: ref },
   );
 
+  // off in the admin panel: all campaigns (Dashboard → Site controls) or this season's (Seasons)
+  if (!controlOn("campaign") || !campaignLive(activeSeason)) return null;
   return (
     <section ref={ref} id="campaign" aria-labelledby="h-campaign" className="mt-sec scroll-mt-24">
       <div

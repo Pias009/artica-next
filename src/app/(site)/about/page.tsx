@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
@@ -5,9 +6,8 @@ import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "About us: footwear factory in Guangzhou",
   description: "Learn about Chime Long's technical footwear engineering, LWG certified leathers, sub-zero testing laboratory, and ethical manufacturing standards.",
   path: "/about",

@@ -1,6 +1,7 @@
 import { SeasonProvider } from "../season/SeasonContext";
 import { BestSellers } from "./BestSellers";
 import { BuyerDesk } from "./BuyerDesk";
+import { BusinessPlanTeaser } from "./BusinessPlanTeaser";
 import { BuyerTypes } from "./BuyerTypes";
 import { EditorialCampaignBanner } from "./EditorialCampaignBanner";
 import { GlobalReach } from "./GlobalReach";
@@ -19,6 +20,10 @@ import { SampleRequest } from "./SampleRequest";
 import { SeasonShowcase } from "./SeasonShowcase";
 import { UpClose } from "./UpClose";
 import { WhenToOrder } from "./WhenToOrder";
+import type { ReactNode } from "react";
+import { SectionScope } from "../ui/SectionScope";
+import type { SectionEdit } from "@/lib/content/model";
+import { homeOrder, type HomeSectionId } from "@/lib/home-sections";
 import type { SeasonId } from "@/lib/season";
 
 /**
@@ -30,39 +35,42 @@ import type { SeasonId } from "@/lib/season";
  *
  * Built once per season (app/season/[season]); every product section puts that season's styles first.
  */
-export function HomePage({ season }: { season: SeasonId }) {
+export function HomePage({ season, sections }: { season: SeasonId; sections?: SectionEdit[] }) {
+  const parts: Record<HomeSectionId, ReactNode> = {
+    hero: <HeroSpotlight />,
+    "season-edit": <SeasonShowcase season={season} />,
+    hot: <HotProducts />,
+    new: <NewArrivals />,
+    campaign: <EditorialCampaignBanner />,
+    styles: <BestSellers />,
+    "up-close": <UpClose />,
+    lookbook: <LookbookFittingBanner />,
+    programs: <BuyerTypes />,
+    worn: <RetailMerchandisingBanner />,
+    samples: <SampleRequest />,
+    "order-sheet": <OrderSheet />,
+    "when-to-order": <WhenToOrder />,
+    "business-plan": <BusinessPlanTeaser />,
+    packing: <HowItShips />,
+    worldwide: <GlobalReach />,
+    journey: <OrderJourney />,
+    "buyer-desk": <BuyerDesk />,
+    partner: <PrivateLabel />,
+    "line-sheet": <LineSheetCta />,
+    reveal: <HomeReveal />,
+  };
   return (
     <SeasonProvider season={season}>
       {/* the colour field the glass surfaces sit on (home page only); its tints follow the season theme */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 bg-aurora" />
-      <HeroSpotlight />
-      {/* what's in season */}
-      <SeasonShowcase season={season} />
-      {/* what sells */}
-      <HotProducts />
-      <NewArrivals />
-      <EditorialCampaignBanner />
-      {/* the range, and how it's made */}
-      <BestSellers />
-      <UpClose />
-      <LookbookFittingBanner />
-      {/* who it's for */}
-      <BuyerTypes />
-      <RetailMerchandisingBanner />
-      {/* ordering it */}
-      <SampleRequest />
-      <OrderSheet />
-      <WhenToOrder />
-      {/* getting it */}
-      <HowItShips />
-      <GlobalReach />
-      <OrderJourney />
-      {/* planning it, and checking us */}
-      <BuyerDesk />
-      {/* the partnership, and the close */}
-      <PrivateLabel />
-      <LineSheetCta />
-      <HomeReveal />
+      {/* in the order set in the admin panel (Pages → Home), hidden sections left out; built-in order otherwise */}
+      {homeOrder(sections)
+        .filter((s) => s.visible)
+        .map((s) => (
+          <SectionScope key={s.id} id={s.id}>
+            {parts[s.id]}
+          </SectionScope>
+        ))}
     </SeasonProvider>
   );
 }

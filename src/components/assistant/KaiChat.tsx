@@ -1,16 +1,18 @@
 "use client";
 
+import { deskOn } from "@/lib/content/live";
 import { useChat } from "@ai-sdk/react";
 import clsx from "clsx";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Icon } from "../Icon";
-import { forget, kaiChat, save, saved } from "./kai";
+import { forget, kaiChat, MODES, save, saved, useKai, type KaiMode } from "./kai";
 import "./kai.css";
 import { DraftCard, KaiCards } from "./KaiCards";
+import { CostCard, OrderCard, TimingCard } from "./PlanCards";
 import { KaiText } from "./KaiText";
 import { canSpeak, setVoiceOn, speak, stopSpeaking, useSpeaking, useVoiceOn } from "./voice";
-import { ASSISTANT, STARTERS } from "@/lib/assistant/persona";
+import { ASSISTANT, PLAN_STARTERS, STARTERS } from "@/lib/assistant/persona";
 import type { BackOption } from "@/lib/assistant/skills";
 import type { KaiMessage } from "@/lib/assistant/tools";
 
@@ -27,14 +29,20 @@ const WORKING: Record<string, string> = {
   policies: "Checking our terms…",
   aboutCompany: "One moment…",
   draftInquiry: "Preparing your inquiry…",
+  planSeason: "Checking the season dates…",
+  suggestOrder: "Putting your plan together…",
+  estimateLanding: "Working out the costs…",
 };
 
 const noop = () => () => {};
 const textOf = (m: KaiMessage) => m.parts.flatMap((p) => (p.type === "text" ? [p.text] : [])).join("\n");
 
-/** The conversation with Kai: used in the pop-up panel and, wider, on /assistant. */
-export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; autoFocus?: boolean }) {
-  const [chat] = useState(kaiChat);
+/**
+ * A conversation with Kai at one desk: used in the pop-up panel and, wider, on /assistant. Give it `key={mode}` so
+ * switching desks starts that desk's own conversation.
+ */
+export function KaiChat({ mode = "trade", wide = false, autoFocus = false }: { mode?: KaiMode; wide?: boolean; autoFocus?: boolean }) {
+  const [chat] = useState(() => kaiChat(mode));
   const { messages, sendMessage, status, stop, error, setMessages, clearError } = useChat<KaiMessage>({ chat });
   const [input, setInput] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
@@ -48,11 +56,20 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
   // bring back this tab's conversation after the first render (sessionStorage isn't there on the server)
   useEffect(() => {
     if (!chat.messages.length) {
-      const before = saved();
+      const before = saved(mode);
       if (before.length) setMessages(before);
     }
     return () => stopSpeaking();
-  }, [chat, setMessages]);
+  }, [chat, mode, setMessages]);
+
+  // a question handed over by another part of the site ("Ask the planning desk")
+  const ask = useKai((s) => s.ask);
+  const asked = useKai((s) => s.asked);
+  useEffect(() => {
+    if (!ask || status === "submitted" || status === "streaming") return;
+    asked();
+    void sendMessage({ text: ask.slice(0, 2000) });
+  }, [ask, asked, status, sendMessage]);
 
   useEffect(() => {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -103,7 +120,7 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
     <div className="flex h-full min-h-0 flex-col">
       <div ref={scroller} role="log" aria-live="polite" aria-label={`Conversation with ${ASSISTANT.name}`} className={clsx("min-h-0 flex-1 overflow-y-auto overscroll-contain", wide ? "px-1 py-4" : "px-4 py-4")}>
         {messages.length === 0 ? (
-          <Welcome onPick={(q) => send(q)} wide={wide} />
+          <Welcome mode={mode} onPick={(q) => send(q)} wide={wide} />
         ) : (
           <ol className={clsx("grid gap-4", wide && "mx-auto max-w-[900px]")}>
             {messages.map((m) =>
@@ -183,7 +200,7 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
             }}
             rows={1}
             maxLength={2000}
-            placeholder={`Ask ${ASSISTANT.name} about styles, seasons, MOQ, shipping…`}
+            placeholder={mode === "plan" ? "Your market, budget, or a question about timing and costs…" : `Ask ${ASSISTANT.name} about styles, seasons, MOQ, shipping…`}
             aria-label={`Message ${ASSISTANT.name}`}
             className="max-h-32 min-h-11 flex-1 resize-none bg-transparent py-2.5 text-[16px] outline-none [field-sizing:content] placeholder:text-muted md:min-h-10 md:text-[14px]"
           />
@@ -221,8 +238,8 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
                   stop();
                   stopSpeaking();
                   setMessages([]);
-                  save([]);
-                  forget();
+                  save(mode, []);
+                  forget(mode);
                 }}
                 className="min-h-11 px-2 font-semibold underline md:min-h-8"
               >
@@ -236,18 +253,23 @@ export function KaiChat({ wide = false, autoFocus = false }: { wide?: boolean; a
   );
 }
 
-function Welcome({ onPick, wide }: { onPick: (q: string) => void; wide: boolean }) {
+function Welcome({ mode, onPick, wide }: { mode: KaiMode; onPick: (q: string) => void; wide: boolean }) {
+  const plan = mode === "plan";
   return (
     <div className={clsx("grid gap-5", wide ? "mx-auto max-w-[600px] pt-[8vh] text-center" : "pt-2")}>
       <div className={clsx("kai-rise flex items-center gap-3.5", wide && "flex-col")}>
         <KaiAvatar className={wide ? "size-20 text-[34px]" : "size-12 text-[20px]"} />
         <div>
-          <p className={clsx("font-headline font-semibold tracking-[-0.01em]", wide ? "text-[28px]" : "text-[19px]")}>Hi, I&rsquo;m {ASSISTANT.name}.</p>
-          <p className="text-[14px] text-ink-2">I help buyers pick what will sell in their market, and get pricing fast.</p>
+          <p className={clsx("font-headline font-semibold tracking-[-0.01em]", wide ? "text-[28px]" : "text-[19px]")}>{plan ? "The planning desk." : <>Hi, I&rsquo;m {ASSISTANT.name}.</>}</p>
+          <p className="text-[14px] text-ink-2">
+            {plan
+              ? "Tell me where you sell and your budget. I'll work out the season you can still catch, what to order, and what it costs landed."
+              : "I help buyers pick what will sell in their market, and get pricing fast."}
+          </p>
         </div>
       </div>
       <ul className={clsx("flex flex-wrap gap-2", wide && "justify-center")}>
-        {STARTERS.map((q, i) => (
+        {(plan ? PLAN_STARTERS : STARTERS).map((q, i) => (
           <li key={q} className="kai-rise" style={{ "--i": i + 1 } as CSSProperties}>
             <button type="button" onClick={() => onPick(q)} className="kai-pane kai-tilt min-h-11 rounded-full px-4 py-2 text-left text-[14px] font-medium md:min-h-9 md:text-[13px]">
               {q}
@@ -288,6 +310,12 @@ function AssistantPart({ part, wide, writing, onAsk }: { part: Part; wide: boole
       return <DraftCard draft={tool.output} />;
     case "tool-offTopic":
       return <BackOptions options={tool.output.options} onAsk={onAsk} />;
+    case "tool-planSeason":
+      return <TimingCard data={tool.output} wide={wide} />;
+    case "tool-suggestOrder":
+      return <OrderCard data={tool.output} wide={wide} />;
+    case "tool-estimateLanding":
+      return <CostCard data={tool.output} />;
     default:
       return null;
   }
@@ -319,6 +347,31 @@ function BackOptions({ options, onAsk }: { options: BackOption[]; onAsk?: (q: st
         ))}
       </ul>
     </nav>
+  );
+}
+
+/** Switches between Kai's two desks. Each keeps its own conversation. */
+export function KaiModeTabs({ className }: { className?: string }) {
+  const mode = useKai((s) => s.mode);
+  const setMode = useKai((s) => s.setMode);
+  // with one desk switched off in the admin panel there's nothing to choose
+  if (!MODES.every((m) => deskOn(m.id))) return null;
+  return (
+    <div role="tablist" aria-label="Choose a desk" className={clsx("kai-pane grid grid-cols-2 gap-1 rounded-full p-1", className)}>
+      {MODES.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          role="tab"
+          aria-selected={mode === m.id}
+          title={m.hint}
+          onClick={() => setMode(m.id)}
+          className={clsx("min-h-10 rounded-full px-3 text-[13.5px] font-semibold transition-colors md:min-h-9 md:text-[13px]", mode === m.id ? "kai-ink text-white" : "text-ink-2 hover:text-ink")}
+        >
+          {m.label}
+        </button>
+      ))}
+    </div>
   );
 }
 

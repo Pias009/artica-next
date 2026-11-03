@@ -74,6 +74,14 @@ export function localReply(message: string, ctx: { season?: SeasonId; country?: 
     };
   }
 
+  // "what's your MOQ?": the minimums, without a quantity to check
+  if (has(t, /\b(moq|minimum order|minimum quantity|minimums?|smallest order)\b/) && !/\d/.test(t) && !has(t, /\b(pay|payment|deposit|terms)\b/)) {
+    return {
+      text: `Our minimum is ${MOQ_PAIRS} pairs (${MOQ_CASES} cases of ${PACK}) per style and colour, then in steps of 5 cases. Private label starts at 600 pairs and tier pricing at 1,000 pairs per style. How many pairs are you thinking of?`,
+      tools,
+    };
+  }
+
   // quantities: "1200 pairs", "60 cases", "a 40ft container"
   const qty = t.match(/(\d[\d,.]*)\s*(pairs?|cases?|cartons?)/);
   if (qty || has(t, /\b(container|pallet|cbm|volume|how many)\b/)) {

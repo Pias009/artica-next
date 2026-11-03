@@ -129,33 +129,9 @@ export function productDetails({ style }: { style: string }) {
   };
 }
 
-/* Countries by name, from the browser's own region names ("Germany" → "DE"), plus what people type. */
-const REGION = new Intl.DisplayNames(["en"], { type: "region" });
-const COUNTRY_CODE: Record<string, string> = { usa: "US", america: "US", "united states of america": "US", uk: "GB", england: "GB", britain: "GB", uae: "AE", emirates: "AE", korea: "KR", holland: "NL" };
-for (let a = 65; a <= 90; a++)
-  for (let b = 65; b <= 90; b++) {
-    const code = String.fromCharCode(a, b);
-    try {
-      const name = REGION.of(code);
-      if (name && name !== code) COUNTRY_CODE[name.toLowerCase()] ??= code;
-    } catch {}
-  }
-/** "Germany", "de", "DE" → { code: "DE", name: "Germany" }; null when unknown. */
-export function country(input: string | null | undefined) {
-  const s = (input ?? "").trim();
-  if (!s) return null;
-  const code = /^[a-z]{2}$/i.test(s) ? s.toUpperCase() : COUNTRY_CODE[s.toLowerCase()];
-  const name = code && REGION.of(code);
-  return code && name && name !== code ? { code, name } : null;
-}
+import { country } from "../countries";
 
-/** The first country named in free text ("we sell in Germany and…" → Germany), longest names first. */
-const COUNTRY_NAMES = Object.keys(COUNTRY_CODE).filter((n) => n.length > 3).sort((a, b) => b.length - a.length);
-export function countryIn(text: string) {
-  const t = ` ${text.toLowerCase().replace(/[^\p{L}\s]/gu, " ")} `;
-  const hit = COUNTRY_NAMES.find((n) => t.includes(` ${n} `)) ?? ["usa", "uk", "uae"].find((n) => t.includes(` ${n} `));
-  return hit ? country(hit) : null;
-}
+export { country, countryIn } from "../countries";
 
 /** What sells where, now: the season in that country this month (or the month given), its best styles and when to order. */
 export function seasonAdvice({ country: where, month }: { country?: string; month?: number }) {
@@ -337,6 +313,7 @@ export function offTopic({ season }: { season?: SeasonId } = {}): { options: Bac
       { kind: "ask", label: "MOQ and prices", prompt: "What's your MOQ and how does pricing work?" },
       { kind: "ask", label: "How to order", prompt: "How do I place an order?" },
       { kind: "link", label: "Get pricing", href: "/inquiry" },
+      { kind: "link", label: "Plan my season", href: "/business-plan" },
       { kind: "link", label: "Browse the catalog", href: "/catalog" },
       { kind: "link", label: "Shipping", href: "/ship-to" },
       { kind: "link", label: "FAQ", href: "/faq" },

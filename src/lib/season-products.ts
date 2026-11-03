@@ -24,7 +24,9 @@ export const IN_SEASON = 3;
 
 const text = (p: Product) => `${categoryOf(p)} ${p.type} ${p.tags.join(" ")}`.toLowerCase();
 
-export const seasonScore = (p: Product, season: SeasonId) => RULES[season].reduce((n, [re, w]) => (re.test(text(p)) ? n + w : n), 0);
+/** How well a style suits a season, from its kind and tags; styles the admin pinned to the season count as in season. */
+export const seasonScore = (p: Product, season: SeasonId) =>
+  RULES[season].reduce((n, [re, w]) => (re.test(text(p)) ? n + w : n), 0) + (p.pinnedSeasons?.includes(season) ? IN_SEASON : 0);
 export const inSeason = (p: Product, season: SeasonId) => seasonScore(p, season) >= IN_SEASON;
 
 /** The list with the season's best first; ties keep their catalogue order. */

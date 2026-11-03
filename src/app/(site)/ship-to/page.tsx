@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntroImage } from "@/components/buyer/IntroImage";
@@ -5,9 +6,8 @@ import { ShipToPicker } from "@/components/buyer/ShipToPicker";
 import { PageIntro } from "@/components/PageIntro";
 import { ArrowLink, SectionHead } from "@/components/ui/SectionHead";
 import { MARKETS } from "@/lib/buyer-desk";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Wholesale footwear shipping by country",
   description: "Port, transit time, trade terms (DDP, FOB, EXW) and import rules for wholesale footwear shipped to North America, Europe, the UK, the Middle East and Australia.",
   path: "/ship-to",

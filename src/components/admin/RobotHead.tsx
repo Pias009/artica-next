@@ -63,7 +63,10 @@ export function RobotHead({ className }: { className?: string }) {
               rx="2.5"
               fill="#9ff0e0"
               className="motion-safe:animate-[robot-talk_.9s_ease-in-out_infinite]"
-              style={{ transformOrigin: `${x}px 97px`, animationDelay: `${i * 0.12}s` }}
+              style={{
+                transformOrigin: `${x}px 97px`,
+                animationDelay: `${i * 0.12}s`,
+              }}
             />
           ))}
         </g>

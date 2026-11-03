@@ -32,6 +32,7 @@ const LINE_ITEMS = NAV.filter((n): n is NavItem & { line: ProductLine } => !!n.l
 const PAGE_ITEMS: NavItem[] = [
   ...NAV.filter((n) => !n.line && !n.opt),
   { href: "/buyer-desk", label: "Buyer desk" },
+  { href: "/business-plan", label: "Business planner" },
   { href: "/shipping", label: "Shipping" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },

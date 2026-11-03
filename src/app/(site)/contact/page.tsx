@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
@@ -5,9 +6,8 @@ import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Contact the wholesale trade desk",
   description: "Contact the Chime Long trade desk for wholesale pricing, line sheets, samples and showroom appointments. Replies within 24 hours.",
   path: "/contact",

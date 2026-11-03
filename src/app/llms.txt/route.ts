@@ -1,9 +1,11 @@
+import { loadContent } from "@/lib/content/store";
 import { lc } from "@/lib/product-copy";
 import { categoryOf, LEAD, LINE_LABEL, MOQ_CASES, MOQ_PAIRS, PACK, PRIVATE_LABEL_MIN, products, type ProductLine } from "@/lib/products";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { SITE_PAGES } from "@/lib/site-pages";
 
-export const dynamic = "force-static";
+// built once, then refreshed hourly so the admin panel's product edits reach it
+export const revalidate = 3600;
 
 const LINES: ProductLine[] = ["women", "men", "kids"];
 const SECTIONS = ["Shop", "Wholesale terms", "Buyer tools", "Company", "Legal"] as const;
@@ -13,7 +15,8 @@ const link = (name: string, path: string, note?: string) => `- [${name}](${absol
  * llms.txt (llmstxt.org): the site in plain Markdown for AI assistants and answer engines, so a buyer asking one about
  * wholesale footwear gets our terms and styles right. Built from the same constants the pages use.
  */
-export function GET() {
+export async function GET() {
+  await loadContent();
   const body = [
     `# ${SITE_NAME}`,
     "",

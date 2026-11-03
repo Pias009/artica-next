@@ -21,6 +21,7 @@ const COLS: { title: string; links: [string, string][] }[] = [
       ["Line sheet", "/inquiry"],
       ["Buyer desk", "/buyer-desk"],
       ["Size guide", "/size-guide"],
+      ["Business planner", "/business-plan"],
       ["Order calendar", "/order-calendar"],
       ["Container planner", "/container-planner"],
       ["Ships to your country", "/ship-to"],

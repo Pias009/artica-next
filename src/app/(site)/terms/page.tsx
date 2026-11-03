@@ -1,11 +1,11 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { LegalText } from "@/components/LegalText";
 import { PageIntro } from "@/components/PageIntro";
 import { COMPANY } from "@/lib/company";
 import { MOQ_CASES, MOQ_PAIRS, PACK } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Terms of trade",
   description: "Terms for using the Chime Long wholesale site and for quotes, samples, orders, inspection, delivery and claims.",
   path: "/terms",

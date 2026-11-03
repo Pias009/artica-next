@@ -3,25 +3,33 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { askAssistant, SUGGESTED } from "./ai";
+import { askAdminAction } from "./ai-actions";
+import { usePanel } from "./panel-data";
 import { AdminIcon, Sheet, useStream } from "./ui";
 
 type Message = { from: "you" | "ai"; text: string };
 
 /** The assistant: ask about the site's inquiries, styles and replies; answers stream in. */
 export function Assistant({ open, onClose, prompt }: { open: boolean; onClose: () => void; prompt: { text: string; n: number } | null }) {
+  const data = usePanel();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [thinking, setThinking] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
   const [run, setRun] = useState(0);
   const [input, setInput] = useState("");
   const end = useRef<HTMLDivElement>(null);
   const { shown, busy } = useStream(answer, run, (text) => setMessages((m) => [...m, { from: "ai", text }]));
 
-  const ask = (text: string) => {
-    if (!text.trim() || busy) return;
+  // the AI model answers from the real figures; without it (off, over budget, unreachable) the panel's own rules do
+  const ask = async (text: string) => {
+    if (!text.trim() || busy || thinking) return;
     setMessages((m) => [...m, { from: "you", text }]);
-    setAnswer(askAssistant(text));
-    setRun((r) => r + 1);
     setInput("");
+    setThinking(true);
+    const reply = await askAdminAction(text).catch(() => null);
+    setThinking(false);
+    setAnswer(reply ?? askAssistant(text, data));
+    setRun((r) => r + 1);
   };
 
   // a question sent from elsewhere in the panel ("Ask the assistant")
@@ -42,7 +50,7 @@ export function Assistant({ open, onClose, prompt }: { open: boolean; onClose: (
     <Sheet open={open} onClose={onClose} title="Assistant">
       <div className="flex min-h-full flex-col">
         <div className="grid flex-1 content-start gap-3 pb-4" aria-live="polite">
-          {!messages.length && !busy && (
+          {!messages.length && !busy && !thinking && (
             <div className="rounded-3xl bg-ink p-5 text-white">
               <AdminIcon name="sparkle" className="size-6" />
               <p className="mt-3 text-[17px] font-semibold">Ask about your buyers, styles and replies.</p>
@@ -60,9 +68,15 @@ export function Assistant({ open, onClose, prompt }: { open: boolean; onClose: (
               {m.text}
             </p>
           ))}
-          {busy && (
+          {(busy || thinking) && (
             <p className="max-w-[88%] rounded-3xl rounded-bl-lg bg-white/90 px-4 py-3 text-[14px] leading-relaxed whitespace-pre-line">
-              {shown || <span className="inline-flex gap-1 py-1">{[0, 1, 2].map((d) => <span key={d} className="size-1.5 rounded-full bg-ink/40 motion-safe:animate-bounce" style={{ animationDelay: `${d * 120}ms` }} />)}</span>}
+              {shown || (
+                <span className="inline-flex gap-1 py-1">
+                  {[0, 1, 2].map((d) => (
+                    <span key={d} className="size-1.5 rounded-full bg-ink/40 motion-safe:animate-bounce" style={{ animationDelay: `${d * 120}ms` }} />
+                  ))}
+                </span>
+              )}
             </p>
           )}
           <div ref={end} />
@@ -71,7 +85,13 @@ export function Assistant({ open, onClose, prompt }: { open: boolean; onClose: (
         <div className="sticky bottom-0 -mx-1 bg-[#f4f4f2]/95 px-1 pt-2">
           <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
             {SUGGESTED.map((s) => (
-              <button key={s} type="button" onClick={() => ask(s)} disabled={busy} className="min-h-9 flex-none rounded-full bg-white px-3.5 text-[12.5px] font-medium ring-1 ring-ink/10 transition-colors hover:bg-ink hover:text-white disabled:opacity-50">
+              <button
+                key={s}
+                type="button"
+                onClick={() => ask(s)}
+                disabled={busy || thinking}
+                className="min-h-9 flex-none rounded-full bg-white px-3.5 text-[12.5px] font-medium ring-1 ring-ink/10 transition-colors hover:bg-ink hover:text-white disabled:opacity-50"
+              >
                 {s}
               </button>
             ))}
@@ -86,8 +106,19 @@ export function Assistant({ open, onClose, prompt }: { open: boolean; onClose: (
             <label htmlFor="ask" className="sr-only">
               Ask the assistant
             </label>
-            <input id="ask" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask anything about the site" className="min-h-10 flex-1 bg-transparent text-[14.5px] outline-none placeholder:text-ink/40" />
-            <button type="submit" disabled={!input.trim() || busy} aria-label="Send" className="grid size-10 place-items-center rounded-full bg-ink text-white transition-opacity disabled:opacity-30">
+            <input
+              id="ask"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything about the site"
+              className="min-h-10 flex-1 bg-transparent text-[14.5px] outline-none placeholder:text-ink/40"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || busy || thinking}
+              aria-label="Send"
+              className="grid size-10 place-items-center rounded-full bg-ink text-white transition-opacity disabled:opacity-30"
+            >
               <AdminIcon name="send" className="size-4" />
             </button>
           </form>

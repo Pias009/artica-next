@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { loadContent } from "@/lib/content/store";
 import { cookies } from "next/headers";
 import { PageIntro } from "@/components/PageIntro";
 import { CatalogIntroPanel, CatalogTerms } from "@/components/product/CatalogIntroPanel";
@@ -86,11 +87,15 @@ function view(s: CatalogState) {
 }
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const edit = (await loadContent()).pages["/catalog"];
   const v = view(parseCatalogParams(await searchParams));
-  return pageMeta({ title: v.title, description: v.description, path: v.path });
+  // the admin panel's search title and description apply to the catalog itself, not its filtered views
+  const own = v.path === "/catalog";
+  return pageMeta({ title: (own && edit?.title) || v.title, description: (own && edit?.description) || v.description, path: v.path });
 }
 
 export default async function CatalogPage({ searchParams }: { searchParams: SearchParams }) {
+  await loadContent();
   const initial = parseCatalogParams(await searchParams);
   const v = view(initial);
   // the visitor's season, from the proxy (or their own pick): it leads the featured order

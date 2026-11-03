@@ -1,88 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { usePanel, useSaver } from "../panel-data";
 import { Card, CardHead, Field, SaveBar, Segmented, Toggle } from "../ui";
+import { saveAssistantAction, saveSettingsAction } from "@/app/admin/content-actions";
+import { MARKETS } from "@/lib/buyer-desk";
+import { COMPANY } from "@/lib/company";
+import type { SiteContent, Tone } from "@/lib/content/model";
 import { LEAD, MOQ_PAIRS, PACK, PRIVATE_LABEL_MIN } from "@/lib/products";
 
-const INITIAL = {
-  company: "Guangzhou Chime Long Trading Co., Ltd.",
-  email: "wholesale@articafootwear.com",
-  phone: "+1 (800) 412-8820",
-  hours: "Mon–Fri 9:00–18:00 EST",
-  moq: String(MOQ_PAIRS),
-  pack: String(PACK),
-  privateLabel: String(PRIVATE_LABEL_MIN),
-  samples: LEAD.samples.replace("d", ""),
-  bulk: LEAD.bulk.replace("d", ""),
-  sea: "14–42",
-  air: "3–7",
-  road: "14–20",
-  tone: "warm" as "plain" | "warm" | "formal",
-  autoDraft: true,
-  briefs: true,
-  notifyNew: true,
-  notifyOverdue: true,
-  weekly: false,
+type State = {
+  contact: SiteContent["contact"];
+  alerts: SiteContent["alerts"];
+  tone: Tone;
+};
+
+/** A fact the site computes with: shown here, changed in code (it drives prices, planners and Kai). */
+function Fixed({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/60 px-4 py-3">
+      <p className="text-[12px] font-semibold text-ink/55">{label}</p>
+      <p className="mt-0.5 text-[15px] font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+const sea = () => {
+  const n = MARKETS.flatMap((m) => m.transit.match(/\d+/g)?.map(Number) ?? []);
+  return n.length ? `${Math.min(...n)}–${Math.max(...n)} days` : "–";
 };
 
 /** The site's fixed facts (company, trade terms, transit times) and how the assistant and alerts behave. */
 export function Settings() {
-  const [saved, setSaved] = useState(INITIAL);
-  const [s, setS] = useState(INITIAL);
-  const set = <K extends keyof typeof INITIAL>(k: K) => (v: (typeof INITIAL)[K]) => setS((x) => ({ ...x, [k]: v }));
-  const changes = (Object.keys(s) as (keyof typeof INITIAL)[]).filter((k) => s[k] !== saved[k]).length;
+  const panel = usePanel();
+  const init = useMemo<State>(
+    () => ({
+      contact: panel.content.contact,
+      alerts: panel.content.alerts,
+      tone: panel.content.assistant.tone,
+    }),
+    [panel],
+  );
+  const [saved, setSaved] = useState(init);
+  const [s, setS] = useState(init);
+  const saver = useSaver(async (v: State) => {
+    const a = await saveSettingsAction({
+      contact: v.contact,
+      alerts: v.alerts,
+    });
+    if (!a.ok || v.tone === saved.tone) return a;
+    return saveAssistantAction({ ...panel.content.assistant, tone: v.tone });
+  }, setSaved);
+  const contact = (k: keyof State["contact"]) => (v: string) => setS((x) => ({ ...x, contact: { ...x.contact, [k]: v } }));
+  const alert = (k: keyof State["alerts"]) => (v: boolean) => setS((x) => ({ ...x, alerts: { ...x.alerts, [k]: v } }));
+  const changes =
+    (["email", "phone", "hours"] as const).filter((k) => (s.contact[k] ?? "") !== (saved.contact[k] ?? "")).length +
+    (["notifyNew", "notifyOverdue", "weekly"] as const).filter((k) => s.alerts[k] !== saved.alerts[k]).length +
+    Number(s.tone !== saved.tone);
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card i={0}>
-        <CardHead title="Company" sub="Shown in the footer, contact page and every email" />
+        <CardHead title="Company" sub="The trade desk's contact details: footer, contact page, FAQ and Kai" />
         <div className="mt-5 grid gap-4">
-          <Field label="Company name" value={s.company} onChange={set("company")} />
+          <Fixed label="Company name" value={COMPANY.name} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Trade desk email" value={s.email} onChange={set("email")} />
-            <Field label="Phone" value={s.phone} onChange={set("phone")} />
+            <Field label="Trade desk email" value={s.contact.email ?? ""} placeholder="As built" onChange={contact("email")} />
+            <Field label="Phone" value={s.contact.phone ?? ""} placeholder="As built" onChange={contact("phone")} />
           </div>
-          <Field label="Opening hours" value={s.hours} onChange={set("hours")} />
+          <Field label="Opening hours" value={s.contact.hours ?? ""} placeholder="As built" onChange={contact("hours")} />
+          <p className="text-[12px] text-ink/50">Empty fields keep the details the site was built with. Inquiry emails go to the inbox set in DESK_EMAIL.</p>
         </div>
       </Card>
 
       <Card i={1}>
-        <CardHead title="Trade terms" sub="Used across product pages, the FAQ and the planners" />
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <Field label="MOQ (pairs)" value={s.moq} onChange={set("moq")} />
-          <Field label="Pairs per case" value={s.pack} onChange={set("pack")} />
-          <Field label="Private label MOQ" value={s.privateLabel} onChange={set("privateLabel")} />
-          <Field label="Samples (days)" value={s.samples} onChange={set("samples")} />
-          <Field label="Bulk run (days)" value={s.bulk} onChange={set("bulk")} />
+        <CardHead title="Trade terms" sub="The numbers the site calculates with (set in code)" />
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <Fixed label="MOQ" value={`${MOQ_PAIRS} pairs`} />
+          <Fixed label="Pairs per case" value={String(PACK)} />
+          <Fixed label="Private label from" value={`${PRIVATE_LABEL_MIN} pairs`} />
+          <Fixed label="Samples" value={`${LEAD.samples.replace("d", "")} days`} />
+          <Fixed label="Bulk run" value={`${LEAD.bulk.replace("d", "")} days`} />
+          <Fixed label="Quote" value={`within ${LEAD.quote.replace("h", "")} h`} />
         </div>
+        <p className="mt-3 text-[12px] text-ink/50">
+          They drive case maths, the order calendar, the business planner and Kai, so they change with a release (src/lib/products.ts).
+        </p>
       </Card>
 
       <Card i={2}>
-        <CardHead title="Transit times" sub="The Shipping page's sea, air and road routes" />
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <Field label="Sea (days at sea)" value={s.sea} onChange={set("sea")} />
-          <Field label="Air (door to door)" value={s.air} onChange={set("air")} />
-          <Field label="Road (to Europe)" value={s.road} onChange={set("road")} />
+        <CardHead title="Transit times" sub="Sea transit by market, from the shipping data" />
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          {MARKETS.map((m) => (
+            <Fixed key={m.id} label={m.name} value={m.transit} />
+          ))}
         </div>
+        <p className="mt-3 text-[12px] text-ink/50">Sea, all markets: {sea()}. Set in src/lib/buyer-desk.ts.</p>
       </Card>
 
       <Card i={3} tone="dark">
-        <CardHead dark title="Assistant" sub="Drafts replies, suggests copy and writes the weekly brief" right={<span className="rounded-full bg-white/15 px-2.5 py-1 text-[11.5px] font-semibold">Demo mode</span>} />
+        <CardHead dark title="Assistant voice" sub="How Kai writes on the site, in both desks" />
         <div className="mt-5 grid gap-4 text-[13.5px]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-white/80">Voice</span>
             <div className="rounded-full bg-white">
-              <Segmented label="Assistant voice" value={s.tone} onChange={set("tone")} options={[{ id: "plain", label: "Plain" }, { id: "warm", label: "Warm" }, { id: "formal", label: "Formal" }]} />
+              <Segmented
+                label="Assistant voice"
+                value={s.tone}
+                onChange={(v) => setS((x) => ({ ...x, tone: v }))}
+                options={[
+                  { id: "plain", label: "Plain" },
+                  { id: "warm", label: "Warm" },
+                  { id: "formal", label: "Formal" },
+                ]}
+              />
             </div>
           </div>
-          <label className="flex items-center justify-between gap-3 text-white/80">
-            Draft a reply for every new inquiry
-            <Toggle dark label="Auto-draft replies" checked={s.autoDraft} onChange={set("autoDraft")} />
-          </label>
-          <label className="flex items-center justify-between gap-3 text-white/80">
-            Morning brief on the dashboard
-            <Toggle dark label="Morning brief" checked={s.briefs} onChange={set("briefs")} />
-          </label>
+          <p className="text-white/60">Switch the desks and the AI model on or off in the AI agent view.</p>
         </div>
       </Card>
 
@@ -92,19 +126,19 @@ export function Settings() {
           {(
             [
               ["notifyNew", "Every new inquiry"],
-              ["notifyOverdue", "No reply after 24 hours"],
-              ["weekly", "Weekly summary"],
+              ["notifyOverdue", "No reply after 20 hours (daily)"],
+              ["weekly", "Weekly summary (Mondays)"],
             ] as const
           ).map(([k, l]) => (
             <label key={k} className="flex items-center justify-between gap-3 rounded-2xl bg-white/70 px-4 py-3">
               {l}
-              <Toggle label={l} checked={s[k]} onChange={set(k)} />
+              <Toggle label={l} checked={s.alerts[k]} onChange={alert(k)} />
             </label>
           ))}
         </div>
       </Card>
 
-      <SaveBar count={changes} onDiscard={() => setS(saved)} onSave={() => setSaved(s)} />
+      <SaveBar count={changes} pending={saver.pending} error={saver.error} onDiscard={() => (setS(saved), saver.clearError())} onSave={() => saver.save(s)} />
     </div>
   );
 }

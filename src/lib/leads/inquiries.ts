@@ -1,4 +1,5 @@
 import "server-only";
+import { getContent } from "../content/store";
 import { MongoServerError } from "mongodb";
 import { counters, inquiries, type InquiryDoc, type MailState } from "./db";
 import type { DeskStatus } from "./desk";
@@ -25,6 +26,9 @@ export async function recordInquiry(i: Inquiry, c: Context): Promise<{ ref: stri
   const counter = await counters().findOneAndUpdate({ _id: `inquiry-${year}` }, { $inc: { seq: 1 } }, { upsert: true, returnDocument: "after" });
   const ref = `CL-${year}-${String(counter!.seq).padStart(4, "0")}`;
   const pending = (): MailState => ({ attempts: 0, nextAt: now, sentAt: null, lastError: null });
+  // the desk's "every new inquiry" alert can be switched off in the admin panel (Settings → Alerts)
+  const { alerts } = await getContent();
+  const skipped: MailState = { attempts: 0, nextAt: now, sentAt: now, lastError: "Not sent: new-inquiry alerts are off in the admin settings" };
 
   try {
     await col.insertOne({
@@ -45,7 +49,7 @@ export async function recordInquiry(i: Inquiry, c: Context): Promise<{ ref: stri
       status: "new",
       statusAt: now,
       firstReplyAt: null,
-      mail: { notify_desk: pending(), confirm_buyer: pending() },
+      mail: { notify_desk: alerts.notifyNew ? pending() : skipped, confirm_buyer: pending() },
     });
     return { ref, created: true };
   } catch (e) {

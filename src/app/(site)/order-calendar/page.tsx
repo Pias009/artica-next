@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { IntroImage } from "@/components/buyer/IntroImage";
 import { SeasonCards } from "@/components/buyer/SeasonCards";
@@ -5,9 +6,8 @@ import { ShelfDatePlanner } from "@/components/buyer/ShelfDatePlanner";
 import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { LEAD_DAYS, REVIEW_DAYS, SHELF_DAYS } from "@/lib/buyer-desk";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Order calendar: when to order winter boots",
   description: `When to request samples and confirm bulk for northern and southern winter. Samples ${LEAD_DAYS.samples} days, production ${LEAD_DAYS.bulk}, delivery ${LEAD_DAYS.delivery}.`,
   path: "/order-calendar",

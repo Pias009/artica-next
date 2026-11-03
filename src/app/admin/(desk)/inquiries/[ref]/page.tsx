@@ -17,8 +17,15 @@ export async function generateMetadata({ params }: PageProps<"/admin/inquiries/[
   return { title: (await params).ref };
 }
 
-const MAIL_LABEL: Record<MailKind, string> = { notify_desk: "To the desk", confirm_buyer: "Buyer's confirmation" };
-const ACTION_LABEL: Record<string, string> = { status: "Marked", retry_emails: "Retried emails", reply_drafted: "Drafted a reply with Kai" };
+const MAIL_LABEL: Record<MailKind, string> = {
+  notify_desk: "To the desk",
+  confirm_buyer: "Buyer's confirmation",
+};
+const ACTION_LABEL: Record<string, string> = {
+  status: "Marked",
+  retry_emails: "Retried emails",
+  reply_drafted: "Drafted a reply with Kai",
+};
 
 export default async function InquiryPage({ params }: PageProps<"/admin/inquiries/[ref]">) {
   await requireAdmin();
@@ -40,8 +47,7 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
           <p className="text-xs font-bold tracking-[.14em] text-muted uppercase">{i.ref}</p>
           <h1 className="mt-1 font-headline text-[30px] leading-tight font-semibold tracking-[-0.015em]">{i.company}</h1>
           <p className="mt-1 text-[14px] text-ink-2">
-            {INTENT_LABEL[i.intent]} · received {when(i.createdAt)}{" "}
-            <span className={clsx(late && "font-semibold text-danger")}>({span(i.createdAt)} ago)</span>
+            {INTENT_LABEL[i.intent]} · received {when(i.createdAt)} <span className={clsx(late && "font-semibold text-danger")}>({span(i.createdAt)} ago)</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -90,9 +96,7 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
             <ReplyDraft inquiryRef={i.ref} email={i.email} />
           </Card>
 
-          <Card title="Note">
-            {i.note ? <p className="text-[14px] whitespace-pre-wrap">{i.note}</p> : <p className="text-[14px] text-muted">No note.</p>}
-          </Card>
+          <Card title="Note">{i.note ? <p className="text-[14px] whitespace-pre-wrap">{i.note}</p> : <p className="text-[14px] text-muted">No note.</p>}</Card>
 
           <Card title="History">
             <ol className="grid gap-2 text-[13.5px]">
@@ -100,7 +104,8 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
                 <li key={String(h._id)} className="flex flex-wrap gap-x-2">
                   <span className="text-muted tabular-nums">{when(h.at)}</span>
                   <span>
-                    {ACTION_LABEL[h.action] ?? h.action} {h.action === "status" && h.detail ? STATUS_LABEL[h.detail as keyof typeof STATUS_LABEL]?.toLowerCase() : h.detail}
+                    {ACTION_LABEL[h.action] ?? h.action}{" "}
+                    {h.action === "status" && h.detail ? STATUS_LABEL[h.detail as keyof typeof STATUS_LABEL]?.toLowerCase() : h.detail}
                   </span>
                   <span className="text-muted">by {h.email}</span>
                 </li>
@@ -141,7 +146,12 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
           <Card title="Buyer">
             <Facts
               rows={[
-                ["Email", <a key="e" href={reply} className="break-all underline underline-offset-2">{i.email}</a>],
+                [
+                  "Email",
+                  <a key="e" href={reply} className="break-all underline underline-offset-2">
+                    {i.email}
+                  </a>,
+                ],
                 ["Buyer", i.buyerType],
                 ["Ship to", i.country],
                 ["Browsing from", i.ipCountry ?? "—"],

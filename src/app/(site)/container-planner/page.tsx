@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { ContainerPlanner } from "@/components/buyer/ContainerPlanner";
 import { IntroImage } from "@/components/buyer/IntroImage";
@@ -5,9 +6,8 @@ import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { CARTON, CONTAINERS } from "@/lib/buyer-desk";
 import { CASES_PER_PALLET, PACK } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Shoe container planner: 20ft, 40ft, 40HC",
   description: "Turn wholesale boot cases into pairs, pallets, volume and the container that fits: 20ft, 40ft or 40ft high cube.",
   path: "/container-planner",

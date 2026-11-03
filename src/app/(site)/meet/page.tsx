@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { IntroImage } from "@/components/buyer/IntroImage";
 import { SeasonSignup } from "@/components/buyer/SeasonSignup";
@@ -6,9 +7,8 @@ import { Icon } from "@/components/Icon";
 import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { TRADE_SHOWS } from "@/lib/buyer-desk";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Meet us: factory tours and trade shows",
   description: "Tour the Chime Long factory on a live video call, visit us in Guangzhou, or meet the team at a trade show.",
   path: "/meet",

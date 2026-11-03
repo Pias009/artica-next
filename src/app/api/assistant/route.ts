@@ -3,10 +3,14 @@ import { cookies, headers } from "next/headers";
 import { allow } from "@/lib/assistant/limit";
 import { backOff, modelAllowed, record, spend } from "@/lib/assistant/budget";
 import { localFirst, localReply, type LocalReply } from "@/lib/assistant/local";
+import { planFirst, planReply } from "@/lib/assistant/plan-local";
+import type { PlanProfile } from "@/lib/assistant/plan-skills";
 import { aiReady, kaiModel } from "@/lib/assistant/model";
 import { instructions } from "@/lib/assistant/persona";
 import { country, visitorSeason } from "@/lib/assistant/skills";
-import { makeTools, type KaiMessage } from "@/lib/assistant/tools";
+import { makeTools, MODE_TOOLS, type KaiMessage, type KaiMode } from "@/lib/assistant/tools";
+import { LEVELS, type Level } from "@/lib/planner";
+import { loadContent } from "@/lib/content/store";
 import { dbReady, inquiries } from "@/lib/leads/db";
 import { byId } from "@/lib/products";
 import { SEASON_COOKIE } from "@/lib/season";
@@ -28,7 +32,7 @@ const MAX_TEXT = 2000;
  * Nothing is stored: the conversation lives in the visitor's browser.
  */
 export async function POST(req: Request) {
-  const body = (await req.json().catch(() => null)) as { messages?: unknown; page?: unknown; list?: unknown; offline?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { messages?: unknown; page?: unknown; list?: unknown; offline?: unknown; mode?: unknown; plan?: unknown } | null;
   if (!body || !Array.isArray(body.messages) || !body.messages.length) return new Response("Bad request", { status: 400 });
 
   const h = await headers();
@@ -44,7 +48,13 @@ export async function POST(req: Request) {
 
   let requestedCache: Promise<{ id: string; inquiries: number }[]> | null = null;
   const requested = () => (requestedCache ??= mostRequested());
-  const tools = makeTools({ season, requested });
+  // two desks: trade help (styles, terms, shipping) and business planning (timing, order, cost, cash)
+  const mode: KaiMode = body.mode === "plan" ? "plan" : "trade";
+  // the admin panel's switches (AI agent view): each desk on or off, and whether Kai may use the AI model at all
+  const { assistant } = await loadContent();
+  if (!assistant[mode]) return new Response("This desk is closed for now. Please send us an inquiry.", { status: 503 });
+  const profile = mode === "plan" ? planProfile(body.plan) : {};
+  const tools = makeTools({ season, requested, profile });
 
   // only text from the visitor, each message capped; tool parts are checked against the tools' schemas
   const recent = (body.messages as KaiMessage[]).slice(-MAX_MESSAGES).map((m) =>
@@ -60,18 +70,20 @@ export async function POST(req: Request) {
   if (last.role !== "user") return new Response("Bad request", { status: 400 });
 
   const text = last.parts.flatMap((p) => (p.type === "text" ? [p.text] : [])).join(" ");
-  const ctx = { season, country: where, requested: dbReady() ? await requested() : [] };
+  const ctx = { season, country: where, requested: dbReady() ? await requested() : [], profile };
   const turns = messages.filter((m) => m.role === "user").length;
-  const local = !aiReady() || body.offline === true ? localReply(text, ctx) : (localFirst(text, turns, ctx) ?? ((await modelAllowed()) ? null : localReply(text, ctx)));
+  const [answer, first] = mode === "plan" ? [planReply, planFirst] : [localReply, localFirst];
+  const local = !aiReady() || !assistant.model || body.offline === true ? answer(text, ctx) : (first(text, turns, ctx) ?? ((await modelAllowed()) ? null : answer(text, ctx)));
   if (local) return offline(local);
 
   const { model, providerOptions } = kaiModel();
   spend();
   const result = streamText({
     model,
-    instructions: instructions({ country: where, season, page, list }),
+    instructions: instructions({ country: where, season, page, list, plan: mode === "plan" ? profileText(profile) : undefined, tone: assistant.tone }, mode),
     messages: await convertToModelMessages(messages.slice(-MODEL_TURNS), { tools, ignoreIncompleteToolCalls: true }),
     tools,
+    activeTools: MODE_TOOLS[mode],
     stopWhen: isStepCount(4),
     maxOutputTokens: 600,
     temperature: 0.4,
@@ -117,6 +129,31 @@ function offline(reply: LocalReply) {
     });
     return createUIMessageStreamResponse({ stream, headers: { "x-kai-source": "offline" } });
 }
+
+/** What the planner page knows about the buyer (sent from their browser): checked field by field, the rest dropped. */
+function planProfile(raw: unknown): PlanProfile {
+  if (!raw || typeof raw !== "object") return {};
+  const r = raw as Record<string, unknown>;
+  const lines = Array.isArray(r.lines) ? r.lines.filter((l): l is "men" | "women" | "kids" => l === "men" || l === "women" || l === "kids") : undefined;
+  return {
+    country: typeof r.country === "string" && /^[A-Z]{2}$/.test(r.country) ? r.country : undefined,
+    level: typeof r.level === "string" && r.level in LEVELS ? (r.level as Level) : undefined,
+    firstOrder: typeof r.firstOrder === "boolean" ? r.firstOrder : undefined,
+    budget: typeof r.budget === "number" && r.budget > 0 && r.budget < 1e8 ? r.budget : undefined,
+    lines: lines?.length ? lines : undefined,
+  };
+}
+
+const profileText = (p: PlanProfile) =>
+  [
+    p.level && `${LEVELS[p.level].name}.`,
+    p.country && `Sells in ${country(p.country)?.name ?? p.country}.`,
+    p.firstOrder !== undefined && (p.firstOrder ? "First order with us." : "Has ordered before."),
+    p.budget && `Budget about $${Math.round(p.budget).toLocaleString("en-US")}.`,
+    p.lines?.length && `Customers: ${p.lines.join(", ")}.`,
+  ]
+    .filter(Boolean)
+    .join(" ") || "Nothing yet.";
 
 /** The styles buyers asked for most in the last 90 days (spam left out). */
 async function mostRequested() {

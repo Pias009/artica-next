@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
@@ -6,9 +7,8 @@ import { DeliveryRoute } from "@/components/shipping/DeliveryRoute";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { ArrowLink, SectionHead } from "@/components/ui/SectionHead";
 import { MOQ_CASES, MOQ_PAIRS, PACK } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Shipping and trade terms: DDP, FOB, EXW",
   description: "Wholesale shipping terms for buyers worldwide. DDP, FOB, and EXW logistics, transit times, pallet dimensions, and customs clearance.",
   path: "/shipping",

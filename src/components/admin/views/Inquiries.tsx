@@ -2,14 +2,25 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { useState } from "react";
-import { askAssistant } from "../ai";
-import { INQUIRIES, PIPELINE, intentLabel, type AdminInquiry } from "../data";
-import { AdminIcon, Card, CountUp, Segmented, Sheet, useStream } from "../ui";
+import { useState, useTransition } from "react";
+import { PIPELINE, intentLabel } from "../data";
+import { ago, usePanel } from "../panel-data";
+import { AdminIcon, Card, CountUp, flash, Segmented, Sheet, useStream } from "../ui";
+import { draftReplyAction } from "@/app/admin/actions";
+import { moveInquiryAction } from "@/app/admin/content-actions";
+import type { PanelInquiry } from "@/lib/admin/panel";
 
-/** The trade desk's pipeline: every inquiry by stage, each one openable with an AI-drafted reply. */
+/**
+ * The trade desk's pipeline: the latest real inquiries by stage (spam left out), each openable to move it on or to
+ * draft a reply with Kai. Moving a card saves at once; the full desk (/admin/inquiries) has search and history.
+ */
 export function Inquiries() {
-  const [items, setItems] = useState(INQUIRIES);
+  const panel = usePanel();
+  const [items, setItems] = useState(panel.inquiries);
+  const [moving, startMove] = useTransition();
+  const [subject, setSubject] = useState("");
+  const [notes, setNotes] = useState<string[]>([]);
+  const [drafting, setDrafting] = useState(false);
   const [openRef, setOpenRef] = useState<string | null>(null);
   const [draft, setDraft] = useState<string | null>(null);
   const [run, setRun] = useState(0);
@@ -17,7 +28,23 @@ export function Inquiries() {
   const { shown, busy } = useStream(draft, run, setReply);
   const open = items.find((i) => i.ref === openRef) ?? null;
 
-  const setStatus = (ref: string, status: AdminInquiry["status"]) => setItems((all) => all.map((i) => (i.ref === ref ? { ...i, status } : i)));
+  // saved at once; put back if the server refuses
+  const setStatus = (ref: string, status: PanelInquiry["status"]) => {
+    const before = items.find((i) => i.ref === ref)?.status;
+    if (!before || before === status) return;
+    setItems((all) => all.map((i) => (i.ref === ref ? { ...i, status } : i)));
+    startMove(async () => {
+      const r = await moveInquiryAction(ref, status).catch(() => ({
+        ok: false as const,
+        error: "Couldn't reach the server.",
+      }));
+      if (r.ok) flash(`${ref} moved to ${PIPELINE.find((x) => x.id === status)?.label}`);
+      else {
+        setItems((all) => all.map((i) => (i.ref === ref ? { ...i, status: before } : i)));
+        flash(r.error);
+      }
+    });
+  };
   const pairs = items.filter((i) => i.status !== "lost").reduce((s, i) => s + i.pairs, 0);
 
   return (
@@ -26,7 +53,7 @@ export function Inquiries() {
         {[
           ["Open", items.filter((i) => i.status === "new" || i.status === "replied").length, "waiting on us"],
           ["Quoted", items.filter((i) => i.status === "quoted").length, "with the buyer"],
-          ["Won", items.filter((i) => i.status === "won").length, "this month"],
+          ["Won", items.filter((i) => i.status === "won").length, "orders confirmed"],
           ["Pairs in play", pairs, "across open deals"],
         ].map(([label, n, sub], k) => (
           <Card key={label} i={k} tone={k === 0 ? "dark" : "glass"}>
@@ -38,8 +65,15 @@ export function Inquiries() {
       </div>
 
       <p className="mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-[13px] text-ink/55">
-        Sample pipeline for the layout.
-        <Link href="/admin/inquiries" className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 font-semibold text-white transition-transform hover:scale-[1.03]">
+        {items.length
+          ? `The latest ${items.length} inquiries, spam left out.${moving ? " Saving…" : ""}`
+          : panel.ready
+            ? "No inquiries yet. They appear here as buyers send them."
+            : "No database connected: no inquiries to show."}
+        <Link
+          href="/admin/inquiries"
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 font-semibold text-white transition-transform hover:scale-[1.03]"
+        >
           Open the live inquiry desk <AdminIcon name="up" className="size-3.5 rotate-90" />
         </Link>
       </p>
@@ -63,12 +97,14 @@ export function Inquiries() {
                           setOpenRef(i.ref);
                           setDraft(null);
                           setReply("");
+                          setSubject("");
+                          setNotes([]);
                         }}
                         className="w-full rounded-2xl bg-white/85 p-3 text-left shadow-[0_1px_2px_rgb(18_20_22/.06)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_-12px_rgb(18_20_22/.4)]"
                       >
                         <span className="flex items-center justify-between gap-2 text-[11.5px] text-ink/45">
                           <span className="tabular-nums">{i.ref}</span>
-                          <span>{i.received}</span>
+                          <span>{ago(i.createdAt)}</span>
                         </span>
                         <span className="mt-1.5 block truncate text-[14px] font-semibold">{i.company}</span>
                         <span className="mt-0.5 block truncate text-[12.5px] text-ink/60">
@@ -93,10 +129,13 @@ export function Inquiries() {
           <div className="grid gap-5">
             <div className="rounded-3xl bg-white/80 p-4">
               <p className="text-[12px] text-ink/45 tabular-nums">
-                {open.ref} · {open.received}
+                {open.ref} · {ago(open.createdAt)} · {open.buyerType}
               </p>
               <p className="mt-1 text-[15px] font-semibold">
-                {open.contact} <span className="font-normal text-ink/55">· {open.country}</span>
+                <a href={`mailto:${open.email}`} className="hover:underline">
+                  {open.email}
+                </a>{" "}
+                <span className="font-normal text-ink/55">· {open.country}</span>
               </p>
               <dl className="mt-3 grid grid-cols-2 gap-3 text-[13px]">
                 <div>
@@ -117,13 +156,16 @@ export function Inquiries() {
                   ))}
                 </div>
               )}
-              <p className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[14px] leading-relaxed">&ldquo;{open.note}&rdquo;</p>
+              {open.note && <p className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[14px] leading-relaxed whitespace-pre-line">&ldquo;{open.note}&rdquo;</p>}
+              <Link href={`/admin/inquiries/${open.ref}`} className="mt-3 inline-flex min-h-9 items-center gap-1.5 text-[13px] font-semibold underline">
+                Full record, emails and history
+              </Link>
             </div>
 
             <div>
               <p className="mb-2 text-[12.5px] font-semibold text-ink/70">Stage</p>
               <div className="overflow-x-auto">
-                <Segmented label="Stage" value={open.status} onChange={(v) => setStatus(open.ref, v)} options={PIPELINE} />
+                <Segmented label="Stage" value={open.status} onChange={(v) => v !== "new" && setStatus(open.ref, v)} options={PIPELINE} />
               </div>
             </div>
 
@@ -132,16 +174,30 @@ export function Inquiries() {
                 <p className="text-[12.5px] font-semibold text-ink/70">Reply</p>
                 <button
                   type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    setDraft(askAssistant(`draft a reply to ${open.company}`).replace(/^Here's a draft[^\n]*\n\n/, ""));
+                  disabled={busy || drafting}
+                  onClick={async () => {
+                    setDrafting(true);
+                    const d = await draftReplyAction(open.ref).catch(() => null);
+                    setDrafting(false);
+                    if (!d) return flash("Couldn't draft a reply just now.");
+                    setSubject(d.subject);
+                    setNotes(d.summary);
+                    setDraft(d.body);
                     setRun((r) => r + 1);
                   }}
                   className="flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-white transition-transform hover:scale-[1.03] disabled:opacity-60"
                 >
-                  <AdminIcon name="sparkle" className="size-4" /> {busy ? "Drafting…" : reply ? "Redraft" : "Draft with AI"}
+                  <AdminIcon name="sparkle" className="size-4" /> {busy || drafting ? "Drafting…" : reply ? "Redraft" : "Draft with Kai"}
                 </button>
               </div>
+              {notes.length > 0 && (
+                <ul className="mb-2 grid gap-1 rounded-2xl bg-ink/[0.04] p-3 text-[12.5px] text-ink/70">
+                  {notes.map((n) => (
+                    <li key={n}>· {n}</li>
+                  ))}
+                </ul>
+              )}
+              {subject && <p className="mb-2 text-[13px] font-semibold">Subject: {subject}</p>}
               <textarea
                 aria-label="Reply"
                 rows={10}
@@ -151,17 +207,29 @@ export function Inquiries() {
                 readOnly={busy}
                 className="w-full resize-none rounded-2xl bg-white/80 px-4 py-3 text-[14px] leading-relaxed ring-1 ring-ink/10 outline-none placeholder:text-ink/40 focus:ring-2 focus:ring-ink"
               />
-              <button
-                type="button"
-                disabled={!reply.trim() || busy}
-                onClick={() => {
-                  setStatus(open.ref, "replied");
-                  setOpenRef(null);
-                }}
-                className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-[14px] font-semibold text-white transition-opacity disabled:opacity-40"
-              >
-                <AdminIcon name="send" className="size-4" /> Send and mark replied
-              </button>
+              <p className="mt-2 text-[12px] text-ink/50">
+                Fill in the [tier price] placeholders. The reply goes from your own email, so the buyer can answer you.
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <a
+                  href={`mailto:${open.email}?subject=${encodeURIComponent(subject || `Re: your inquiry ${open.ref}`)}&body=${encodeURIComponent(reply)}`}
+                  aria-disabled={!reply.trim() || busy}
+                  className={clsx(
+                    "flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink text-[14px] font-semibold text-white",
+                    (!reply.trim() || busy) && "pointer-events-none opacity-40",
+                  )}
+                >
+                  <AdminIcon name="send" className="size-4" /> Open in my email
+                </a>
+                <button
+                  type="button"
+                  disabled={open.status !== "new" || moving}
+                  onClick={() => setStatus(open.ref, "replied")}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white text-[14px] font-semibold ring-1 ring-ink/15 transition-opacity disabled:opacity-40"
+                >
+                  {open.status === "new" ? "Mark replied" : "Replied"}
+                </button>
+              </div>
             </div>
           </div>
         )}

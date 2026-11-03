@@ -52,7 +52,16 @@ export type Session = {
 };
 
 type Attempt = { key: string; at: Date };
-export type AuditEntry = { _id?: ObjectId; at: Date; adminId: ObjectId | null; email: string; action: string; ref?: string; detail?: string; ip: string | null };
+export type AuditEntry = {
+  _id?: ObjectId;
+  at: Date;
+  adminId: ObjectId | null;
+  email: string;
+  action: string;
+  ref?: string;
+  detail?: string;
+  ip: string | null;
+};
 
 const db = () => database();
 export const admins = () => db().collection<Admin>("admins");
@@ -68,7 +77,6 @@ const WINDOW = 15 * MIN;
 const MAX_PER_EMAIL = 5;
 const MAX_PER_IP = 20;
 
-
 /** The panel works only with a database and the key that seals authenticator secrets; otherwise it stays shut. */
 export const adminReady = () => dbReady() && !!process.env.ADMIN_ENC_KEY;
 
@@ -83,7 +91,11 @@ export async function requestInfo() {
 }
 
 export async function audit(entry: Omit<AuditEntry, "at" | "ip">, ip?: string | null) {
-  await auditLog().insertOne({ at: new Date(), ip: ip ?? (await requestInfo()).ip, ...entry });
+  await auditLog().insertOne({
+    at: new Date(),
+    ip: ip ?? (await requestInfo()).ip,
+    ...entry,
+  });
 }
 
 export type SignIn = { ok: true } | { ok: false; error: string };
@@ -91,7 +103,11 @@ const WRONG = "That email, password or code isn't right.";
 
 /** Checks all three factors and, when they pass, starts a session and sets its cookie. Server actions only. */
 export async function signIn(emailIn: string, password: string, code: string): Promise<SignIn> {
-  if (!adminReady()) return { ok: false, error: "The admin panel isn't set up on this server yet (MONGODB_URI, ADMIN_ENC_KEY)." };
+  if (!adminReady())
+    return {
+      ok: false,
+      error: "The admin panel isn't set up on this server yet (MONGODB_URI, ADMIN_ENC_KEY).",
+    };
   const email = emailIn.trim().toLowerCase().slice(0, 200);
   const req = await requestInfo();
   const since = new Date(Date.now() - WINDOW);
@@ -101,7 +117,10 @@ export async function signIn(emailIn: string, password: string, code: string): P
   ]);
   if (byEmail >= MAX_PER_EMAIL || byIp >= MAX_PER_IP) {
     await audit({ adminId: null, email, action: "sign_in_locked" }, req.ip);
-    return { ok: false, error: "Too many tries. Wait 15 minutes, then try again." };
+    return {
+      ok: false,
+      error: "Too many tries. Wait 15 minutes, then try again.",
+    };
   }
 
   const admin = await admins().findOne({ email });
@@ -118,12 +137,21 @@ export async function signIn(emailIn: string, password: string, code: string): P
   // claim the code atomically: two sign-ins racing with the same code can't both win
   const claimed =
     admin && step !== null
-      ? (await admins().updateOne({ _id: admin._id, lastTotpStep: { $lt: step }, disabled: false }, { $set: { lastTotpStep: step, lastLoginAt: new Date() } })).modifiedCount === 1
+      ? (await admins().updateOne({ _id: admin._id, lastTotpStep: { $lt: step }, disabled: false }, { $set: { lastTotpStep: step, lastLoginAt: new Date() } }))
+          .modifiedCount === 1
       : false;
 
   if (!admin || !claimed) {
     await attempts().insertMany([{ key: `email:${email}`, at: new Date() }, ...(req.ip ? [{ key: `ip:${req.ip}`, at: new Date() }] : [])]);
-    await audit({ adminId: admin?._id ?? null, email, action: "sign_in_failed", detail: !admin ? "unknown email" : !passwordOk ? "password" : admin.disabled ? "disabled" : "code" }, req.ip);
+    await audit(
+      {
+        adminId: admin?._id ?? null,
+        email,
+        action: "sign_in_failed",
+        detail: !admin ? "unknown email" : !passwordOk ? "password" : admin.disabled ? "disabled" : "code",
+      },
+      req.ip,
+    );
     return { ok: false, error: WRONG };
   }
 
@@ -164,7 +192,10 @@ export const currentAdmin = cache(async (): Promise<{ admin: Admin; session: Ses
   const session = await sessions().findOne({ tokenHash: tokenHash(token) });
   const now = Date.now();
   if (!session || session.expiresAt.getTime() <= now || session.idleUntil.getTime() <= now) return null;
-  const admin = await admins().findOne({ _id: session.adminId, disabled: false });
+  const admin = await admins().findOne({
+    _id: session.adminId,
+    disabled: false,
+  });
   if (!admin) return null;
   if (now - session.lastSeenAt.getTime() > 5 * MIN) {
     const idleUntil = new Date(Math.min(now + IDLE, session.expiresAt.getTime()));
@@ -194,7 +225,12 @@ export async function skipSignIn() {
     maxAge: ABSOLUTE / 1000,
   });
   const who = mode === "local" ? LOCAL : PREVIEW;
-  if (dbReady()) await audit({ adminId: who.admin._id, email: who.admin.email, action: "sign_in_skipped" });
+  if (dbReady())
+    await audit({
+      adminId: who.admin._id,
+      email: who.admin.email,
+      action: "sign_in_skipped",
+    });
   return true;
 }
 
@@ -203,8 +239,29 @@ function standIn(id: string, email: string, name: string): { admin: Admin; sessi
   const _id = new ObjectId(id);
   const never = new Date(8.64e15);
   return {
-    admin: { _id, email, name, passwordHash: "", totpSealed: "", lastTotpStep: 0, disabled: false, createdAt: new Date(0), lastLoginAt: null },
-    session: { _id, tokenHash: "", adminId: _id, createdAt: new Date(0), lastSeenAt: new Date(0), expiresAt: never, idleUntil: never, ip: null, country: null, userAgent: "" },
+    admin: {
+      _id,
+      email,
+      name,
+      passwordHash: "",
+      totpSealed: "",
+      lastTotpStep: 0,
+      disabled: false,
+      createdAt: new Date(0),
+      lastLoginAt: null,
+    },
+    session: {
+      _id,
+      tokenHash: "",
+      adminId: _id,
+      createdAt: new Date(0),
+      lastSeenAt: new Date(0),
+      expiresAt: never,
+      idleUntil: never,
+      ip: null,
+      country: null,
+      userAgent: "",
+    },
   };
 }
 const LOCAL = standIn("000000000000000000000000", "dev@localhost", "Dev (sign-in skipped)");
@@ -225,5 +282,10 @@ export async function signOut() {
   if (token && dbReady()) await sessions().deleteOne({ tokenHash: tokenHash(token) });
   jar.delete(SESSION_COOKIE);
   jar.delete(SKIP_COOKIE);
-  if (who && dbReady()) await audit({ adminId: who.admin._id, email: who.admin.email, action: "sign_out" });
+  if (who && dbReady())
+    await audit({
+      adminId: who.admin._id,
+      email: who.admin.email,
+      action: "sign_out",
+    });
 }

@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,9 +8,8 @@ import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { SIZE_CHART, sizeRange, sizeTable } from "@/lib/buyer-desk";
 import { LINE_LABEL, PACK, type ProductLine } from "@/lib/products";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Shoe size guide: US, EU, UK and cm",
   description: `Wholesale boot sizes in US, EU, UK and centimetres for men, women and kids, with the pairs of each size in a ${PACK}-pair case.`,
   path: "/size-guide",

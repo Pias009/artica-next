@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState, type KeyboardEvent } from "react";
 import { Icon } from "../Icon";
+import { track } from "../Track";
 import { filterProducts, inLine, LINE_LABEL, products, type Product, type ProductLine } from "@/lib/products";
 
 const RECENT_KEY = "cl-recent-searches";
@@ -68,6 +69,7 @@ export function NavSearch({ onDone }: { onDone: () => void }) {
 
   const openProduct = (p: Product) => {
     remember(query.trim());
+    track("search", { q: query.trim(), n: all.length });
     router.push(`/products/${p.slug}`);
     onDone();
   };

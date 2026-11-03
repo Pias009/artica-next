@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
+import { CONTENT_ELEMENT, publicContent } from "@/lib/content/model";
+import { loadContent } from "@/lib/content/store";
 import { paintScript } from "@/lib/season";
 import { DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -49,13 +51,17 @@ export const viewport: Viewport = {
  * The document shell every page shares: fonts and the season theme. What surrounds a page comes from its route group:
  * the public site's header, footer and drawer in (site)/layout.tsx, the admin's own frame in admin/.
  */
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // the admin panel's edits, applied before anything renders and handed to the browser below
+  const content = publicContent(await loadContent());
   return (
     // data-season is set by the head script before first paint, so React leaves it alone on hydration
     <html lang="en" className={`${inter.variable} ${serif.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* the visitor's season theme, painted before anything shows (src/lib/season.ts); /admin's CSP allows it by hash */}
         <script dangerouslySetInnerHTML={{ __html: paintScript() }} />
+        {/* data, not code (never run, so no CSP hash needed): content/live.ts reads it in the browser */}
+        <script id={CONTENT_ELEMENT} type="application/json" dangerouslySetInnerHTML={{ __html: JSON.stringify(content).replace(/</g, "\\u003c") }} />
       </head>
       <body className="bg-white font-sans text-ink antialiased">{children}</body>
     </html>

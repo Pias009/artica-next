@@ -1,46 +1,52 @@
 /*
- * The assistant, answering from the panel's own data. These are local stand-ins with the same shape as a model
- * call (prompt in, text out), so wiring a real model later (an API route on the AI SDK) only swaps these bodies.
+ * The assistant's own answers from the panel's real figures (PanelData), used when the AI model is off, over budget
+ * or unreachable. The model answers first through askAdminAction (ai-actions.ts).
  */
 
-import { INQUIRIES, MARKETS, MONTHS, PRODUCTS, WEEK, intentLabel, type Section } from "./data";
+import type { PanelData } from "@/lib/admin/panel";
 
 const n = (x: number) => x.toLocaleString("en-US");
+const INTENT: Record<string, string> = {
+  quote: "quote",
+  sample: "samples",
+  visit: "visit",
+  private_label: "private label",
+  shipping: "shipping",
+};
 
-export const SUGGESTED = ["Summarise this week's inquiries", "Which styles should I feature?", "Draft a reply to the newest inquiry", "How fast are we replying?"];
+export const SUGGESTED = [
+  "Summarise this week's inquiries",
+  "Which styles should I feature?",
+  "Draft a reply to the newest inquiry",
+  "How fast are we replying?",
+];
 
-export function askAssistant(prompt: string): string {
+export function askAssistant(prompt: string, d: PanelData): string {
   const p = prompt.toLowerCase();
-  const open = INQUIRIES.filter((i) => i.status === "new" || i.status === "replied");
+  if (!d.ready) return "There's no database connected yet (MONGODB_URI), so there are no inquiries or visitor figures to read.";
+  const rows = d.inquiries;
+  const open = rows.filter((i) => i.status === "new" || i.status === "replied");
   if (/draft|reply to|write back/.test(p)) {
-    const i = INQUIRIES[0];
-    return `Here's a draft for ${i.contact} at ${i.company}:\n\nHi ${i.contact.split(" ")[0]},\n\nThanks for your inquiry about the ${i.styles.join(" and ")}. For ${n(i.pairs)} pairs we can ship DDP to Oslo, duties included, with samples in 10 days. I've attached the FW26 line sheet and tier pricing; the quote holds for 30 days.\n\nWould a short video call this week help to settle sizes?\n\nBest regards,\nThe Chime Long trade desk`;
+    const i = rows.find((r) => r.status === "new") ?? rows[0];
+    if (!i) return "There are no inquiries to reply to yet.";
+    return `A start for ${i.company} (${i.ref}):\n\nDear ${i.company} team,\n\nThank you for your inquiry${i.styles.length ? ` about the ${i.styles.join(", ")}` : ""}. ${i.pairs ? `For ${n(i.pairs)} pairs ` : ""}we'll send tier pricing ([tier price] per pair) and shipping to ${i.country}. Samples reach you in about 10 days.\n\nCould you confirm your trade terms (DDP or FOB) and the month you need the goods?\n\nBest regards,\nChime Long trade desk\n\nOpen the inquiry for a full draft with Kai.`;
   }
   if (/style|product|feature|sell/.test(p)) {
-    const top = [...PRODUCTS].sort((a, b) => b.inquiries - a.inquiries).slice(0, 3);
-    return `Feature these three: ${top.map((t) => `${t.name} (${t.inquiries} inquiries)`).join(", ")}. ${top[0].name} is asked about most and pairs well with the winter campaign; put it first in Hot products and on the campaign banner.`;
+    const top = [...d.products]
+      .sort((a, b) => b.inquiries - a.inquiries)
+      .filter((x) => x.inquiries)
+      .slice(0, 3);
+    if (!top.length)
+      return "No style has been asked for in the last 90 days yet. Feature the styles with a Top reorder or Trending badge until inquiries come in.";
+    return `Feature these: ${top.map((t) => `${t.name} (${t.inquiries} ${t.inquiries === 1 ? "inquiry" : "inquiries"})`).join(", ")}, the most asked for in the last 90 days. Turn on Featured in Products to put them first everywhere on the site.`;
   }
   if (/fast|reply|response|speed/.test(p)) {
-    const last = MONTHS[MONTHS.length - 1];
-    return `${Math.round((last.replied / last.leads) * 100)}% of ${last.m}'s ${last.leads} inquiries had a first reply inside 24 hours, up from ${Math.round((MONTHS[0].replied / MONTHS[0].leads) * 100)}% in ${MONTHS[0].m}. ${open.length} are still waiting on a quote; the oldest is ${open[open.length - 1].company}.`;
+    const s = d.inquiryStats;
+    const last = d.overview?.months.at(-1);
+    return `${s?.medianReplyHours != null ? `Median first reply over the last 30 days: ${s.medianReplyHours.toFixed(1)} h. ` : "No replies recorded in the last 30 days. "}${last ? `${last.replied} of ${last.m}'s ${last.leads} inquiries had a reply inside 24 hours. ` : ""}${s?.overdue ? `${s.overdue} new ${s.overdue === 1 ? "inquiry is" : "inquiries are"} past 20 hours without a reply.` : "Nothing is overdue."}`;
   }
-  const week = WEEK.reduce((s, d) => s + d.n, 0);
-  const busiest = [...WEEK].sort((a, b) => b.n - a.n)[0];
-  return `${week} inquiries this week, the busiest on ${busiest.day} (${busiest.n}). ${INQUIRIES.filter((i) => i.status === "new").length} are new, mostly ${intentLabel("quote").toLowerCase()} requests; ${MARKETS[0].name} and ${MARKETS[1].name} send the most. ${INQUIRIES[0].company} wants ${n(INQUIRIES[0].pairs)} pairs DDP: answer that one first.`;
-}
-
-/** Copy suggestions for a section: shorter, sharper, and benefit-first. */
-export function suggestCopy(s: Section): { tone: string; title: string; sub: string }[] {
-  const t = s.title.replace(/\.$/, "");
-  const first = t.split(/[,:.–]/)[0].trim();
-  return [
-    { tone: "Shorter", title: `${first}.`, sub: s.sub.split(/[,.]/)[0] + "." },
-    { tone: "Bolder", title: `${first}, built to sell through.`, sub: "Factory-direct, from 300 pairs per style." },
-    { tone: "Benefit first", title: "Fewer returns, fuller shelves.", sub: `${s.sub.replace(/\.$/, "")}, with samples in 10 days.` },
-  ];
-}
-
-/** A product description the way the catalogue writes them. */
-export function describeProduct(name: string, type: string, rating?: string) {
-  return `The ${name} is a ${type.toLowerCase()} made for full-price sell-through: waterproof leather, a sealed seam bootie and a lugged rubber sole${rating ? ` rated to ${rating}` : ""}. Ships in mixed-size cases of 12, from 300 pairs per style.`;
+  const week = d.overview?.week.reduce((a, x) => a + x.n, 0) ?? 0;
+  const busiest = [...(d.overview?.week ?? [])].sort((a, b) => b.n - a.n)[0];
+  const newest = rows[0];
+  return `${week} ${week === 1 ? "inquiry" : "inquiries"} in the last 7 days${busiest?.n ? `, the most on ${busiest.day} (${busiest.n})` : ""}. ${open.length} waiting on a reply or quote${d.overview?.markets[0] ? `; ${d.overview.markets[0].name} sends the most` : ""}.${newest ? ` Newest: ${newest.company} (${newest.country}), ${INTENT[newest.intent] ?? newest.intent}${newest.pairs ? `, ${n(newest.pairs)} pairs` : ""}.` : ""}`;
 }

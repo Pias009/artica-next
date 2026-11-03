@@ -1,4 +1,6 @@
 import { cronAuthorized } from "@/lib/leads/cron";
+import { readContent } from "@/lib/content/store";
+import { weeklySummary } from "@/lib/admin/weekly";
 import { dbReady } from "@/lib/leads/db";
 import { deskPath, deskReady } from "@/lib/leads/desk";
 import { overdue, purgeSpam } from "@/lib/leads/inquiries";
@@ -15,7 +17,10 @@ export async function GET(req: Request) {
   if (!dbReady()) return Response.json({ skipped: "no MONGODB_URI" });
 
   const sent = await drain({ limit: 100 });
-  const [late, failing, purged] = await Promise.all([overdue(), stuck(), purgeSpam()]);
+  const { alerts } = await readContent();
+  const [lateAll, failing, purged] = await Promise.all([overdue(), stuck(), purgeSpam()]);
+  // "No reply after 24 hours" off in the admin panel (Settings → Alerts): the digest only reports stuck emails
+  const late = alerts.notifyOverdue ? lateAll : [];
 
   if (failing.length) console.error(`[outbox] outbox.stuck ${failing.length}`, failing);
   if ((late.length || failing.length) && mailReady()) {
@@ -39,6 +44,12 @@ export async function GET(req: Request) {
       idempotencyKey: `digest-${new Date().toISOString().slice(0, 10)}`,
     });
     if (error) console.error("[digest] not sent", error);
+  }
+  // Mondays (Guangzhou time), if switched on: the week in numbers
+  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "Asia/Shanghai" }).format(new Date());
+  if (alerts.weekly && weekday === "Mon" && mailReady()) {
+    const error = await sendMail({ to: deskInbox(), replyTo: deskInbox(), subject: "Chime Long: the week in numbers", text: await weeklySummary(), idempotencyKey: `weekly-${new Date().toISOString().slice(0, 10)}` });
+    if (error) console.error("[weekly] not sent", error);
   }
   return Response.json({ ...sent, overdue: late.length, stuck: failing.length, purged });
 }

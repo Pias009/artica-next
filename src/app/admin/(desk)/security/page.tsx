@@ -23,7 +23,10 @@ const ACTION: Record<string, string> = {
 export default async function SecurityPage() {
   const { admin, session } = await requireAdmin();
   const [mine, log] = await Promise.all([
-    sessions().find({ adminId: admin._id, expiresAt: { $gt: new Date() } }).sort({ lastSeenAt: -1 }).toArray(),
+    sessions()
+      .find({ adminId: admin._id, expiresAt: { $gt: new Date() } })
+      .sort({ lastSeenAt: -1 })
+      .toArray(),
     auditLog().find({}).sort({ at: -1 }).limit(60).toArray(),
   ]);
   const others = mine.filter((s) => !s._id.equals(session._id));
@@ -50,7 +53,10 @@ export default async function SecurityPage() {
           {mine.map((s) => {
             const current = s._id.equals(session._id);
             return (
-              <li key={s._id.toHexString()} className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-2 text-[13.5px] first:border-0 first:pt-0">
+              <li
+                key={s._id.toHexString()}
+                className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-2 text-[13.5px] first:border-0 first:pt-0"
+              >
                 <span>
                   <b className="font-semibold">{device(s.userAgent)}</b>
                   {current && <span className="ml-2 rounded-full bg-badge-new px-2 py-0.5 text-[11.5px] font-semibold">This browser</span>}

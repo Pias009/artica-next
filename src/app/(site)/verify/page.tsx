@@ -1,3 +1,4 @@
+import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntroImage } from "@/components/buyer/IntroImage";
@@ -7,9 +8,8 @@ import { PageIntro } from "@/components/PageIntro";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { REGISTRATION, VERIFY_STEPS } from "@/lib/buyer-desk";
 import { COMPANY, tel } from "@/lib/company";
-import { pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = pageMeta({
+export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Verify us: check a shoe supplier in China",
   description: "Check Chime Long before you pay: company registration, a live factory tour, a company bank account only, and inspection before the balance.",
   path: "/verify",

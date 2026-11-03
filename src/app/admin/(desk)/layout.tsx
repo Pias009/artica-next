@@ -42,8 +42,8 @@ export default async function DeskLayout({ children }: LayoutProps<"/admin">) {
           <div className="rounded-card bg-white p-6 text-[14px] text-ink-2">
             <h1 className="font-headline text-[24px] font-semibold text-ink">No database on this deployment</h1>
             <p className="mt-2 max-w-[60ch]">
-              Live inquiries come from MongoDB. Add <code>MONGODB_URI</code> to this deployment&rsquo;s environment
-              variables, allow Vercel in Atlas (Network Access), and redeploy. The dashboard shows sample data until then.
+              Live inquiries come from MongoDB. Add <code>MONGODB_URI</code> to this deployment&rsquo;s environment variables, allow Vercel in Atlas (Network
+              Access), and redeploy. Until then the dashboard has nothing to show or save.
             </p>
           </div>
         )}

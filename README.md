@@ -61,7 +61,9 @@ the 12 store photo slots (need real, permissioned partner photos), and the phone
 The buyer desk pages (`/buyer-desk`, `/size-guide`, `/order-calendar`, `/container-planner`, `/ship-to`, `/quality`,
 `/verify`, `/meet`) all render from `src/lib/buyer-desk.ts`: confirm the size conversions, season shelf dates, container
 loads, market rules, quality steps, registration details (empty ones read "Sent on request") and trade shows (empty
-until dates are set). `/privacy` and `/terms` are working drafts for the client's lawyer to review.
+until dates are set). The business planner (`/business-plan`, engine in `src/lib/planner/`, plan in
+`docs/design/business-desk.md`) uses the same lead times plus each market's slowest transit; its example FOB price,
+freight rates and fees (`EXAMPLE` in `src/lib/planner/index.ts`) are labelled estimates to confirm. `/privacy` and `/terms` are working drafts for the client's lawyer to review.
 
 ## Structure
 
