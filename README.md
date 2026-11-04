@@ -185,7 +185,8 @@ inquiries. Design: `docs/design/assistant.md`.
 | `/admin/security` | Your sessions (sign out any of them) and the audit log of every sign-in and change |
 | `/admin/login` | Email and password |
 
-**Accounts are made from the command line only** (there is no sign-up page). Each prints a generated password once:
+**Accounts** (there is no sign-up page): set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env.local` and in Vercel, then redeploy,
+or make one from the command line, which prints a generated password once:
 
 ```bash
 npm run db:migrate                                   # once: admin collections and indexes

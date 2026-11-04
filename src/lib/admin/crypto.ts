@@ -42,6 +42,12 @@ export const dummyHash = () => (dummy ??= hashPassword(randomBytes(24).toString(
 /** A strong password for a new admin: 24 characters from a 64-letter alphabet (144 bits). */
 export const newPassword = () => randomBytes(18).toString("base64url");
 
+/** Whether two secrets are equal, taking the same time wherever they differ: hashing first makes the lengths equal. */
+export function sameSecret(a: string, b: string) {
+  const digest = (s: string) => createHash("sha256").update(s.normalize("NFKC")).digest();
+  return timingSafeEqual(digest(a), digest(b));
+}
+
 /* ---- Session tokens: the cookie holds the token, the database only its hash ---- */
 
 export const newToken = () => randomBytes(32).toString("base64url");

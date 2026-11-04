@@ -1,7 +1,7 @@
 // The admin panel's cryptography: `npm test`. Node runs the TypeScript module directly (type stripping).
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { hashPassword, tokenHash, verifyPassword } from "../src/lib/admin/crypto.ts";
+import { hashPassword, sameSecret, tokenHash, verifyPassword } from "../src/lib/admin/crypto.ts";
 
 test("passwords: right one passes, wrong ones and short ones don't", async () => {
   const h = await hashPassword("correct horse battery staple");
@@ -11,6 +11,13 @@ test("passwords: right one passes, wrong ones and short ones don't", async () =>
   assert.equal(await verifyPassword("anything", "not-a-hash"), false);
   assert.notEqual(await hashPassword("correct horse battery staple"), h, "salted");
   await assert.rejects(hashPassword("short"));
+});
+
+test("comparing a password with the one in the environment: exact, whatever the lengths", () => {
+  assert.equal(sameSecret("open sesame", "open sesame"), true);
+  assert.equal(sameSecret("open sesame", "open sesamE"), false);
+  assert.equal(sameSecret("open", "open sesame"), false);
+  assert.equal(sameSecret("", "open sesame"), false);
 });
 
 test("session tokens are stored only as hashes", () => {

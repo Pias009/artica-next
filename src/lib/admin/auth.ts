@@ -4,12 +4,12 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { SESSION_COOKIE } from "./cookie";
-import { dummyHash, newToken, tokenHash, verifyPassword } from "./crypto";
+import { dummyHash, newToken, sameSecret, tokenHash, verifyPassword } from "./crypto";
 import { database, dbReady } from "@/lib/leads/db";
 
 /*
- * Who may use /admin. Admins are created from the command line only (scripts/admin.mjs): there is no sign-up page.
- * Signing in takes an email and a password.
+ * Who may use /admin. There is no sign-up page: an admin is set by ADMIN_EMAIL and ADMIN_PASSWORD on the server, or
+ * created from the command line (scripts/admin.mjs). Signing in takes an email and a password.
  *
  * Defences, in the order a request meets them:
  *  - proxy.ts sends anyone without a session cookie to the sign-in page, and sets a strict CSP and no-store headers.
@@ -94,6 +94,13 @@ export async function audit(entry: Omit<AuditEntry, "at" | "ip">, ip?: string | 
 export type SignIn = { ok: true } | { ok: false; error: string };
 const WRONG = "That email or password isn't right.";
 
+/** The admin set by ADMIN_EMAIL and ADMIN_PASSWORD on this server, if both are. Trimmed: a pasted value often has a stray space. */
+function matchesEnvAdmin(email: string, password: string) {
+  const wantEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const wantPassword = process.env.ADMIN_PASSWORD?.trim();
+  return !!wantEmail && !!wantPassword && email === wantEmail && sameSecret(password, wantPassword);
+}
+
 /** Checks the email and password and, when they pass, starts a session and sets its cookie. Server actions only. */
 export async function signIn(emailIn: string, password: string): Promise<SignIn> {
   if (!dbReady())
@@ -116,9 +123,19 @@ export async function signIn(emailIn: string, password: string): Promise<SignIn>
     };
   }
 
-  const admin = await admins().findOne({ email });
+  let admin = await admins().findOne({ email });
   // the same work whether or not the email exists, so timing doesn't reveal which emails are admins
-  const passwordOk = await verifyPassword(password, admin?.passwordHash ?? (await dummyHash()));
+  const hashOk = await verifyPassword(password, admin?.passwordHash || (await dummyHash()));
+  const envOk = matchesEnvAdmin(email, password);
+  const passwordOk = hashOk || envOk;
+  // sessions belong to a record in the database, so the admin from the environment gets one on first sign-in
+  if (envOk && !admin) {
+    admin = await admins().findOneAndUpdate(
+      { email },
+      { $setOnInsert: { name: "Chime Long admin", passwordHash: "", disabled: false, createdAt: new Date(), lastLoginAt: null } },
+      { upsert: true, returnDocument: "after" },
+    );
+  }
 
   if (!admin || !passwordOk || admin.disabled) {
     await attempts().insertMany([{ key: `email:${email}`, at: new Date() }, ...(req.ip ? [{ key: `ip:${req.ip}`, at: new Date() }] : [])]);
