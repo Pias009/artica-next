@@ -196,13 +196,16 @@ npm run admin -- sign-out-all
 
 Needs `MONGODB_URI` and `ADMIN_ENC_KEY` (`openssl rand -base64 32`; already in `.env.local`). Set the **same**
 `ADMIN_ENC_KEY` in Vercel: authenticator keys are sealed with it, so a different key locks everyone out until `reset`.
-Without either, `/admin/login` says the panel isn't set up and no one can sign in.
+Without either, `/admin/login` still shows the form, but signing in answers that the panel isn't set up.
 
 **Skip sign-in (dev):** the sign-in page shows a "Skip sign-in (dev)" button on `npm run dev` at `localhost`, and
 on **Vercel preview** links (which sit behind Vercel's own login, so keep Deployment Protection on). It opens the
 panel without an account or a database: the dashboard shows sample data, and the inquiry pages ask for `MONGODB_URI`.
 An orange "sign-in skipped" badge shows, and Sign out ends it. The button never appears on production (the live
 site), and a skip cookie is ignored there; `tests/admin-bypass.test.mjs` checks this.
+
+The one exception is `ADMIN_SKIP_SIGNIN=1`, for a deployment still in development. It shows the button on that server
+even with a real database, so anyone with the link can open the panel and its data. **Remove it before launch.**
 
 How it's protected (`src/lib/admin/auth.ts`, `src/proxy.ts`):
 - **Three factors:** a password (scrypt, N=2^15), a TOTP code, and the email. A code works once, so a code

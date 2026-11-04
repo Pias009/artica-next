@@ -14,7 +14,7 @@ export default async function AdminRoot({ children }: LayoutProps<"/admin">) {
       {/* so a skipped sign-in is never mistaken for the real thing */}
       {skip && (
         <p role="status" className="fixed bottom-3 left-3 z-50 rounded-full bg-[#b45309] px-3 py-1.5 text-[12px] font-semibold text-white shadow-lg">
-          {skip === "local" ? "Local dev" : skip === "preview" ? "Preview" : "No database"} · sign-in skipped
+          {skip === "local" ? "Local dev" : skip === "preview" ? "Preview" : skip === "flag" ? "Bypass on" : "No database"} · sign-in skipped
         </p>
       )}
       {children}

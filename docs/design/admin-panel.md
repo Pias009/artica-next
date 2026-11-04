@@ -2,7 +2,7 @@
 
 **Status:** Built (2026-11-03) · **Code:** `src/components/admin/`, `src/lib/admin/panel.ts`, `src/app/admin/content-actions.ts`, `src/lib/content/`, `src/lib/analytics/`
 
-`/admin` is the dashboard. It needs a signed-in admin, or "Skip sign-in (dev)" where that's allowed (local dev, Vercel previews, a deployment with no database). On load, `panelData()` (`src/lib/admin/panel.ts`) reads everything the views show, and views publish edits through server actions. Every action checks the admin again, validates each field with zod, writes the audit log, then expires the cache so the site shows the change on the next page load.
+`/admin` is the dashboard. It needs a signed-in admin, or "Skip sign-in (dev)" where that's allowed (local dev, Vercel previews, a deployment with no database, or `ADMIN_SKIP_SIGNIN=1` on that server). On load, `panelData()` (`src/lib/admin/panel.ts`) reads everything the views show, and views publish edits through server actions. Every action checks the admin again, validates each field with zod, writes the audit log, then expires the cache so the site shows the change on the next page load.
 
 ## What each view reads and changes
 
@@ -39,5 +39,6 @@
 ## Before production
 
 - Create an admin (`node scripts/admin.mjs create`): with `MONGODB_URI` set, production has no skip.
+- Remove `ADMIN_SKIP_SIGNIN` from the deployment and redeploy: while it's set, anyone with the link can open the panel.
 - Run `node scripts/migrate.mjs` once for the `visits` indexes. The app also creates them on first use.
 - Optional: `VISIT_SALT`, a long random secret for visit IDs. Without it, `ADMIN_ENC_KEY` is used, or failing that the database URI.
