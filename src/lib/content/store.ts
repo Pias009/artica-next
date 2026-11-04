@@ -37,8 +37,8 @@ const cached = unstable_cache(readContent, ["site-content-v1"], {
   revalidate: 300,
 });
 
-/** The edits, cached: for rendering the site. */
-export const getContent = () => (dbReady() ? cached() : Promise.resolve(EMPTY_CONTENT));
+/** The edits, cached: for rendering the site. A copy cached by an older build may lack newer fields, so it's filled out too. */
+export const getContent = () => (dbReady() ? cached().then(withDefaults) : Promise.resolve(EMPTY_CONTENT));
 
 /**
  * Loads the edits and applies them to the shared catalogue and contact details before rendering. Called by the root

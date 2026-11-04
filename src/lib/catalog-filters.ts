@@ -3,7 +3,7 @@
  * so a number always says how many styles picking that option would leave.
  */
 
-import { categoryOf, filterProducts, products, type Product, type ProductLine } from "./products";
+import { allProducts, categoryOf, filterProducts, products, type Product, type ProductLine } from "./products";
 import { isSeason, type SeasonId } from "./season";
 import { bySeason, inSeason } from "./season-products";
 
@@ -116,11 +116,10 @@ export function applyCatalog(s: CatalogState, visitor: SeasonId | null = null) {
   return { searched, matches: sortStyles(searched.filter((p) => passes(p, s)), s.sort, s.season ?? visitor) };
 }
 
-/** Category and colour options in catalogue order, so the panel doesn't reshuffle as counts change. */
-const ALL_CATS = [...new Set(products.map(categoryOf))];
-const ALL_COLORS = [...new Map(products.map((p) => [p.color.name, p.color.hex])).entries()].map(([name, hex]) => ({ name, hex }));
-
 export function facets(searched: Product[], s: CatalogState) {
+  // category and colour options in catalogue order, so the panel doesn't reshuffle as counts change
+  const allCats = [...new Set(allProducts.map(categoryOf))];
+  const allColors = [...new Map(allProducts.map((p) => [p.color.name, p.color.hex])).entries()].map(([name, hex]) => ({ name, hex }));
   const tally = (skip: Facet, keys: (p: Product) => string[]) => {
     const m = new Map<string, number>();
     for (const p of searched) if (passes(p, s, skip)) for (const k of keys(p)) m.set(k, (m.get(k) ?? 0) + 1);
@@ -137,8 +136,8 @@ export function facets(searched: Product[], s: CatalogState) {
     lines,
     features,
     // an option with no matches drops out unless it's selected (so it can still be cleared)
-    cats: ALL_CATS.filter((c) => cats.get(c) || s.cats.includes(c)).map((name) => ({ name, count: cats.get(name) ?? 0 })),
-    colors: ALL_COLORS.filter((c) => colors.get(c.name) || s.colors.includes(c.name)).map((c) => ({ ...c, count: colors.get(c.name) ?? 0 })),
+    cats: allCats.filter((c) => cats.get(c) || s.cats.includes(c)).map((name) => ({ name, count: cats.get(name) ?? 0 })),
+    colors: allColors.filter((c) => colors.get(c.name) || s.colors.includes(c.name)).map((c) => ({ ...c, count: colors.get(c.name) ?? 0 })),
   };
 }
 

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-export function NavLink({ href, children }: { href: "/admin" | "/admin/inquiries" | "/admin/security"; children: ReactNode }) {
+export function NavLink({ href, children }: { href: "/admin" | "/admin/inquiries/all" | "/admin/security"; children: ReactNode }) {
   const path = usePathname();
-  const active = href === "/admin" ? path === "/admin" : path.startsWith(href);
+  // one inquiry (/admin/inquiries/CL-…) counts as Inquiries
+  const active = href === "/admin" ? path === "/admin" : path.startsWith(href.replace("/all", ""));
   return (
     <Link
       href={href}

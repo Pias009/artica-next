@@ -20,6 +20,11 @@ export const VIEWS: { id: View; label: string; title: string }[] = [
   { id: "settings", label: "Settings", title: "Settings" },
 ];
 
+/** Each section's address: /admin, /admin/products… */
+export const viewHref = (v: View) => (v === "overview" ? "/admin" : `/admin/${v}`);
+/** The section an address belongs to: /admin/products/new is Products. */
+export const viewOf = (path: string): View => VIEWS.find((v) => v.id === path.split("/")[2])?.id ?? "overview";
+
 const INTENTS: Record<Intent, string> = {
   quote: "Quote",
   sample: "Samples",

@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useMemo, useState } from "react";
-import { ago, usePanel, useSaver } from "../panel-data";
+import { ago, useAsk, usePanel, useSaver } from "../panel-data";
 import { RobotHead } from "../RobotHead";
 import { AdminIcon, Card, CardHead, Meter, SaveBar, Toggle } from "../ui";
 import { saveAssistantAction } from "@/app/admin/content-actions";
@@ -40,8 +40,9 @@ const JOBS: {
  * Kai, the site's AI assistant: switch each desk and the AI model on or off (saved at once to the site), see today's
  * use against the limits, and what was done in the panel with its help.
  */
-export function Agent({ onAsk }: { onAsk?: (p: string) => void }) {
+export function Agent() {
   const panel = usePanel();
+  const onAsk = useAsk();
   const init = useMemo(() => panel.content.assistant, [panel]);
   const [saved, setSaved] = useState(init);
   const [s, setS] = useState(init);
@@ -109,7 +110,7 @@ export function Agent({ onAsk }: { onAsk?: (p: string) => void }) {
             </p>
             <button
               type="button"
-              onClick={() => onAsk?.("Summarise this week's inquiries")}
+              onClick={() => onAsk("Summarise this week's inquiries")}
               className="mt-2 inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-white"
             >
               <AdminIcon name="sparkle" className="size-4" /> Ask about this week

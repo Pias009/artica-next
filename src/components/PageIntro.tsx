@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
+import { Copy } from "./ui/Copy";
 
 /**
  * Page opening: breadcrumb, a calm sentence-case title and one supporting line.
@@ -41,7 +42,12 @@ export function PageIntro({
       ))}
     </nav>
   );
-  const heading = <h1 className="max-w-[18ch] font-headline text-[clamp(40px,5.4vw,72px)] leading-[1.04] font-semibold tracking-[-0.02em]">{title}</h1>;
+  // the title and line can be rewritten in the admin panel (Pages)
+  const heading = (
+    <Copy as="h1" k="intro.title" className="max-w-[18ch] font-headline text-[clamp(40px,5.4vw,72px)] leading-[1.04] font-semibold tracking-[-0.02em]">
+      {title}
+    </Copy>
+  );
 
   return (
     <div data-deco={tone === "sky" ? "band" : undefined} className={`bleed relative isolate px-(--shell-pad) pt-10 md:pt-14 ${tone === "sky" ? "mb-12 overflow-hidden bg-sky pb-14 md:pb-20" : "mb-8 pb-2 md:pb-4"}`}>
@@ -50,7 +56,11 @@ export function PageIntro({
           <div>
             {breadcrumb}
             {heading}
-            {text && <p className="mt-5 max-w-[52ch] text-[18px] text-ink-2">{text}</p>}
+            {text && (
+              <Copy k="intro.sub" className="mt-5 max-w-[52ch] text-[18px] text-ink-2">
+                {text}
+              </Copy>
+            )}
             {children}
           </div>
           {aside}
@@ -63,7 +73,11 @@ export function PageIntro({
             {heading}
             {(text || children) && (
               <div className="lg:pb-2">
-                {text && <p className="max-w-[46ch] text-[18px] text-ink-2">{text}</p>}
+                {text && (
+                  <Copy k="intro.sub" className="max-w-[46ch] text-[18px] text-ink-2">
+                    {text}
+                  </Copy>
+                )}
                 {children}
               </div>
             )}

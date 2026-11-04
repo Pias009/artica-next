@@ -3,13 +3,13 @@ import { ObjectId } from "mongodb";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { SESSION_COOKIE, SKIP_COOKIE, skipAllowed } from "./cookie";
-import { dummyHash, newToken, open, tokenHash, verifyPassword, verifyTotp } from "./crypto";
+import { SESSION_COOKIE } from "./cookie";
+import { dummyHash, newToken, tokenHash, verifyPassword } from "./crypto";
 import { database, dbReady } from "@/lib/leads/db";
 
 /*
  * Who may use /admin. Admins are created from the command line only (scripts/admin.mjs): there is no sign-up page.
- * Signing in takes three things: email, password and the current code from an authenticator app.
+ * Signing in takes an email and a password.
  *
  * Defences, in the order a request meets them:
  *  - proxy.ts sends anyone without a session cookie to the sign-in page, and sets a strict CSP and no-store headers.
@@ -27,10 +27,6 @@ export type Admin = {
   email: string;
   name: string;
   passwordHash: string;
-  /** The authenticator secret, sealed with ADMIN_ENC_KEY (crypto.ts). */
-  totpSealed: string;
-  /** The time step of the last code used: a code works once. */
-  lastTotpStep: number;
   disabled: boolean;
   createdAt: Date;
   lastLoginAt: Date | null;
@@ -77,9 +73,6 @@ const WINDOW = 15 * MIN;
 const MAX_PER_EMAIL = 5;
 const MAX_PER_IP = 20;
 
-/** The panel works only with a database and the key that seals authenticator secrets; otherwise it stays shut. */
-export const adminReady = () => dbReady() && !!process.env.ADMIN_ENC_KEY;
-
 /** Where the request came from, for rate limits, the audit log and the session list. Vercel sets x-real-ip. */
 export async function requestInfo() {
   const h = await headers();
@@ -99,14 +92,14 @@ export async function audit(entry: Omit<AuditEntry, "at" | "ip">, ip?: string | 
 }
 
 export type SignIn = { ok: true } | { ok: false; error: string };
-const WRONG = "That email, password or code isn't right.";
+const WRONG = "That email or password isn't right.";
 
-/** Checks all three factors and, when they pass, starts a session and sets its cookie. Server actions only. */
-export async function signIn(emailIn: string, password: string, code: string): Promise<SignIn> {
-  if (!adminReady())
+/** Checks the email and password and, when they pass, starts a session and sets its cookie. Server actions only. */
+export async function signIn(emailIn: string, password: string): Promise<SignIn> {
+  if (!dbReady())
     return {
       ok: false,
-      error: "The admin panel isn't set up on this server yet (MONGODB_URI, ADMIN_ENC_KEY).",
+      error: "Sign-in isn't available: this server has no database connected (MONGODB_URI).",
     };
   const email = emailIn.trim().toLowerCase().slice(0, 200);
   const req = await requestInfo();
@@ -126,35 +119,22 @@ export async function signIn(emailIn: string, password: string, code: string): P
   const admin = await admins().findOne({ email });
   // the same work whether or not the email exists, so timing doesn't reveal which emails are admins
   const passwordOk = await verifyPassword(password, admin?.passwordHash ?? (await dummyHash()));
-  let step: number | null = null;
-  if (admin && passwordOk && !admin.disabled) {
-    try {
-      step = verifyTotp(open(admin.totpSealed, process.env.ADMIN_ENC_KEY), code.replace(/\s/g, ""), Date.now(), admin.lastTotpStep);
-    } catch (e) {
-      console.error("[admin] can't open the authenticator secret: is ADMIN_ENC_KEY the one it was made with?", e);
-    }
-  }
-  // claim the code atomically: two sign-ins racing with the same code can't both win
-  const claimed =
-    admin && step !== null
-      ? (await admins().updateOne({ _id: admin._id, lastTotpStep: { $lt: step }, disabled: false }, { $set: { lastTotpStep: step, lastLoginAt: new Date() } }))
-          .modifiedCount === 1
-      : false;
 
-  if (!admin || !claimed) {
+  if (!admin || !passwordOk || admin.disabled) {
     await attempts().insertMany([{ key: `email:${email}`, at: new Date() }, ...(req.ip ? [{ key: `ip:${req.ip}`, at: new Date() }] : [])]);
     await audit(
       {
         adminId: admin?._id ?? null,
         email,
         action: "sign_in_failed",
-        detail: !admin ? "unknown email" : !passwordOk ? "password" : admin.disabled ? "disabled" : "code",
+        detail: !admin ? "unknown email" : !passwordOk ? "password" : "disabled",
       },
       req.ip,
     );
     return { ok: false, error: WRONG };
   }
 
+  await admins().updateOne({ _id: admin._id }, { $set: { lastLoginAt: new Date() } });
   await attempts().deleteMany({ key: `email:${email}` });
   const token = newToken();
   const now = new Date();
@@ -184,9 +164,7 @@ export async function signIn(emailIn: string, password: string, code: string): P
  * components ask. Null when there is no valid session. Moves the idle deadline along at most every 5 minutes.
  */
 export const currentAdmin = cache(async (): Promise<{ admin: Admin; session: Session } | null> => {
-  const skip = await skipped();
-  if (skip) return skip === "local" ? LOCAL : PREVIEW;
-  if (!adminReady()) return null;
+  if (!dbReady()) return null;
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token || token.length > 100) return null;
   const session = await sessions().findOne({ tokenHash: tokenHash(token) });
@@ -204,69 +182,6 @@ export const currentAdmin = cache(async (): Promise<{ admin: Admin; session: Ses
   return { admin, session };
 });
 
-/** Whether the sign-in page may offer "Skip sign-in (dev)" here: "local", "preview" or false (cookie.ts skipAllowed). */
-export const skipMode = async () => skipAllowed((await headers()).get("host"));
-
-/** Whether this request is in a skipped sign-in: the skip cookie, on a server where skipping is allowed. */
-export const skipped = cache(async () => {
-  const mode = await skipMode();
-  return mode && (await cookies()).has(SKIP_COOKIE) ? mode : false;
-});
-
-/** The "Skip sign-in (dev)" button. False where skipping isn't allowed (production). Server actions only. */
-export async function skipSignIn() {
-  const mode = await skipMode();
-  if (!mode) return false;
-  (await cookies()).set(SKIP_COOKIE, "1", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: ABSOLUTE / 1000,
-  });
-  const who = mode === "local" ? LOCAL : PREVIEW;
-  if (dbReady())
-    await audit({
-      adminId: who.admin._id,
-      email: who.admin.email,
-      action: "sign_in_skipped",
-    });
-  return true;
-}
-
-/** Who you are while sign-in is skipped. Changes are still audited, under these addresses. */
-function standIn(id: string, email: string, name: string): { admin: Admin; session: Session } {
-  const _id = new ObjectId(id);
-  const never = new Date(8.64e15);
-  return {
-    admin: {
-      _id,
-      email,
-      name,
-      passwordHash: "",
-      totpSealed: "",
-      lastTotpStep: 0,
-      disabled: false,
-      createdAt: new Date(0),
-      lastLoginAt: null,
-    },
-    session: {
-      _id,
-      tokenHash: "",
-      adminId: _id,
-      createdAt: new Date(0),
-      lastSeenAt: new Date(0),
-      expiresAt: never,
-      idleUntil: never,
-      ip: null,
-      country: null,
-      userAgent: "",
-    },
-  };
-}
-const LOCAL = standIn("000000000000000000000000", "dev@localhost", "Dev (sign-in skipped)");
-const PREVIEW = standIn("000000000000000000000001", "dev@preview", "Dev (sign-in skipped)");
-
 /** For every admin page and server action: the admin, or off to the sign-in page. */
 export async function requireAdmin() {
   const who = await currentAdmin();
@@ -281,8 +196,7 @@ export async function signOut() {
   const token = jar.get(SESSION_COOKIE)?.value;
   if (token && dbReady()) await sessions().deleteOne({ tokenHash: tokenHash(token) });
   jar.delete(SESSION_COOKIE);
-  jar.delete(SKIP_COOKIE);
-  if (who && dbReady())
+  if (who)
     await audit({
       adminId: who.admin._id,
       email: who.admin.email,

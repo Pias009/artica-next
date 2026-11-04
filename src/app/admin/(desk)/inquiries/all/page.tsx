@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { StatusBadge } from "../StatusBadge";
+import { StatusBadge } from "../../StatusBadge";
 import { requireAdmin } from "@/lib/admin/auth";
 import { hoursSince, span, STATUS_LABEL, when } from "@/lib/admin/format";
 import { dashboard, DUE_HOURS, INTENTS, listInquiries, parseQuery, STATUSES, type ListQuery } from "@/lib/admin/inquiries";
 import { INTENT_LABEL } from "@/lib/leads/mail";
 
-export const metadata: Metadata = { title: "Inquiries" };
+export const metadata: Metadata = { title: "All inquiries" };
 
 /** The address for this list with some of its filters changed (any filter change goes back to page 1). */
 function href(q: ListQuery, patch: Partial<ListQuery>) {
@@ -18,10 +18,10 @@ function href(q: ListQuery, patch: Partial<ListQuery>) {
   if (next.q) p.set("q", next.q);
   if (next.page > 1) p.set("page", String(next.page));
   const s = p.toString();
-  return s ? `/admin/inquiries?${s}` : "/admin/inquiries";
+  return s ? `/admin/inquiries/all?${s}` : "/admin/inquiries/all";
 }
 
-export default async function InquiriesPage({ searchParams }: PageProps<"/admin/inquiries">) {
+export default async function InquiriesPage({ searchParams }: PageProps<"/admin/inquiries/all">) {
   await requireAdmin();
   const q = parseQuery(await searchParams);
   const [stats, list] = await Promise.all([dashboard(), listInquiries(q)]);
@@ -77,7 +77,7 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
         ))}
       </div>
 
-      <form action="/admin/inquiries" className="mt-3 flex flex-wrap gap-2">
+      <form action="/admin/inquiries/all" className="mt-3 flex flex-wrap gap-2">
         {q.status !== "all" && <input type="hidden" name="status" value={q.status} />}
         <input
           name="q"

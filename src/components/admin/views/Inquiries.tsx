@@ -71,7 +71,7 @@ export function Inquiries() {
             ? "No inquiries yet. They appear here as buyers send them."
             : "No database connected: no inquiries to show."}
         <Link
-          href="/admin/inquiries"
+          href="/admin/inquiries/all"
           className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 font-semibold text-white transition-transform hover:scale-[1.03]"
         >
           Open the live inquiry desk <AdminIcon name="up" className="size-3.5 rotate-90" />

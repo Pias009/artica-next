@@ -6,11 +6,10 @@ import { country } from "../countries";
 import { readContent } from "../content/store";
 import { aiReady, provider } from "../assistant/model";
 import { HOME_SECTIONS } from "../home-sections";
+import { pageBlocks, type Block } from "./page-blocks";
 import { database, dbReady, inquiries, type Status } from "../leads/db";
 import type { Intent } from "../leads/mail";
-import { allProducts, builtIn, categoryOf } from "../products";
-import { SEASON_IDS, type SeasonId } from "../season";
-import { seasonScore, IN_SEASON } from "../season-products";
+import { builtInProducts, type Product } from "../products";
 import { SITE_PAGES } from "../site-pages";
 
 /*
@@ -106,28 +105,19 @@ async function productRows() {
       )
     : [];
   const count = new Map(asked.map((a) => [a._id, a.n]));
-  return allProducts.map((p) => {
-    const base = builtIn(p.id)!;
-    const plain = { ...p, pinnedSeasons: undefined };
-    return {
-      id: p.id,
-      slug: p.slug,
-      name: base.name,
-      desc: base.desc,
-      type: p.type,
-      line: p.line,
-      category: categoryOf(p),
-      badge: builtIn(p.id)!.badge ?? null,
-      rating: p.rating ?? null,
-      color: p.color.name,
-      hex: p.color.hex,
-      scene: p.scene,
-      image: p.outer.src,
-      /** Seasons its kind and materials suit, before any pin. */
-      autoSeasons: SEASON_IDS.filter((s) => seasonScore(plain, s) >= IN_SEASON) as SeasonId[],
-      inquiries: count.get(p.id) ?? 0,
-    };
-  });
+  const built = builtInProducts();
+  // straight from the database: the site's copy of the catalogue leaves out new styles that are still hidden
+  const { added } = await readContent();
+  return [...built, ...added].map((p: Product, i) => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    image: p.outer.src,
+    /** The whole style before any edit; the Products view lays `content.products` over it. */
+    base: p,
+    added: i >= built.length,
+    inquiries: count.get(p.id) ?? 0,
+  }));
 }
 export type PanelProduct = Awaited<ReturnType<typeof productRows>>[number];
 
@@ -547,14 +537,16 @@ async function agentData() {
 }
 
 /** The whole dashboard, for the signed-in admin. */
-export async function panelData() {
-  const [content, products, inq, overview, visitors, agent] = await Promise.all([
+export async function panelData(origin?: string) {
+  const paths = SITE_PAGES.filter((p) => !p.path.includes("?") && p.path !== "/").map((p) => p.path);
+  const [content, products, inq, overview, visitors, agent, blocks] = await Promise.all([
     readContent(),
     productRows(),
     inquiryData(),
     overviewData(),
     visitorData(),
     agentData(),
+    origin ? pageBlocks(origin, paths).catch(() => ({}) as Record<string, Block[] | null>) : Promise.resolve({} as Record<string, Block[] | null>),
   ]);
   return {
     ready: dbReady(),
@@ -566,6 +558,8 @@ export async function panelData() {
       summary: p.summary,
       group: p.section,
       views: visitors?.pageViews[p.path] ?? 0,
+      /** Its intro and section headings, with the words as built (null: couldn't be read just now). */
+      blocks: p.path === "/" ? [] : (blocks[p.path] ?? null),
     })),
     homeSections: HOME_SECTIONS.map((s) => ({ ...s })),
     inquiries: inq.rows,

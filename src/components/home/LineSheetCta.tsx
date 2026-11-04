@@ -18,19 +18,20 @@ const POINTS = [
   "Case-pack ratios",
   "Tier pricing within 24 hours",
 ];
-const STYLES = collapse(products); // one lead shoe per category
-/** A taste of the sheet: one style from each line, then the next best. */
-const ROWS = collapse([
-  ...(["men", "women", "kids"] as const)
-    .map((l) => STYLES.find((p) => p.line === l)!)
-    .filter(Boolean),
-  ...STYLES,
-]).slice(0, 5);
 const PER_PAGE = 8;
-const PAGES = Math.max(1, Math.ceil(products.length / PER_PAGE));
 
 /** Closing: email-first line-sheet request beside a fanned stack of the sheet itself; hands the email to the inquiry drawer. */
 export function LineSheetCta() {
+  // worked out here, not on import: the catalogue includes the admin panel's edits only once they've been applied
+  const STYLES = collapse(products); // one lead shoe per category
+  /** A taste of the sheet: one style from each line, then the next best. */
+  const ROWS = collapse([
+    ...(["men", "women", "kids"] as const)
+      .map((l) => STYLES.find((p) => p.line === l)!)
+      .filter(Boolean),
+    ...STYLES,
+  ]).slice(0, 5);
+  const PAGES = Math.max(1, Math.ceil(products.length / PER_PAGE));
   const openDrawer = useUI((s) => s.openDrawer);
   const [email, setEmail] = useState("");
   const ref = useRef<HTMLElement>(null);

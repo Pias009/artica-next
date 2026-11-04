@@ -39,7 +39,7 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
 
   return (
     <>
-      <Link href="/admin/inquiries" className="text-[13px] font-semibold text-ink-2 hover:text-ink">
+      <Link href="/admin/inquiries/all" className="text-[13px] font-semibold text-ink-2 hover:text-ink">
         ← Inquiries
       </Link>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">

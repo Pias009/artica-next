@@ -2,432 +2,399 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { describeProductAction } from "../ai-actions";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePanel, useSaver } from "../panel-data";
-import { AdminIcon, Card, Field, SaveBar, Segmented, Sheet, Toggle, useStream } from "../ui";
+import { AdminIcon, SaveBar, Segmented, Toggle } from "../ui";
+import { SCENE_BG, type LibraryPhoto } from "./products/PhotoField";
+import { FullPage, ProductAside, ProductForm } from "./products/ProductForm";
 import { saveProductsAction } from "@/app/admin/content-actions";
-import type { PanelProduct } from "@/lib/admin/panel";
-import type { ProductEdit } from "@/lib/content/model";
+import { autofill, blankDraft, fromTemplate, problems, toItem, toPayload, uniqueSlug, vocabOf, type Item } from "@/lib/admin/product-draft";
+import { categoryFor } from "@/lib/product-categories";
 import { LINE_LABEL, type ProductLine } from "@/lib/products";
-import { SEASON_IDS, type SeasonId } from "@/lib/season";
 
-/** A style as the view edits it: the catalogue as built, with the saved edits applied. */
-type AdminProduct = PanelProduct & {
-  live: boolean;
-  featured: boolean;
-  pins: SeasonId[];
-  baseName: string;
-  baseDesc: string;
-  baseBadge: string | null;
-};
-type Badge = NonNullable<ProductEdit["badge"]>;
+type Sort = "name" | "asked" | "featured" | "category";
+type Status = "all" | "live" | "hidden" | "featured" | "added";
 
-const toItems = (rows: PanelProduct[], edits: Record<string, ProductEdit>): AdminProduct[] =>
-  rows.map((p) => {
-    const e = edits[p.id] ?? {};
-    return {
-      ...p,
-      baseName: p.name,
-      baseDesc: p.desc,
-      baseBadge: p.badge,
-      name: e.name || p.name,
-      desc: e.desc || p.desc,
-      badge: e.badge === "none" ? null : (e.badge ?? p.badge),
-      live: e.live !== false,
-      featured: !!e.featured,
-      pins: (e.seasons ?? []).filter((s) => !p.autoSeasons.includes(s)),
-    };
-  });
-
-/** Only what differs from the catalogue as built is saved. */
-const toEdits = (items: AdminProduct[]): Record<string, ProductEdit> =>
-  Object.fromEntries(
-    items.flatMap((p) => {
-      const e: ProductEdit = {
-        ...(!p.live && { live: false }),
-        ...(p.featured && { featured: true }),
-        ...(p.name.trim() && p.name.trim() !== p.baseName && { name: p.name.trim() }),
-        ...(p.desc.trim() && p.desc.trim() !== p.baseDesc && { desc: p.desc.trim() }),
-        ...(p.badge !== p.baseBadge && { badge: (p.badge ?? "none") as Badge }),
-        ...(p.pins.length && { seasons: p.pins }),
-      };
-      return Object.keys(e).length ? [[p.id, e]] : [];
-    }),
-  );
-
-const SCENE_BG: Record<string, string> = {
-  sage: "bg-[#e6ebe3]",
-  sand: "bg-[#efe8dd]",
-  blush: "bg-[#f1e6e6]",
-  stone: "bg-[#e8e8e6]",
-};
-const BADGES = ["None", "Top reorder", "New", "Trending"] as const;
-const PAGE = 12; // styles shown at a time; "Show more" adds the next lot
-type Sort = "asked" | "name" | "featured";
-const SORTS: Record<Sort, (a: AdminProduct, b: AdminProduct) => number> = {
-  asked: (a, b) => b.inquiries - a.inquiries,
+const SORTS: Record<Sort, (a: Item, b: Item) => number> = {
   name: (a, b) => a.name.localeCompare(b.name),
-  featured: (a, b) => Number(b.featured) - Number(a.featured) || b.inquiries - a.inquiries,
+  asked: (a, b) => b.inquiries - a.inquiries || a.name.localeCompare(b.name),
+  featured: (a, b) => Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name),
+  category: (a, b) => categoryFor(a).localeCompare(categoryFor(b)) || a.name.localeCompare(b.name),
 };
+const STATUS: Record<Status, { label: string; test: (p: Item) => boolean }> = {
+  all: { label: "All statuses", test: () => true },
+  live: { label: "Live", test: (p) => p.live },
+  hidden: { label: "Hidden", test: (p) => !p.live },
+  featured: { label: "Featured", test: (p) => p.featured },
+  added: { label: "Added here", test: (p) => p.added },
+};
+
+const same = (a: Item, b?: Item) => JSON.stringify(a) === JSON.stringify(b);
 
 /**
- * The catalogue: what's live, what's featured, which seasons each style leads in, and its listing copy. Cards to
- * browse by eye or a dense list to work down, a page at a time, so the full range never lands at once.
+ * The whole catalogue as a list to filter and work down (/admin/products), with a full page to edit any style
+ * (/admin/products/<id>) or add a new one (/admin/products/new). Mounted by their shared layout, so drafts survive
+ * moving between them. Edits stay drafts until published; a new style is published from its own page, on its own.
  */
 export function Products() {
   const panel = usePanel();
-  const initial = useMemo(() => toItems(panel.products, panel.content.products), [panel]);
+  const initial = useMemo(() => panel.products.map((r) => toItem(r, panel.content.products[r.id])), [panel.products, panel.content.products]);
   const [saved, setSaved] = useState(initial);
   const [items, setItems] = useState(initial);
-  const saver = useSaver((v: AdminProduct[]) => saveProductsAction(toEdits(v)), setSaved);
-  const [line, setLine] = useState<ProductLine | "all">("all");
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<Sort>("asked");
-  const [layout, setLayout] = useState<"grid" | "list">("grid");
-  const [limit, setLimit] = useState(PAGE);
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<string | null>(null);
-  const [run, setRun] = useState(0);
-  const { shown, busy } = useStream(draft, run);
+  const afterSave = useRef<(() => void) | null>(null);
+  const saver = useSaver(
+    (v: Item[]) => saveProductsAction(toPayload(v)),
+    (v) => {
+      setSaved(v);
+      // what was saved on its own (a new style, a deletion) joins the drafts; other drafts stay as they are
+      setItems((cur) => [...cur.filter((c) => !c.added || v.some((x) => x.id === c.id)), ...v.filter((x) => !cur.some((c) => c.id === x.id))]);
+      afterSave.current?.();
+      afterSave.current = null;
+    },
+  );
 
-  const changes = useMemo(() => items.filter((p, i) => JSON.stringify(p) !== JSON.stringify(saved[i])).length, [items, saved]);
-  const edit = (id: string, patch: Partial<AdminProduct>) => setItems((all) => all.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-  const found = items.filter((p) => (line === "all" || p.line === line) && (p.name + p.type).toLowerCase().includes(query.toLowerCase())).sort(SORTS[sort]);
-  const list = found.slice(0, limit);
-  // a new filter or order starts again from the first page
-  const fresh =
-    <T,>(set: (v: T) => void) =>
-    (v: T) => {
-      set(v);
-      setLimit(PAGE);
+  const router = useRouter();
+  // what follows /admin/products/: "new", a style's id, or nothing for the list
+  const sub = usePathname().split("/")[3] ?? "";
+  const [line, setLine] = useState<ProductLine | "all">("all");
+  const [category, setCategory] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>("all");
+  const [sort, setSort] = useState<Sort>("name");
+  const [query, setQuery] = useState("");
+  const [draft, setDraft] = useState(blankDraft);
+  const [touched, setTouched] = useState<ReadonlySet<string>>(() => new Set());
+  // which style's Delete has been pressed once, so asking on one never carries over to another
+  const [confirming, setConfirming] = useState<string | null>(null);
+
+  const vocab = useMemo(() => vocabOf(items), [items]);
+  const library = useMemo<LibraryPhoto[]>(() => items.flatMap((p) => [p.outer, ...(p.zip ? [p.zip] : [])].map((s) => ({ ...s, name: p.name }))), [items]);
+  const changes = useMemo(() => items.filter((p) => !same(p, saved.find((s) => s.id === p.id))).length, [items, saved]);
+  const edit = (id: string, patch: Partial<Item>) => setItems((all) => all.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  const leave = () => router.push("/admin/products");
+
+  // nothing to lose by leaving the page unless there are drafts
+  const dirty = changes > 0 || !!draft.name.trim() || !!draft.type.trim() || !!draft.outer.src;
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  /* ---------- the add page ---------- */
+
+  const changeDraft = (patch: Partial<Item>, keys: string[] = []) => {
+    const next = new Set([...touched, ...keys]);
+    setTouched(next);
+    const merged = autofill({ ...draft, ...patch }, next, items, vocab);
+    setDraft({ ...merged, slug: uniqueSlug(merged.name, items.map((p) => p.slug)) });
+  };
+
+  if (sub === "new") {
+    const missing = problems(draft, items);
+    const publish = (live: boolean) => {
+      afterSave.current = () => {
+        setDraft(blankDraft());
+        setTouched(new Set());
+        leave();
+      };
+      saver.save([...saved, { ...draft, live }]);
     };
-  const open = items.find((p) => p.id === openId) ?? null;
+    return (
+      <FullPage
+        title={draft.name.trim() || "New product"}
+        sub={draft.name.trim() ? "New product" : "Fill in what you know: the rest suggests itself as you go."}
+        actions={
+          <>
+            <button type="button" disabled={!!missing.length || saver.pending} onClick={() => publish(false)} className="min-h-10 rounded-full bg-white px-4 text-[13.5px] font-semibold ring-1 ring-ink/10 disabled:opacity-50">
+              Save hidden
+            </button>
+            <button type="button" disabled={!!missing.length || saver.pending} onClick={() => publish(true)} className="min-h-10 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white disabled:opacity-50">
+              {saver.pending ? "Publishing…" : "Publish product"}
+            </button>
+          </>
+        }
+      >
+        {saver.error && <ErrorNote text={saver.error} />}
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <ProductForm
+            item={draft}
+            others={items}
+            vocab={vocab}
+            library={library}
+            adding
+            touched={touched}
+            onChange={changeDraft}
+            onTemplate={(t) => {
+              const { item, touched: keys } = fromTemplate(draft, t);
+              const next = new Set(keys);
+              setTouched(next);
+              setDraft(autofill(item, next, items, vocab));
+            }}
+          />
+          <ProductAside item={draft} others={items} adding missing={missing} />
+        </div>
+      </FullPage>
+    );
+  }
+
+  /* ---------- the edit page ---------- */
+
+  const open = sub ? items.find((p) => p.id === sub) : null;
+  if (open) {
+    const others = items.filter((p) => p.id !== open.id);
+    const missing = problems(open, items);
+    const onSite = saved.find((s) => s.id === open.id);
+    const edited = !open.added && JSON.stringify(toPayload([{ ...open, live: true, featured: false, pins: [] }]).edits) !== "{}";
+    return (
+      <FullPage
+        title={open.name || "Untitled style"}
+        sub={`${LINE_LABEL[open.line]} · ${categoryFor(open)}${open.added ? " · added here" : ""}`}
+        actions={
+          <>
+            <label className="flex min-h-10 items-center gap-2 px-1 text-[13px] font-medium">
+              <Toggle label={`${open.name} live`} checked={open.live} onChange={(v) => edit(open.id, { live: v })} /> Live
+            </label>
+            <label className="flex min-h-10 items-center gap-2 px-1 text-[13px] font-medium">
+              <Toggle label={`Feature ${open.name}`} checked={open.featured} onChange={(v) => edit(open.id, { featured: v })} /> Featured
+            </label>
+            {onSite?.live && (
+              <a href={`/products/${open.slug}`} target="_blank" rel="noreferrer" className="flex min-h-10 items-center rounded-full bg-white px-4 text-[13.5px] font-semibold ring-1 ring-ink/10">
+                View on site
+              </a>
+            )}
+            {edited && (
+              <button type="button" onClick={() => edit(open.id, { ...toItem({ base: open.base, added: false, inquiries: open.inquiries }), live: open.live, featured: open.featured, pins: open.pins })} className="min-h-10 rounded-full px-3 text-[13.5px] font-semibold text-ink/60 hover:text-ink">
+                Restore original
+              </button>
+            )}
+            {open.added &&
+              (confirming === open.id ? (
+                <button
+                  type="button"
+                  disabled={saver.pending}
+                  onClick={() => {
+                    afterSave.current = leave;
+                    saver.save(saved.filter((s) => s.id !== open.id));
+                  }}
+                  className="min-h-10 rounded-full bg-danger px-4 text-[13.5px] font-semibold text-white disabled:opacity-60"
+                >
+                  {saver.pending ? "Deleting…" : "Delete for good"}
+                </button>
+              ) : (
+                <button type="button" onClick={() => setConfirming(open.id)} className="min-h-10 rounded-full px-3 text-[13.5px] font-semibold text-danger hover:bg-danger/[0.06]">
+                  Delete
+                </button>
+              ))}
+            <button type="button" disabled={!changes || !!missing.length || saver.pending} onClick={() => saver.save(items)} className="min-h-10 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white disabled:opacity-50">
+              {saver.pending ? "Publishing…" : changes ? `Publish ${changes} ${changes === 1 ? "change" : "changes"}` : "Published"}
+            </button>
+          </>
+        }
+      >
+        {saver.error && <ErrorNote text={saver.error} />}
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <ProductForm item={open} others={others} vocab={vocab} library={library} adding={false} onChange={(patch) => edit(open.id, patch)} />
+          <ProductAside item={open} others={others} adding={false} missing={missing} />
+        </div>
+      </FullPage>
+    );
+  }
+
+  if (sub) {
+    return (
+      <FullPage title="Product not found" actions={null}>
+        <p className="text-[14px] text-ink/60">No product has this address. It may have been deleted.</p>
+      </FullPage>
+    );
+  }
+
+  /* ---------- the list ---------- */
+
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const passes = (p: Item, skipCategory = false) =>
+    (line === "all" || p.line === line) &&
+    STATUS[status].test(p) &&
+    (skipCategory || !category || categoryFor(p) === category) &&
+    words.every((w) => [p.name, p.type, categoryFor(p), p.color.name, p.spec, ...p.tags].join(" ").toLowerCase().includes(w));
+  const found = items.filter((p) => passes(p)).sort(SORTS[sort]);
+  // each category's count follows the other filters, so a chip never promises what clicking it won't show
+  const counts = new Map<string, number>();
+  for (const p of items) if (passes(p, true)) counts.set(categoryFor(p), (counts.get(categoryFor(p)) ?? 0) + 1);
+  const chips = [...counts].sort((a, b) => a[0].localeCompare(b[0]));
+  const total = [...counts.values()].reduce((a, b) => a + b, 0);
   const max = Math.max(1, ...items.map((p) => p.inquiries));
 
   return (
     <>
-      <Card i={0} className="flex flex-wrap items-center justify-between gap-3 py-4!">
-        <Segmented
-          label="Line"
-          value={line}
-          onChange={fresh(setLine)}
-          options={[
-            { id: "all", label: "All" },
-            ...(Object.keys(LINE_LABEL) as ProductLine[]).map((l) => ({
-              id: l,
-              label: LINE_LABEL[l],
-            })),
-          ]}
-        />
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <label className="flex basis-full items-center gap-2 rounded-full bg-white/80 px-4 ring-1 ring-ink/10 focus-within:ring-2 focus-within:ring-ink sm:basis-auto">
+      <div className="z-20 rounded-[24px] bg-white/85 p-3 shadow-[0_14px_34px_-22px_rgb(18_20_22/.5)] ring-1 ring-white backdrop-blur-xl lg:sticky lg:top-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Segmented<ProductLine | "all">
+            label="Line"
+            value={line}
+            onChange={setLine}
+            options={[{ id: "all", label: "All" }, ...(Object.keys(LINE_LABEL) as ProductLine[]).map((l) => ({ id: l, label: LINE_LABEL[l] }))]}
+          />
+          <label className="flex min-w-48 flex-1 items-center gap-2 rounded-full bg-white px-4 ring-1 ring-ink/10 focus-within:ring-2 focus-within:ring-ink">
             <span className="sr-only">Find a style</span>
-            <input
-              value={query}
-              onChange={(e) => fresh(setQuery)(e.target.value)}
-              placeholder="Find a style"
-              className="min-h-10 w-full bg-transparent text-[14px] outline-none placeholder:text-ink/40 sm:w-44"
-            />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find by name, type, colour or material" className="min-h-10 w-full bg-transparent text-[14px] outline-none placeholder:text-ink/40" />
           </label>
-          <label className="relative">
-            <span className="sr-only">Sort by</span>
-            <select
-              value={sort}
-              onChange={(e) => fresh(setSort)(e.target.value as Sort)}
-              className="min-h-10 appearance-none rounded-full bg-white/80 pr-9 pl-4 text-[13.5px] font-medium ring-1 ring-ink/10 outline-none focus:ring-2 focus:ring-ink"
-            >
-              <option value="asked">Most asked</option>
-              <option value="name">Name A–Z</option>
-              <option value="featured">Featured first</option>
-            </select>
-            <AdminIcon name="down" className="pointer-events-none absolute top-1/2 right-3.5 size-3.5 -translate-y-1/2 text-ink/50" />
-          </label>
-          <div role="group" aria-label="Layout" className="flex rounded-full bg-ink/[0.06] p-1">
-            {(["grid", "list"] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                aria-pressed={layout === l}
-                aria-label={l === "grid" ? "Cards" : "List"}
-                onClick={() => setLayout(l)}
-                className={clsx(
-                  "grid size-9 place-items-center rounded-full transition-colors",
-                  layout === l ? "bg-white text-ink shadow-[0_1px_3px_rgb(18_20_22/.15)]" : "text-ink/50 hover:text-ink",
-                )}
-              >
-                <AdminIcon name={l} className="size-4" />
-              </button>
-            ))}
-          </div>
+          <Select label="Status" value={status} onChange={setStatus} options={(Object.keys(STATUS) as Status[]).map((s) => [s, STATUS[s].label])} />
+          <Select
+            label="Sort by"
+            value={sort}
+            onChange={setSort}
+            options={[
+              ["name", "Name A–Z"],
+              ["asked", "Most asked"],
+              ["featured", "Featured first"],
+              ["category", "Category"],
+            ]}
+          />
+          <Link href="/admin/products/new" prefetch={false} className="flex min-h-10 flex-none items-center gap-1.5 rounded-full bg-ink pr-4 pl-3 text-[13.5px] font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[.98]">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-none stroke-current stroke-[2.2]">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
+            {draft.name.trim() ? "Continue new product" : "Add product"}
+          </Link>
         </div>
-      </Card>
+        <div role="group" aria-label="Category" className="mt-2.5 flex flex-wrap gap-1.5">
+          {[["All categories", total, null] as const, ...chips.map(([c, n]) => [c, n, c] as const)].map(([label, n, id]) => (
+            <button
+              key={label}
+              type="button"
+              aria-pressed={category === id}
+              onClick={() => setCategory(id)}
+              className={clsx("flex min-h-8 flex-none items-center gap-1.5 rounded-full px-3 text-[12.5px] font-semibold whitespace-nowrap transition-colors", category === id ? "bg-ink text-white" : "bg-ink/[0.05] text-ink/70 hover:text-ink")}
+            >
+              {label} <span className={clsx("font-medium tabular-nums", category === id ? "text-white/65" : "text-ink/45")}>{n}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <p className="mt-4 mb-3 px-1 text-[13px] text-ink/55 tabular-nums">
-        {found.length} {found.length === 1 ? "style" : "styles"} · {items.filter((p) => p.live).length} live · {items.filter((p) => p.featured).length} featured
-        · inquiries in the last 90 days
+      <p className="mt-3 mb-2 px-2 text-[13px] text-ink/55 tabular-nums">
+        {found.length} {found.length === 1 ? "style" : "styles"} · {items.filter((p) => p.live).length} live · {items.filter((p) => p.featured).length} featured · inquiries in the last 90 days
       </p>
 
-      {layout === "list" ? (
-        <Card i={1} className="p-2! sm:p-2!">
-          <ul className="divide-y divide-ink/[0.07]">
-            {list.map((p) => (
-              <li
-                key={p.id}
-                className={clsx(
-                  "grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-x-3 rounded-2xl px-2 py-2 transition-colors hover:bg-white/60 md:grid-cols-[56px_minmax(0,1.4fr)_minmax(0,1fr)_auto_auto] md:gap-x-5",
-                  !p.live && "opacity-60",
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenId(p.id)}
-                  aria-label={`Edit ${p.name}`}
-                  className={clsx("grid size-14 place-items-center rounded-xl", SCENE_BG[p.scene])}
-                >
-                  <Image src={p.image} alt="" width={56} height={56} className="max-h-[84%] w-auto max-w-[80%] -scale-x-100 object-contain" />
-                </button>
-                <div className="min-w-0">
-                  <p className="flex items-center gap-2 text-[14.5px] font-semibold">
-                    <span className="truncate">{p.name}</span>
-                    {p.badge && <span className="flex-none rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">{p.badge}</span>}
-                  </p>
-                  <p className="truncate text-[12.5px] text-ink/55">
-                    {LINE_LABEL[p.line]} · {p.type}
-                  </p>
-                </div>
-                <div className="hidden items-center gap-3 md:flex">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-ink/10">
-                    <div className="h-full rounded-full bg-ink" style={{ width: `${(p.inquiries / max) * 100}%` }} />
-                  </div>
-                  <span className="w-7 text-right text-[12.5px] text-ink/60 tabular-nums">{p.inquiries}</span>
-                </div>
-                <label className="hidden items-center gap-2 text-[12.5px] font-medium md:flex">
-                  <Toggle label={`${p.name} live`} checked={p.live} onChange={(v) => edit(p.id, { live: v })} /> Live
-                </label>
-                <label className="flex items-center gap-2 text-[12.5px] font-medium">
-                  <span className="hidden sm:inline">Featured</span>
-                  <Toggle label={`Feature ${p.name}`} checked={p.featured} onChange={(v) => edit(p.id, { featured: v })} />
-                </label>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {list.map((p, i) => (
-            <li key={p.id} className="contents">
-              <Card i={i + 1} className={clsx("flex flex-col p-3! transition-opacity", !p.live && "opacity-60")}>
-                <button
-                  type="button"
-                  onClick={() => setOpenId(p.id)}
-                  className={clsx("group relative grid aspect-[5/4] place-items-center overflow-hidden rounded-[20px]", SCENE_BG[p.scene])}
-                  aria-label={`Edit ${p.name}`}
-                >
-                  <Image
-                    src={p.image}
-                    alt=""
-                    width={260}
-                    height={208}
-                    className="w-[72%] -scale-x-100 object-contain drop-shadow-[0_14px_14px_rgb(18_20_22/.22)] transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:-translate-y-1.5 group-hover:-rotate-3"
-                  />
-                  {p.badge && <span className="absolute top-3 left-3 rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold text-white">{p.badge}</span>}
-                </button>
-                <div className="flex flex-1 flex-col px-2 pt-3 pb-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] font-semibold">{p.name}</p>
-                      <p className="truncate text-[12.5px] text-ink/55">
+      <div className="overflow-hidden rounded-[24px] bg-white/70 ring-1 ring-white">
+        <table className="w-full border-collapse text-left">
+          <thead className="text-[12px] font-semibold text-ink/50">
+            <tr className="border-b border-ink/[0.08]">
+              <th scope="col" className="py-3 pl-4 font-semibold">
+                Style
+              </th>
+              <th scope="col" className="hidden px-3 font-semibold lg:table-cell">
+                Category
+              </th>
+              <th scope="col" className="hidden px-3 font-semibold xl:table-cell">
+                Colour
+              </th>
+              <th scope="col" className="hidden px-3 font-semibold xl:table-cell">
+                Sizes
+              </th>
+              <th scope="col" className="hidden px-3 font-semibold md:table-cell">
+                Inquiries
+              </th>
+              <th scope="col" className="hidden px-3 font-semibold sm:table-cell">
+                Live
+              </th>
+              <th scope="col" className="px-3 pr-4 font-semibold">
+                Featured
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {found.map((p) => (
+              <tr key={p.id} className={clsx("border-b border-ink/[0.06] transition-colors last:border-0 hover:bg-white/70", !same(p, saved.find((s) => s.id === p.id)) && "bg-[#b45309]/[0.06]")}>
+                <td className="py-2 pl-4">
+                  <Link href={`/admin/products/${p.id}`} prefetch={false} scroll={false} className="flex min-w-0 items-center gap-3 rounded-xl" aria-label={`Edit ${p.name}`}>
+                    <span className={clsx("relative block size-14 flex-none rounded-xl", SCENE_BG[p.scene], !p.live && "opacity-50")}>
+                      {p.outer.src && <Image src={p.outer.src} alt="" fill sizes="56px" className="object-contain p-1" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[14.5px] font-semibold">
+                        {p.name}
+                        {p.badge && <span className="rounded-full bg-ink px-2 py-0.5 text-[11px] font-semibold text-white">{p.badge}</span>}
+                        {!p.live && <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-semibold text-ink/60">Hidden</span>}
+                        {p.added && <span className="rounded-full bg-[#2f8f5b]/12 px-2 py-0.5 text-[11px] font-semibold text-[#21734a]">Added here</span>}
+                      </span>
+                      <span className="block text-[12.5px] text-ink/55">
                         {LINE_LABEL[p.line]} · {p.type}
-                      </p>
-                    </div>
-                    <span className="size-4 flex-none rounded-full ring-2 ring-white" style={{ background: p.hex }} title={p.color} />
-                  </div>
-                  <div className="mt-3">
-                    <div className="flex justify-between text-[12px] text-ink/55">
-                      <span>Inquiries</span>
-                      <span className="tabular-nums">{p.inquiries}</span>
-                    </div>
-                    <div className="mt-1 h-1 overflow-hidden rounded-full bg-ink/10">
-                      <div
-                        className="h-full origin-left rounded-full bg-ink motion-safe:animate-[admin-in_.9s_both]"
-                        style={{ width: `${(p.inquiries / max) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between gap-2 pt-3 text-[12.5px] font-medium">
-                    <label className="flex items-center gap-2">
-                      <Toggle label={`${p.name} live`} checked={p.live} onChange={(v) => edit(p.id, { live: v })} /> Live
-                    </label>
-                    <label className="flex items-center gap-2">
-                      Featured <Toggle label={`Feature ${p.name}`} checked={p.featured} onChange={(v) => edit(p.id, { featured: v })} />
-                    </label>
-                  </div>
-                </div>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {found.length > list.length ? (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setLimit((n) => n + PAGE)}
-            className="flex min-h-11 items-center gap-2 rounded-full bg-white/80 px-5 text-[13.5px] font-semibold ring-1 ring-ink/10 transition-colors hover:bg-white"
-          >
-            Show {Math.min(PAGE, found.length - list.length)} more
-            <span className="font-medium text-ink/50 tabular-nums">
-              {list.length} of {found.length}
-            </span>
-          </button>
-        </div>
-      ) : (
-        !found.length && <p className="mt-6 text-center text-[14px] text-ink/55">No styles match “{query}”.</p>
-      )}
-
-      <Sheet
-        open={!!open}
-        onClose={() => {
-          setOpenId(null);
-          setDraft(null);
-        }}
-        title={open ? `Edit ${open.name}` : "Edit style"}
-      >
-        {open && (
-          <div className="grid gap-5">
-            <div className={clsx("grid aspect-[16/9] place-items-center rounded-3xl", SCENE_BG[open.scene])}>
-              <Image
-                src={open.image}
-                alt={open.name}
-                width={320}
-                height={180}
-                className="h-[80%] w-auto -scale-x-100 object-contain drop-shadow-[0_14px_14px_rgb(18_20_22/.22)]"
-              />
-            </div>
-            <Field label="Style name" value={open.name} max={40} onChange={(v) => edit(open.id, { name: v })} />
-            <p className="-mt-3 text-[12px] text-ink/50">
-              Its address stays /products/{open.slug}.{" "}
-              <a href={`/products/${open.slug}`} target="_blank" rel="noreferrer" className="font-semibold underline">
-                View on the site
-              </a>
-            </p>
-            <div>
-              <p className="mb-1.5 text-[12.5px] font-semibold text-ink/70">Badge</p>
-              <div className="flex flex-wrap gap-2">
-                {BADGES.map((b) => {
-                  const on = (open.badge ?? "None") === b;
-                  const built = (open.baseBadge ?? "None") === b;
-                  return (
-                    <button
-                      key={b}
-                      type="button"
-                      aria-pressed={on}
-                      title={built ? "The built-in badge" : undefined}
-                      onClick={() => edit(open.id, { badge: b === "None" ? null : b })}
-                      className={clsx(
-                        "min-h-9 rounded-full px-3.5 text-[13px] font-semibold transition-colors",
-                        on ? "bg-ink text-white" : "bg-white text-ink/70 ring-1 ring-ink/10 hover:text-ink",
-                      )}
-                    >
-                      {b}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <p className="mb-1.5 text-[12.5px] font-semibold text-ink/70">Leads in these seasons</p>
-              <p className="mb-2 text-[12px] text-ink/50">Seasons marked auto come from its kind and materials; add others to put it forward then too.</p>
-              <div className="flex flex-wrap gap-2">
-                {SEASON_IDS.map((s) => {
-                  const auto = open.autoSeasons.includes(s);
-                  const on = auto || open.pins.includes(s);
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      aria-pressed={on}
-                      disabled={auto}
-                      onClick={() =>
-                        edit(open.id, {
-                          pins: on ? open.pins.filter((x) => x !== s) : [...open.pins, s],
-                        })
-                      }
-                      className={clsx(
-                        "min-h-9 rounded-full px-3.5 text-[13px] font-semibold capitalize transition-colors",
-                        on ? "bg-ink text-white" : "bg-white text-ink/70 ring-1 ring-ink/10 hover:text-ink",
-                      )}
-                    >
-                      {s}
-                      {auto && <span className="ml-1 text-[11px] font-medium opacity-70">auto</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <p className="text-[12.5px] font-semibold text-ink/70">Listing description</p>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={async () => {
-                    setDraft("…");
-                    const text = await describeProductAction(open.id, open.name);
-                    setDraft(text);
-                    setRun((r) => r + 1);
-                  }}
-                  className="flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-white transition-transform hover:scale-[1.03] disabled:opacity-60"
-                >
-                  <AdminIcon name="sparkle" className="size-4" /> {busy ? "Writing…" : "Write with AI"}
-                </button>
-              </div>
-              <textarea
-                aria-label="Listing description"
-                rows={6}
-                readOnly={!!draft}
-                value={draft ? shown : open.desc}
-                onChange={(e) => edit(open.id, { desc: e.target.value })}
-                className={clsx(
-                  "w-full resize-none rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed ring-1 outline-none focus:ring-2 focus:ring-ink",
-                  draft ? "bg-ink/[0.04] ring-ink/20" : "bg-white/80 ring-ink/10",
-                )}
-              />
-              {draft && !busy && (
-                <div className="mt-2 flex gap-2 motion-safe:animate-[admin-in_.35s_both]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      edit(open.id, { desc: shown });
-                      setDraft(null);
-                    }}
-                    className="min-h-9 rounded-full bg-ink px-4 text-[13px] font-semibold text-white"
-                  >
-                    Use this
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDraft(null)}
-                    className="min-h-9 rounded-full px-3 text-[13px] font-semibold text-ink/60 hover:text-ink"
-                  >
-                    Keep mine
-                  </button>
-                </div>
-              )}
-            </div>
+                      </span>
+                    </span>
+                  </Link>
+                </td>
+                <td className="hidden px-3 text-[13px] text-ink/70 lg:table-cell">{categoryFor(p)}</td>
+                <td className="hidden px-3 xl:table-cell">
+                  <span className="flex items-center gap-2 text-[13px] text-ink/70">
+                    <span className="size-3.5 flex-none rounded-full ring-1 ring-ink/15" style={{ background: p.color.hex }} />
+                    {p.color.name}
+                  </span>
+                </td>
+                <td className="hidden px-3 text-[13px] whitespace-nowrap text-ink/70 xl:table-cell">{p.sizes}</td>
+                <td className="hidden px-3 md:table-cell">
+                  <span className="flex items-center gap-2.5">
+                    <span className="h-1 w-16 overflow-hidden rounded-full bg-ink/10">
+                      <span className="block h-full rounded-full bg-ink" style={{ width: `${(p.inquiries / max) * 100}%` }} />
+                    </span>
+                    <span className="text-[12.5px] text-ink/60 tabular-nums">{p.inquiries}</span>
+                  </span>
+                </td>
+                <td className="hidden px-3 sm:table-cell">
+                  <Toggle label={`${p.name} live`} checked={p.live} onChange={(v) => edit(p.id, { live: v })} />
+                </td>
+                <td className="px-3 pr-4">
+                  <Toggle label={`Feature ${p.name}`} checked={p.featured} onChange={(v) => edit(p.id, { featured: v })} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!found.length && (
+          <div className="px-4 py-12 text-center">
+            <p className="text-[14px] text-ink/60">No styles match these filters.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setLine("all");
+                setCategory(null);
+                setStatus("all");
+                setQuery("");
+              }}
+              className="mt-2 text-[13.5px] font-semibold underline"
+            >
+              Clear filters
+            </button>
           </div>
         )}
-      </Sheet>
+      </div>
 
-      <SaveBar
-        count={changes}
-        pending={saver.pending}
-        error={saver.error}
-        onDiscard={() => (setItems(saved), saver.clearError())}
-        onSave={() => saver.save(items)}
-      />
+      <SaveBar count={changes} pending={saver.pending} error={saver.error} onDiscard={() => (setItems(saved), saver.clearError())} onSave={() => saver.save(items)} />
     </>
+  );
+}
+
+const ErrorNote = ({ text }: { text: string }) => (
+  <p role="alert" className="mb-4 rounded-2xl bg-danger px-4 py-2.5 text-[13.5px] font-medium text-white">
+    {text}
+  </p>
+);
+
+function Select<T extends string>({ label, value, onChange, options }: { label: string; value: T; onChange: (v: T) => void; options: [T, string][] }) {
+  return (
+    <label className="relative flex-none">
+      <span className="sr-only">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value as T)} className="min-h-10 appearance-none rounded-full bg-white pr-9 pl-4 text-[13.5px] font-medium ring-1 ring-ink/10 outline-none focus:ring-2 focus:ring-ink">
+        {options.map(([id, text]) => (
+          <option key={id} value={id}>
+            {text}
+          </option>
+        ))}
+      </select>
+      <AdminIcon name="down" className="pointer-events-none absolute top-1/2 right-3.5 size-3.5 -translate-y-1/2 text-ink/50" />
+    </label>
   );
 }

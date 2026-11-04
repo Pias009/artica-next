@@ -10,7 +10,7 @@ import { HOME_SECTIONS } from "@/lib/home-sections";
 import { dbReady } from "@/lib/leads/db";
 import { setStatus } from "@/lib/leads/inquiries";
 import { isDeskStatus } from "@/lib/leads/desk";
-import { allProducts } from "@/lib/products";
+import { ProductsPayload } from "@/lib/admin/product-schema";
 import { SEASON_IDS } from "@/lib/season";
 import { SITE_PAGES } from "@/lib/site-pages";
 
@@ -24,19 +24,8 @@ export type SaveResult = { ok: true; at: string } | { ok: false; error: string }
 
 const text = (max: number) => z.string().trim().max(max);
 const season = z.enum(SEASON_IDS);
-const PRODUCT_IDS = new Set(allProducts.map((p) => p.id));
 const PATHS = new Set(SITE_PAGES.map((p) => p.path.split("?")[0]));
 const SECTION_IDS = new Set<string>(HOME_SECTIONS.map((s) => s.id));
-
-const ProductEdit = z.object({
-  live: z.boolean().optional(),
-  featured: z.boolean().optional(),
-  name: text(40).optional(),
-  desc: text(600).optional(),
-  seasons: z.array(season).max(6).optional(),
-  badge: z.enum(["Top reorder", "New", "Trending", "none"]).optional(),
-});
-const Products = z.record(z.string(), ProductEdit).refine((r) => Object.keys(r).every((id) => PRODUCT_IDS.has(id)), "Unknown style");
 
 const PageEdit = z.object({
   published: z.boolean().optional(),
@@ -53,6 +42,12 @@ const PageEdit = z.object({
     )
     .max(40)
     .optional(),
+  // any page's intro and section words, by "<heading id>.title|sub", and the sections hidden (by heading id)
+  copy: z
+    .record(z.string().regex(/^[\w-]{1,40}\.(title|sub)$/, "Unknown text"), text(300))
+    .refine((r) => Object.keys(r).length <= 80, "Too many changes on one page")
+    .optional(),
+  hidden: z.array(z.string().regex(/^[\w-]{1,40}$/)).max(40).optional(),
 });
 const Pages = z.record(z.string(), PageEdit).refine((r) => Object.keys(r).every((p) => PATHS.has(p)), "Unknown page");
 
@@ -121,8 +116,12 @@ async function save<T extends z.ZodType>(schema: T, input: unknown, what: string
 const compact = <V extends object>(r: Record<string, V>) =>
   Object.fromEntries(Object.entries(r).filter(([, v]) => Object.values(v).some((x) => x !== undefined)));
 
-export async function saveProductsAction(edits: unknown) {
-  return save(Products, edits, "products", (v) => ({ products: compact(v) }));
+export async function saveProductsAction(payload: unknown) {
+  return save(ProductsPayload, payload, "products", (v) => {
+    // through JSON so a field left out stays out, rather than reaching the database as null
+    const { edits, added } = JSON.parse(JSON.stringify(v)) as typeof v;
+    return { products: compact(edits) as SiteContent["products"], added: added as SiteContent["added"] };
+  });
 }
 export async function savePagesAction(edits: unknown) {
   return save(Pages, edits, "pages", (v) => ({ pages: compact(v) }));

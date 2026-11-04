@@ -45,6 +45,11 @@ export function onLive(apply: (c: PublicContent) => void) {
   if (c) apply(c);
 }
 
+/** A page's rewritten words for a key ("intro.title", "h-how.sub"), if the admin wrote some. */
+export const pageCopy = (path: string, key: string) => live()?.pages?.[path]?.copy[key] || undefined;
+/** Whether the admin hid the section with this heading id on this page. */
+export const pageHidden = (path: string, id: string) => !!live()?.pages?.[path]?.hidden.includes(id);
+
 /** A home-page section's new headline and supporting line, if the admin wrote one. */
 export const sectionCopy = (id: string) => live()?.copy[id];
 export const controlOn = (k: "effects" | "campaign") => live()?.controls[k] ?? true;

@@ -2,16 +2,9 @@
 
 import { requireAdmin } from "@/lib/admin/auth";
 import { panelData } from "@/lib/admin/panel";
-import { answerAdmin, describeStyle, sectionIdeas } from "@/lib/assistant/admin-ai";
-import { allProducts } from "@/lib/products";
+import { answerAdmin, sectionIdeas } from "@/lib/assistant/admin-ai";
 
 /* The admin panel's AI buttons, as server actions: each checks the admin first. */
-
-export async function describeProductAction(id: string, name: string) {
-  await requireAdmin();
-  if (!allProducts.some((p) => p.id === id)) return "";
-  return describeStyle(id, String(name).slice(0, 40));
-}
 
 export async function sectionIdeasAction(label: string, title: string, sub: string) {
   await requireAdmin();

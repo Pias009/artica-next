@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { type View } from "../data";
 import { ago, usePanel } from "../panel-data";
 import { AdminIcon, Card, CardHead, CountUp, Meter, useEntered } from "../ui";
 import type { PanelVisitors } from "@/lib/admin/panel";
@@ -31,7 +31,7 @@ const EMPTY: PanelVisitors = {
  * each visit leaves, where visits come from, where the buying path loses people, which pages they leave from and what
  * they look for. Refreshes itself every 30 seconds while open.
  */
-export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
+export function Visitors() {
   const panel = usePanel();
   const data = panel.visitors ?? EMPTY;
   const visitors = data.people;
@@ -302,15 +302,12 @@ export function Visitors({ onGo }: { onGo?: (v: View) => void }) {
             </li>
           ))}
         </ul>
-        {onGo && (
-          <button
-            type="button"
-            onClick={() => onGo("products")}
-            className="mt-4 flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-ink transition-transform hover:scale-[1.03]"
-          >
-            <AdminIcon name="sparkle" className="size-4" /> Review the catalogue
-          </button>
-        )}
+        <Link
+          href="/admin/products"
+          className="mt-4 flex min-h-10 w-fit items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-ink transition-transform hover:scale-[1.03]"
+        >
+          <AdminIcon name="sparkle" className="size-4" /> Review the catalogue
+        </Link>
       </Card>
 
       <p className="px-2 text-[12.5px] text-ink/50 lg:col-span-12">

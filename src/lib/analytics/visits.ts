@@ -74,7 +74,7 @@ export function deviceOf(ua: string, width: number): Device {
 /** Today's anonymous visit id for an address and browser (see above). */
 export function visitId(ip: string, ua: string) {
   const day = new Date().toISOString().slice(0, 10);
-  const secret = process.env.VISIT_SALT || process.env.ADMIN_ENC_KEY || process.env.MONGODB_URI || "";
+  const secret = process.env.VISIT_SALT || process.env.MONGODB_URI || "";
   const salt = createHash("sha256").update(`${secret}|${day}`).digest();
   return createHash("sha256").update(salt).update(`${ip}|${ua}`).digest("hex").slice(0, 20);
 }

@@ -3,7 +3,6 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { backOff, modelAllowed, record, spend } from "./budget";
 import { aiReady, kaiModel } from "./model";
-import { productDetails } from "./skills";
 import { COMPANY } from "../company";
 
 /*
@@ -36,20 +35,7 @@ async function ask<T extends z.ZodType>(instructions: string, prompt: string, sc
 }
 
 /** A catalogue description for a style, from its real materials and spec. */
-export async function describeStyle(id: string, name: string) {
-  const d = productDetails({ style: id });
-  if (!d.found) return "";
-  const facts = {
-    name,
-    type: d.type,
-    line: d.line,
-    colour: d.color,
-    materials: d.materials,
-    sizes: d.sizeRange,
-    rating: d.rating ?? null,
-    casePack: d.casePack,
-    current: d.description,
-  };
+export async function describeFacts(facts: { name: string; type: string; line: string; colour: string; materials: string[]; sizes: string; rating: string | null; casePack: string; current: string }) {
   const out = await ask(
     `You write product descriptions for ${COMPANY.name}'s wholesale footwear catalogue. Audience: shop buyers. 2–3 sentences, under 60 words, concrete: what it is, what it's made of, why it sells. Use only the facts given; no prices, no claims of certification, no exclamation marks.`,
     JSON.stringify(facts),
@@ -57,11 +43,11 @@ export async function describeStyle(id: string, name: string) {
     300,
   );
   if (out?.description) return out.description.trim();
-  const mats = d.materials
+  const mats = facts.materials
     .slice(0, 2)
     .map((m) => m.split(": ")[1] ?? m)
     .join(" and ");
-  return `The ${name} is a ${d.type.toLowerCase()} in ${d.color.toLowerCase()}${mats ? `, made with ${mats.toLowerCase()}` : ""}${d.rating ? ` and rated to ${d.rating}` : ""}. Sizes ${d.sizeRange}, packed in mixed-size cases of 12, from 300 pairs per style.`;
+  return `The ${facts.name} is a ${facts.type.toLowerCase()} in ${facts.colour.toLowerCase()}${mats ? `, made with ${mats.toLowerCase()}` : ""}${facts.rating ? ` and rated to ${facts.rating}` : ""}. Sizes ${facts.sizes}, packed in mixed-size cases of 12, from 300 pairs per style.`;
 }
 
 export type CopyIdea = { tone: string; title: string; sub: string };

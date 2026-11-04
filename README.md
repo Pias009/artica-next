@@ -177,39 +177,30 @@ inquiries. Design: `docs/design/assistant.md`.
 | Route | What |
 |---|---|
 | `/admin` | Dashboard (`src/components/admin/AdminPanel`), full-screen |
-| `/admin/inquiries` | Every inquiry from the database: filter by status, request and text, flags for over 20 hours and failing emails |
+| `/admin/visitors`, `/admin/agent`, `/admin/pages`, `/admin/seasons`, `/admin/settings` | The panel's other sections, each at its own address |
+| `/admin/products` | The catalogue as a list, by line, category, status and text. `/admin/products/<id>` edits every field of a style; `/admin/products/new` adds one, suggesting from the catalogue as you type. Uploads need `CLOUDINARY_*` on the server |
+| `/admin/inquiries` | The latest inquiries by stage |
+| `/admin/inquiries/all` | Every inquiry from the database: filter by status, request and text, flags for over 20 hours and failing emails |
 | `/admin/inquiries/[ref]` | One inquiry: lines, note, buyer, emails (with "Send now"), status buttons, history |
 | `/admin/security` | Your sessions (sign out any of them) and the audit log of every sign-in and change |
-| `/admin/login` | Email, password and a 6-digit authenticator code |
+| `/admin/login` | Email and password |
 
-**Accounts are made from the command line only** (there is no sign-up page). Each prints a generated password and an
-authenticator key once:
+**Accounts are made from the command line only** (there is no sign-up page). Each prints a generated password once:
 
 ```bash
 npm run db:migrate                                   # once: admin collections and indexes
-npm run admin -- create you@company.com "Your Name"  # add the key to 1Password / Google Authenticator / Authy
-npm run admin -- reset you@company.com               # lost phone or password: new ones, all sessions ended
+npm run admin -- create you@company.com "Your Name"  # new admin
+npm run admin -- reset you@company.com               # lost password: a new one, all sessions ended
 npm run admin -- disable you@company.com             # blocks sign-in, ends sessions (enable undoes it)
 npm run admin -- list
 npm run admin -- sign-out-all
 ```
 
-Needs `MONGODB_URI` and `ADMIN_ENC_KEY` (`openssl rand -base64 32`; already in `.env.local`). Set the **same**
-`ADMIN_ENC_KEY` in Vercel: authenticator keys are sealed with it, so a different key locks everyone out until `reset`.
-Without either, `/admin/login` still shows the form, but signing in answers that the panel isn't set up.
-
-**Skip sign-in (dev):** the sign-in page shows a "Skip sign-in (dev)" button on `npm run dev` at `localhost`, and
-on **Vercel preview** links (which sit behind Vercel's own login, so keep Deployment Protection on). It opens the
-panel without an account or a database: the dashboard shows sample data, and the inquiry pages ask for `MONGODB_URI`.
-An orange "sign-in skipped" badge shows, and Sign out ends it. The button never appears on production (the live
-site), and a skip cookie is ignored there; `tests/admin-bypass.test.mjs` checks this.
-
-The one exception is `ADMIN_SKIP_SIGNIN=1`, for a deployment still in development. It shows the button on that server
-even with a real database, so anyone with the link can open the panel and its data. **Remove it before launch.**
+Needs `MONGODB_URI`. Without it, `/admin/login` still shows the form, but signing in answers that no database is connected.
 
 How it's protected (`src/lib/admin/auth.ts`, `src/proxy.ts`):
-- **Three factors:** a password (scrypt, N=2^15), a TOTP code, and the email. A code works once, so a code
-  someone sees can't be replayed. Authenticator keys are AES-256-GCM sealed at rest.
+- **Password:** hashed with scrypt (N=2^15). There is no second factor, so the password alone opens the panel: use the
+  generated one, and keep it in a password manager.
 - **Sessions:** a random token in a `__Host-` cookie (HttpOnly, Secure, SameSite=Strict). The database keeps only its
   SHA-256. Sessions end after 2 idle hours or 12 hours in all, and can be ended from `/admin/security` or the CLI.
 - **Checked twice:** the proxy sends requests without the cookie to sign-in, and every admin page and server action

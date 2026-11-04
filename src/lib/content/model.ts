@@ -4,7 +4,11 @@
  * as built". Pure types and defaults: shared by the server (content/store.ts), the proxy and the browser.
  */
 
+import type { Product } from "../products";
 import type { SeasonId } from "../season";
+
+/** A style made in the admin panel; shown, featured and pinned through `products`, like a built-in one. */
+export type AddedProduct = Omit<Product, "featured" | "pinnedSeasons">;
 
 export type ProductEdit = {
   /** false hides the style everywhere on the site (lists, search, its page, Kai, the sitemap). */
@@ -17,6 +21,22 @@ export type ProductEdit = {
   seasons?: SeasonId[];
   /** The badge on its cards; "none" removes the built-in one. */
   badge?: "Top reorder" | "New" | "Trending" | "none";
+  /** The rest of a built-in style. Left out: as built. "" as the category: worked out from the type. */
+  type?: string;
+  line?: Product["line"];
+  category?: string;
+  sizes?: string;
+  sizeRun?: string[];
+  spec?: string;
+  tags?: string[];
+  outer?: Product["outer"];
+  /** null removes the built-in second photo. */
+  zip?: Product["outer"] | null;
+  materials?: Product["materials"];
+  color?: Product["color"];
+  scene?: Product["scene"];
+  /** null removes the built-in rating. */
+  rating?: string | null;
 };
 
 export type SectionEdit = {
@@ -32,6 +52,12 @@ export type PageEdit = {
   /** Search title and description (the page's own are used when empty). */
   title?: string;
   description?: string;
+  /**
+   * Any page: new words for its intro and section headings, by key ("intro.title", "intro.sub", "h-how.title",
+   * "h-how.sub"; a section's key is its heading's id), and the sections hidden (by heading id).
+   */
+  copy?: Record<string, string>;
+  hidden?: string[];
   /** Home page only: the sections in order, each shown or hidden, with optional new headline and supporting line. */
   sections?: SectionEdit[];
 };
@@ -40,6 +66,7 @@ export type Tone = "plain" | "warm" | "formal";
 
 export type SiteContent = {
   products: Record<string, ProductEdit>;
+  added: AddedProduct[];
   pages: Record<string, PageEdit>;
   seasons: {
     /** true: each visitor sees the season in their country; false: everyone sees `fallback`. */
@@ -58,6 +85,7 @@ export type SiteContent = {
 
 export const EMPTY_CONTENT: SiteContent = {
   products: {},
+  added: [],
   pages: {},
   seasons: { auto: true, fallback: "winter", campaigns: {} },
   controls: { effects: true, campaign: true },
@@ -71,6 +99,7 @@ export function withDefaults(raw: Partial<SiteContent> | null | undefined): Site
   const r = raw ?? {};
   return {
     products: r.products ?? {},
+    added: r.added ?? [],
     pages: r.pages ?? {},
     seasons: {
       ...EMPTY_CONTENT.seasons,
@@ -91,7 +120,13 @@ export function publicContent(c: SiteContent) {
   const home = c.pages["/"]?.sections;
   return {
     products: c.products,
+    // a hidden new style stays out of the page source until it goes live
+    added: c.added.filter((p) => c.products[p.id]?.live !== false),
     copy: Object.fromEntries((home ?? []).filter((s) => s.title || s.sub).map((s) => [s.id, { title: s.title, sub: s.sub }])),
+    /** Every page's rewritten words and hidden sections (pages with none left out). */
+    pages: Object.fromEntries(
+      Object.entries(c.pages).flatMap(([path, p]) => (p.copy && Object.keys(p.copy).length) || p.hidden?.length ? [[path, { copy: p.copy ?? {}, hidden: p.hidden ?? [] }]] : []),
+    ) as Record<string, { copy: Record<string, string>; hidden: string[] }>,
     seasons: { campaigns: c.seasons.campaigns },
     controls: c.controls,
     contact: c.contact,

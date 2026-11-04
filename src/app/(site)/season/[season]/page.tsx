@@ -4,11 +4,14 @@ import { HomePage } from "@/components/home/HomePage";
 import { loadContent } from "@/lib/content/store";
 import { isSeason, SEASON_IDS } from "@/lib/season";
 
-/** One home page per season, built ahead of time; proxy.ts serves "/" from the visitor's. */
+/**
+ * One home page per season, built ahead of time; proxy.ts serves "/" from the visitor's. Other values are turned away
+ * below, not with `dynamicParams = false`: that also answers 404 for these pages once a save in the admin panel has
+ * expired them, which took the home page down.
+ */
 export function generateStaticParams() {
   return SEASON_IDS.map((season) => ({ season }));
 }
-export const dynamicParams = false;
 
 // the same page as "/", so search engines index that address only. No robots tag here: "/" is served from this route,
 // so a noindex would land on the home page too. proxy.ts sends noindex for /season/* requested directly instead.

@@ -1,12 +1,11 @@
 "use client";
 
 import clsx from "clsx";
-import { Fragment, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+import { accent, plain } from "./copy-text";
 import { useSectionScope } from "./SectionScope";
-import { sectionCopy } from "@/lib/content/live";
-
-/** The admin's headline: "*closing words*" in asterisks become the plum italic accent. */
-const accent = (t: string) => t.split(/\*([^*]+)\*/).map((part, i) => (i % 2 ? <em key={i}>{part}</em> : <Fragment key={i}>{part}</Fragment>));
+import { pageCopy, pageHidden, sectionCopy } from "@/lib/content/live";
 
 /**
  * The section heading, one format across the site: the title (sentence case; wrap its closing words in <em> for the
@@ -27,18 +26,31 @@ export function SectionHead({
   right?: ReactNode;
   className?: string;
 }) {
-  // on the home page, the admin panel can rewrite a section's headline and line (Pages → Home)
+  // the admin panel's Pages view can rewrite a heading and its line: home sections by section, other pages by the
+  // heading's id; data-copy and data-default tell the panel which words these are and what they were as built
   const scope = useSectionScope();
-  const copy = scope ? sectionCopy(scope) : undefined;
-  if (copy?.title) title = accent(copy.title);
-  if (copy?.sub) sub = copy.sub;
+  const path = usePathname();
+  const builtTitle = plain(title);
+  const builtSub = sub ?? "";
+  const home = scope ? sectionCopy(scope) : undefined;
+  const t = home?.title || (id && !scope ? pageCopy(path, `${id}.title`) : undefined);
+  const s = home?.sub || (id && !scope ? pageCopy(path, `${id}.sub`) : undefined);
+  if (t) title = accent(t);
+  if (s) sub = s;
+  // a section hidden on this page: its own <section> (the innermost one holding this heading) is not shown
+  const hidden = !!id && !scope && pageHidden(path, id);
   return (
     <div className={clsx("mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10", className)}>
+      {hidden && <style>{`section:has(#${id}):not(:has(section #${id})){display:none!important}`}</style>}
       <div className="max-w-[640px]">
-        <h2 id={id} className="type-section">
+        <h2 id={id} className="type-section" {...(id && { "data-copy": `${id}.title`, "data-default": builtTitle })}>
           {title}
         </h2>
-        {sub && <p className="mt-3 text-[17px] text-ink-2">{sub}</p>}
+        {(sub || id) && (
+          <p className={clsx("mt-3 text-[17px] text-ink-2", !sub && "hidden")} {...(id && { "data-copy": `${id}.sub`, "data-default": builtSub })}>
+            {sub}
+          </p>
+        )}
       </div>
       {right}
     </div>

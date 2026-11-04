@@ -1,59 +1,29 @@
 "use client";
 
 import clsx from "clsx";
-import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Assistant } from "./Assistant";
-import { VIEWS, type View } from "./data";
+import { VIEWS, viewHref, viewOf } from "./data";
 import { signOutAction } from "@/app/admin/actions";
 import { PanelDataProvider } from "./panel-data";
 import { AdminIcon, Flash, type AdminIconName } from "./ui";
 import type { PanelData } from "@/lib/admin/panel";
-import { Overview } from "./views/Overview";
 
 /*
  * The admin panel UI, after the frosted-glass dashboard reference: a blurred room behind everything, frosted and dark
  * cards, a big light title, a rail of quick actions on the left and the section nav as a pill at the bottom.
  *
- * Mounted by src/app/admin/(dashboard) behind sign-in, with the signed-in admin and the real data (lib/admin/panel.ts),
- * shared with the views through PanelDataProvider. Views keep edits as drafts and publish them with server actions
- * (app/admin/content-actions.ts), which check the admin and validate every field again.
+ * The frame of the routes in src/app/admin/(dashboard), behind sign-in, with the signed-in admin and the real data
+ * (lib/admin/panel.ts), shared with the views through PanelDataProvider. Each section is its own page at its own
+ * address. Views keep edits as drafts and publish them with server actions (app/admin/content-actions.ts), which check
+ * the admin and validate every field again.
  *
  * Kept quick: the room is blurred once (a static image), so the cards need no live backdrop blur; only the two
- * floating bars blur what's behind them. Views other than the dashboard load on first visit.
+ * floating bars blur what's behind them.
  */
-
-const loading = () => <div className="h-[60vh] animate-pulse rounded-[28px] bg-white/40" />;
-const VIEW_PARTS = {
-  overview: Overview,
-  visitors: dynamic(() => import("./views/Visitors").then((m) => m.Visitors), {
-    loading,
-  }),
-  agent: dynamic(() => import("./views/Agent").then((m) => m.Agent), {
-    loading,
-  }),
-  pages: dynamic(() => import("./views/Pages").then((m) => m.Pages), {
-    loading,
-  }),
-  products: dynamic(() => import("./views/Products").then((m) => m.Products), {
-    loading,
-  }),
-  inquiries: dynamic(() => import("./views/Inquiries").then((m) => m.Inquiries), { loading }),
-  seasons: dynamic(() => import("./views/Seasons").then((m) => m.Seasons), {
-    loading,
-  }),
-  settings: dynamic(() => import("./views/Settings").then((m) => m.Settings), {
-    loading,
-  }),
-} satisfies Record<View, ComponentType<never>>;
-
-/** The open view lives in the URL hash (#inquiries), so views can be linked to and Back works. */
-const onHash = (cb: () => void) => (window.addEventListener("hashchange", cb), () => window.removeEventListener("hashchange", cb));
-const readView = (): View => {
-  const h = window.location.hash.slice(1);
-  return VIEWS.some((v) => v.id === h) ? (h as View) : "overview";
-};
 
 const RAIL: {
   icon: AdminIconName;
@@ -67,12 +37,8 @@ const RAIL: {
   { icon: "globe", label: "View the site", action: "site" },
 ];
 
-export function AdminPanel({ admin, data }: { admin?: { name: string; email: string }; data: PanelData }) {
-  const view = useSyncExternalStore(onHash, readView, () => "overview" as View);
-  const go = useCallback((v: View) => {
-    window.location.hash = v === "overview" ? "" : v;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+export function AdminPanel({ admin, data, children }: { admin?: { name: string; email: string }; data: PanelData; children: ReactNode }) {
+  const view = viewOf(usePathname());
   const [assistant, setAssistant] = useState(false);
   const [prompt, setPrompt] = useState<{ text: string; n: number } | null>(null);
   const ask = useCallback((text?: string) => {
@@ -105,14 +71,12 @@ export function AdminPanel({ admin, data }: { admin?: { name: string; email: str
   }, [view]);
 
   const meta = VIEWS.find((v) => v.id === view)!;
-  const Part = VIEW_PARTS[view] as ComponentType<{
-    onAsk?: (p: string) => void;
-    onGo?: (v: View) => void;
-  }>;
   const active = VIEWS.findIndex((v) => v.id === view);
+  // the catalogue is worked through as a table: the whole width of the screen, and a small title
+  const wide = view === "products";
 
   return (
-    <PanelDataProvider data={data}>
+    <PanelDataProvider data={data} ask={ask}>
       <div className="relative isolate min-h-dvh overflow-x-clip pb-36 text-ink">
         {/* the room, blurred once */}
         <div aria-hidden="true" className="fixed inset-0 -z-10 bg-[#e9e8e4]">
@@ -136,19 +100,23 @@ export function AdminPanel({ admin, data }: { admin?: { name: string; email: str
               <a key={r.label} href="/" target="_blank" rel="noreferrer" aria-label={r.label} title={r.label} className={cls}>
                 <AdminIcon name={r.icon} />
               </a>
-            ) : (
-              <button key={r.label} type="button" aria-label={r.label} title={r.label} onClick={() => (action === "ask" ? ask() : go(action))} className={cls}>
+            ) : action === "ask" ? (
+              <button key={r.label} type="button" aria-label={r.label} title={r.label} onClick={() => ask()} className={cls}>
                 <AdminIcon name={r.icon} />
               </button>
+            ) : (
+              <Link key={r.label} href={viewHref(action)} prefetch={false} aria-label={r.label} title={r.label} className={cls}>
+                <AdminIcon name={r.icon} />
+              </Link>
             );
           })}
         </nav>
 
-        <div className="mx-auto w-full max-w-[1584px] px-4 sm:px-6 md:pl-20">
-          <header className="flex flex-wrap items-end justify-between gap-4 pt-8 pb-6 sm:pt-12">
+        <div className={clsx("mx-auto w-full px-4 sm:px-6 md:pl-20", !wide && "max-w-[1584px]")}>
+          <header className={clsx("flex flex-wrap items-end justify-between gap-4", wide ? "pt-5 pb-4" : "pt-8 pb-6 sm:pt-12")}>
             <div key={view} className="motion-safe:animate-[admin-in_.5s_cubic-bezier(.22,1,.36,1)_both]">
               <p className="text-[13px] font-medium text-ink/55">Chime Long · admin</p>
-              <h1 className="text-[clamp(48px,8vw,112px)] leading-[0.95] font-light tracking-[-0.045em]">{meta.title}</h1>
+              <h1 className={clsx("leading-[0.95] font-light tracking-[-0.045em]", wide ? "text-[clamp(30px,3vw,40px)]" : "text-[clamp(48px,8vw,112px)]")}>{meta.title}</h1>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -164,9 +132,7 @@ export function AdminPanel({ admin, data }: { admin?: { name: string; email: str
             </div>
           </header>
 
-          <main key={view}>
-            <Part onAsk={ask} onGo={go} />
-          </main>
+          <main key={view}>{children}</main>
         </div>
 
         {/* the section nav */}
@@ -179,18 +145,18 @@ export function AdminPanel({ admin, data }: { admin?: { name: string; email: str
                 style={{ transform: `translateX(${active * 92}px)` }}
               />
               {VIEWS.map((v) => (
-                <button
+                <Link
                   key={v.id}
-                  type="button"
+                  href={viewHref(v.id)}
+                  prefetch={false}
                   aria-current={v.id === view ? "page" : undefined}
-                  onClick={() => go(v.id)}
                   className={clsx(
-                    "relative min-h-11 w-[92px] flex-none rounded-full text-[13.5px] font-medium transition-colors",
+                    "relative grid min-h-11 w-[92px] flex-none place-items-center rounded-full text-[13.5px] font-medium transition-colors",
                     v.id === view ? "text-white" : "text-white/65 hover:text-white",
                   )}
                 >
                   {v.label}
-                </button>
+                </Link>
               ))}
             </div>
             <button

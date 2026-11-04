@@ -7,7 +7,7 @@
 
 import { EXPORT_DOCS, LEAD_DAYS, load, marketOf, REVIEW_DAYS, SHELF_DAYS, type Market } from "../buyer-desk";
 import { country, inSentence } from "../countries";
-import { categoryOf, MOQ_CASES, PACK, PRIVATE_LABEL_MIN, products, STEP_CASES, TIERS, type Product, type ProductLine } from "../products";
+import { byId, categoryOf, MOQ_CASES, PACK, PRIVATE_LABEL_MIN, products, STEP_CASES, TIERS, type Product, type ProductLine } from "../products";
 import { SEASON_DATA, SEASONS, type SeasonId } from "../season";
 import { seasonPicks } from "../season-products";
 import { addDays, buyNow, cashflow, daysBetween, freightCost, landedCost, outcomes, priceForMargin, seasonWindows, timeWindows, type Freight, type Lead, type Timed, type Window } from "./core";
@@ -218,15 +218,13 @@ export function defaultPlan(level: Level = "new", code = "US"): PlanInput {
   };
 }
 
-const byIdMap = new Map(products.map((p) => [p.id, p]));
-
 function computePlan(input: PlanInput, today: Date) {
   const timing = timingFor(input.country, today, input.firstOrder);
   const target = timing.windows.find((w) => windowKey(w) === input.target) ?? timing.now ?? timing.windows[0];
   const lines = input.styles.length ? input.styles : suggestLines({ level: input.level, season: target.season, lines: input.lines, budget: input.budget, fob: input.fob, dutyPct: input.dutyPct });
   const roles = rolesFor(input.level, lines.length);
   const picks: Pick[] = lines.flatMap((l, i) => {
-    const product = byIdMap.get(l.id);
+    const product = byId[l.id];
     return product ? [{ ...l, role: roles[i], product, pairs: l.cases * PACK, category: categoryOf(product) }] : [];
   });
   const cases = picks.reduce((n, p) => n + p.cases, 0);

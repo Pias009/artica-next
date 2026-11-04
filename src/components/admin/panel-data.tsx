@@ -7,12 +7,19 @@ import type { PanelData } from "@/lib/admin/panel";
 
 /** The dashboard's data from the server (lib/admin/panel.ts), for every view. */
 const Ctx = createContext<PanelData | null>(null);
-export const PanelDataProvider = ({ data, children }: { data: PanelData; children: ReactNode }) => <Ctx value={data}>{children}</Ctx>;
+/** Opens the assistant with a question, from any view. */
+const AskCtx = createContext<(prompt: string) => void>(() => {});
+export const PanelDataProvider = ({ data, ask, children }: { data: PanelData; ask: (prompt: string) => void; children: ReactNode }) => (
+  <Ctx value={data}>
+    <AskCtx value={ask}>{children}</AskCtx>
+  </Ctx>
+);
 export function usePanel() {
   const d = useContext(Ctx);
   if (!d) throw new Error("usePanel outside the admin panel");
   return d;
 }
+export const useAsk = () => useContext(AskCtx);
 
 /**
  * Saving a view's edits through its server action: pending while it runs, the server's error if it refuses, and on

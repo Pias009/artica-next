@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, SKIP_COOKIE, skipAllowed } from "@/lib/admin/cookie";
+import { SESSION_COOKIE } from "@/lib/admin/cookie";
+import { BLOCKS_HEADER, blocksToken } from "@/lib/content/blocks-token";
 import { routing } from "@/lib/content/routing";
 import { isSeason, SEASON_COOKIE, SEASON_DATA, paintScript, seasonOf } from "@/lib/season";
 
@@ -20,7 +21,9 @@ export async function proxy(req: NextRequest) {
   if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return admin(req);
   // the admin panel's page and season settings (content/routing.ts, cached for 30 s)
   const site = await routing();
-  if (site.hidden.has(url.pathname.replace(/\/$/, ""))) return NextResponse.rewrite(new URL("/__unpublished", req.url), { status: 404 });
+  // the admin panel reading an unpublished page's text (lib/admin/page-blocks.ts) still gets the page
+  const panel = req.headers.get(BLOCKS_HEADER) === blocksToken();
+  if (!panel && site.hidden.has(url.pathname.replace(/\/$/, ""))) return NextResponse.rewrite(new URL("/__unpublished", req.url), { status: 404 });
   const asked = url.searchParams.get("country")?.toUpperCase();
   const country =
     (asked && /^[A-Z]{2}$/.test(asked) ? asked : null) ??
@@ -63,9 +66,9 @@ const SEASON_HASH = `'sha256-${createHash("sha256").update(paintScript()).digest
  */
 function admin(req: NextRequest) {
   const dev = process.env.NODE_ENV === "development";
-  // every admin page shows real data and needs a session (or the dev skip, where it's allowed); only sign-in is open
+  // every admin page shows real data and needs a session; only sign-in is open
   const signInPage = req.nextUrl.pathname === "/admin/login";
-  if (!signInPage && !req.cookies.has(SESSION_COOKIE) && !(req.cookies.has(SKIP_COOKIE) && skipAllowed(req.headers.get("host")))) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
+  if (!signInPage && !req.cookies.has(SESSION_COOKIE)) return secure(NextResponse.redirect(new URL("/admin/login", req.url)));
 
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const csp = [
@@ -75,7 +78,8 @@ function admin(req: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    `connect-src 'self'${dev ? " ws:" : ""}`,
+    // Cloudinary: the Products view sends new photos straight there (lib/admin/cloudinary.ts)
+    `connect-src 'self' https://api.cloudinary.com${dev ? " ws:" : ""}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",

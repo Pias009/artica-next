@@ -3,7 +3,7 @@
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { audit, requireAdmin, sessions, signIn, signOut, skipSignIn } from "@/lib/admin/auth";
+import { audit, requireAdmin, sessions, signIn, signOut } from "@/lib/admin/auth";
 import { inquiryDetail, retryEmails } from "@/lib/admin/inquiries";
 import { draftReply, type ReplyDraft } from "@/lib/assistant/reply";
 import { isDeskStatus } from "@/lib/leads/desk";
@@ -17,15 +17,9 @@ import { setStatus } from "@/lib/leads/inquiries";
 export type SignInState = { error?: string };
 
 export async function signInAction(_prev: SignInState, form: FormData): Promise<SignInState> {
-  const result = await signIn(String(form.get("email") ?? ""), String(form.get("password") ?? "").slice(0, 200), String(form.get("code") ?? "").slice(0, 12));
+  const result = await signIn(String(form.get("email") ?? ""), String(form.get("password") ?? "").slice(0, 200));
   if (!result.ok) return { error: result.error };
   redirect("/admin");
-}
-
-/** "Skip sign-in (dev)": only where the sign-in page offers it (local dev, Vercel previews); refused anywhere else. */
-export async function skipSignInAction() {
-  if (await skipSignIn()) redirect("/admin");
-  redirect("/admin/login");
 }
 
 export async function signOutAction() {

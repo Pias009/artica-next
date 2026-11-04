@@ -6,7 +6,8 @@
 import { kidsPhotoStyles, womenPhotoStyles, type PhotoStyle } from "./catalog-photos";
 import shots from "./cloudinary-shots.json";
 import { onLive } from "./content/live";
-import type { ProductEdit } from "./content/model";
+import type { AddedProduct, ProductEdit } from "./content/model";
+import { categoryFor } from "./product-categories";
 import type { SeasonId } from "./season";
 
 export type ProductLine = "men" | "women" | "kids";
@@ -24,6 +25,8 @@ export type Product = {
   name: string;
   type: string;
   line: ProductLine;
+  /** Picked in the admin panel; otherwise worked out from the type (product-categories.ts). */
+  category?: string;
   badge?: "Top reorder" | "New" | "Trending";
   sizes: string;
   sizeRun: string[];
@@ -71,7 +74,7 @@ export const CASE_PACK: Record<ProductLine, [size: string, pairs: number][]> = {
 export const img = (file: string) => `/images/${file}.webp`;
 const shot = (file: string, w: number, h: number): Shot => ({ src: img(file), w, h });
 
-const SIZES: Record<ProductLine, string> = { men: "US 7–13", women: "US 5–10", kids: "Youth 11–4" };
+export const SIZES: Record<ProductLine, string> = { men: "US 7–13", women: "US 5–10", kids: "Youth 11–4" };
 const SCENES: Scene[] = ["sage", "sand", "blush", "stone"];
 const cloudShots: Record<string, Shot> = shots;
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -267,36 +270,16 @@ export const inLine = (line: ProductLine) => products.filter((p) => p.line === l
 
 /* ---------- categories: shoes of the same kind in a line are one listing, shown once ---------- */
 
-/** First match on the shoe's type wins, so the specific kinds (chelsea, hiker…) come before the broad ones (lace-up, zip). */
-const CATEGORY_RULES: [test: RegExp, label: string][] = [
-  [/chelsea/, "Chelsea boots"],
-  [/knee-high|tall/, "Tall boots"],
-  [/snow boot/, "Snow boots"],
-  [/hiker|work boot/, "Hiker boots"],
-  [/sandal|slide/, "Sandals & slides"],
-  [/loafer/, "Loafers"],
-  [/derby|mary jane/, "Derbies & Mary Janes"],
-  [/pump/, "Pumps"],
-  [/flat/, "Flats"],
-  [/sneaker|high-top/, "Sneakers"],
-  [/combat/, "Combat boots"],
-  [/lace|cuff/, "Lace-up boots"],
-  [/ankle|zip/, "Ankle boots"],
-];
-const ruleFor = (p: Product) => CATEGORY_RULES.find(([re]) => re.test(p.type.toLowerCase()))?.[1] ?? "Boots";
-// Kids have a single lace-up, so it joins their ankle boots rather than standing alone.
-const CATEGORY: Record<string, string> = Object.fromEntries(
-  products.map((p) => {
-    const c = ruleFor(p);
-    return [p.id, p.line === "kids" && c === "Lace-up boots" ? "Ankle boots" : c];
-  }),
-);
 /** The category a shoe is listed under: "Chelsea boots", "Loafers"… */
-export const categoryOf = (p: Product) => CATEGORY[p.id];
+export const categoryOf = (p: Product) => categoryFor(p);
 
 const groupKey = (p: Product) => `${p.line}:${categoryOf(p)}`;
 const GROUPS = new Map<string, Product[]>();
-for (const p of products) GROUPS.set(groupKey(p), [...(GROUPS.get(groupKey(p)) ?? []), p]);
+const regroup = (list: Product[]) => {
+  GROUPS.clear();
+  for (const p of list) GROUPS.set(groupKey(p), [...(GROUPS.get(groupKey(p)) ?? []), p]);
+};
+regroup(products);
 
 /** Every shoe in p's category and line, p included, in catalogue order. */
 export const groupOf = (p: Product) => GROUPS.get(groupKey(p))?.filter((x) => x === p || products.includes(x)) ?? [p];
@@ -304,32 +287,60 @@ export const groupOf = (p: Product) => GROUPS.get(groupKey(p))?.filter((x) => x 
 
 /** Every style, hidden ones included (the admin panel lists them all). `products` is what the site shows. */
 export const allProducts: Product[] = [...products];
-const BASE = new Map(products.map((p) => [p.id, { name: p.name, desc: p.desc, badge: p.badge }]));
-/** A style's name and description as built, before any admin edit. */
+const BUILT = [...products];
+const BASE = new Map(products.map((p) => [p.id, { ...p }]));
+/** A style as built, before any admin edit. */
 export const builtIn = (id: string) => BASE.get(id);
+/** Every style as built, before any admin edit. */
+export const builtInProducts = () => [...BASE.values()];
+
+/** A style with an admin edit laid over it: any field left out keeps the base value; null removes an optional one. */
+export function mergeEdit(base: Product, e: ProductEdit): Product {
+  const line = e.line ?? base.line;
+  const tags = e.tags ?? base.tags;
+  return {
+    ...base,
+    name: e.name?.trim() || base.name,
+    desc: e.desc?.trim() || base.desc,
+    type: e.type?.trim() || base.type,
+    line,
+    category: e.category === "" ? undefined : (e.category ?? base.category),
+    badge: e.badge === "none" ? undefined : (e.badge ?? base.badge),
+    sizes: e.sizes?.trim() || base.sizes,
+    sizeRun: e.sizeRun ?? base.sizeRun,
+    spec: e.spec?.trim() || base.spec,
+    // the line is always a tag: the site's filters and search go by it
+    tags: [line, ...tags.filter((t) => t !== "men" && t !== "women" && t !== "kids")],
+    outer: e.outer ?? base.outer,
+    zip: e.zip === null ? undefined : (e.zip ?? base.zip),
+    materials: e.materials ?? base.materials,
+    color: e.color ?? base.color,
+    scene: e.scene ?? base.scene,
+    rating: e.rating === null ? undefined : (e.rating ?? base.rating),
+    featured: !!e.featured,
+    pinnedSeasons: e.seasons?.length ? e.seasons : undefined,
+  };
+}
 
 /**
  * Applies the admin panel's product edits to the catalogue in place, so every list, page and tool that reads
- * `products` sees them: hidden styles leave the list, featured ones move to the front, new names and descriptions
- * replace the built-in ones. Idempotent: it starts from the built-in values each time. Run on the server by
+ * `products` sees them: added styles join the list, hidden ones leave it, featured ones move to the front, and edited
+ * fields replace the built-in ones. Idempotent: it starts from the built-in values each time. Run on the server by
  * content/store.ts and in the browser below, from the edits printed into the page.
  */
-export function applyProductEdits(edits: Record<string, ProductEdit>) {
-  for (const p of allProducts) {
-    const base = BASE.get(p.id)!;
-    const e = edits[p.id] ?? {};
-    p.name = e.name?.trim() || base.name;
-    p.desc = e.desc?.trim() || base.desc;
-    p.badge = e.badge === "none" ? undefined : (e.badge ?? base.badge);
-    p.featured = !!e.featured;
-    p.pinnedSeasons = e.seasons?.length ? e.seasons : undefined;
-  }
+export function applyProductEdits(edits: Record<string, ProductEdit>, added: AddedProduct[] = []) {
+  for (const p of allProducts) if (!BASE.has(p.id)) delete byId[p.id];
+  const extra = added.filter((p) => !BASE.has(p.id)).map((p) => mergeEdit(p, edits[p.id] ?? {}));
+  for (const p of BUILT) Object.assign(p, mergeEdit(BASE.get(p.id)!, edits[p.id] ?? {}));
+  for (const p of extra) byId[p.id] = p;
+  allProducts.splice(0, allProducts.length, ...BUILT, ...extra);
+  regroup(allProducts);
   const shown = allProducts.filter((p) => edits[p.id]?.live !== false);
   // featured first, otherwise catalogue order
   shown.sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || allProducts.indexOf(a) - allProducts.indexOf(b));
   products.splice(0, products.length, ...shown);
 }
-onLive((c) => applyProductEdits(c.products));
+onLive((c) => applyProductEdits(c.products, c.added));
 
 /** One shoe per category, keeping the first of each in list order (so a filter's best match fronts its category). */
 export function collapse(list: Product[]) {

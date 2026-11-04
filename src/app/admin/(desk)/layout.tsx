@@ -6,8 +6,7 @@ import { dbReady } from "@/lib/leads/db";
 /**
  * The frame for the working pages (the real inquiries and security); the dashboard at /admin is full-screen. It
  * checks the session, but layouts don't run again on every navigation, so each page and action checks for itself too
- * (requireAdmin is cached per request, so that costs one lookup). These pages read the database: without one (a
- * preview opened with "Skip sign-in"), they say so instead of failing.
+ * (requireAdmin is cached per request, so that costs one lookup).
  */
 export default async function DeskLayout({ children }: LayoutProps<"/admin">) {
   const { admin } = await requireAdmin();
@@ -20,7 +19,7 @@ export default async function DeskLayout({ children }: LayoutProps<"/admin">) {
           </span>
           <nav aria-label="Admin" className="flex gap-1">
             <NavLink href="/admin">Dashboard</NavLink>
-            <NavLink href="/admin/inquiries">Inquiries</NavLink>
+            <NavLink href="/admin/inquiries/all">Inquiries</NavLink>
             <NavLink href="/admin/security">Security</NavLink>
           </nav>
           <div className="ml-auto flex items-center gap-3">

@@ -19,6 +19,12 @@ type Section = {
   visible: boolean;
   title: string;
   sub: string;
+  /** The words as built, shown as the placeholder (other pages; the home page's live in the sections themselves). */
+  builtTitle?: string;
+  /** null: this heading has no supporting line to rewrite. */
+  builtSub?: string | null;
+  hideable: boolean;
+  movable: boolean;
 };
 type AdminPage = {
   path: string;
@@ -30,9 +36,14 @@ type AdminPage = {
   title: string;
   description: string;
   sections: Section[];
+  /** The page couldn't be read for its headings just now. */
+  unread: boolean;
 };
 
-/** The site's pages with the saved edits applied. Only the home page has sections to arrange. */
+/**
+ * The site's pages with the saved edits applied: the home page's sections (shown, hidden, ordered, rewritten), and on
+ * every other page its intro and section headings, read from the page itself (rewritten, sections shown or hidden).
+ */
 function toPages(d: PanelData): AdminPage[] {
   return d.pages.map((p) => {
     const e = d.content.pages[p.path] ?? {};
@@ -49,15 +60,30 @@ function toPages(d: PanelData): AdminPage[] {
               visible,
               title: copy?.title ?? "",
               sub: copy?.sub ?? "",
+              hideable: true,
+              movable: true,
             };
           })
-        : [];
+        : (p.blocks ?? []).map((b) => ({
+            id: b.id,
+            label: b.label,
+            kind: b.kind,
+            copy: true,
+            visible: !e.hidden?.includes(b.id),
+            title: e.copy?.[`${b.id}.title`] ?? "",
+            sub: e.copy?.[`${b.id}.sub`] ?? "",
+            builtTitle: b.title,
+            builtSub: b.sub,
+            hideable: b.hideable,
+            movable: false,
+          }));
     return {
       ...p,
       published: e.published !== false,
       title: e.title ?? "",
       description: e.description ?? "",
       sections,
+      unread: p.path !== "/" && p.blocks === null,
     };
   });
 }
@@ -67,12 +93,26 @@ function toEdits(pages: AdminPage[], d: PanelData): Record<string, PageEdit> {
   const builtOrder = d.homeSections.map((h) => h.id).join();
   return Object.fromEntries(
     pages.flatMap((p) => {
+      const home = p.path === "/";
       const changed =
-        p.sections.length && (p.sections.map((x) => x.id).join() !== builtOrder || p.sections.some((x) => !x.visible || x.title.trim() || x.sub.trim()));
+        home &&
+        p.sections.length &&
+        (p.sections.map((x) => x.id).join() !== builtOrder || p.sections.some((x) => !x.visible || x.title.trim() || x.sub.trim()));
+      const copy = home
+        ? {}
+        : Object.fromEntries(
+            p.sections.flatMap((x) => [
+              ...(x.title.trim() ? [[`${x.id}.title`, x.title.trim()]] : []),
+              ...(x.sub.trim() ? [[`${x.id}.sub`, x.sub.trim()]] : []),
+            ]),
+          );
+      const hidden = home ? [] : p.sections.filter((x) => !x.visible).map((x) => x.id);
       const e: PageEdit = {
         ...(!p.published && { published: false }),
         ...(p.title.trim() && { title: p.title.trim() }),
         ...(p.description.trim() && { description: p.description.trim() }),
+        ...(Object.keys(copy).length && { copy }),
+        ...(hidden.length && { hidden }),
         ...(changed && {
           sections: p.sections.map((x) => ({
             id: x.id,
@@ -125,7 +165,7 @@ export function Pages() {
     if (!section) return;
     setIdeas(null);
     setThinking(true);
-    const got = await sectionIdeasAction(section.label, section.title, section.sub).catch(() => null);
+    const got = await sectionIdeasAction(section.label, section.title || section.builtTitle || "", section.sub || section.builtSub || "").catch(() => null);
     setIdeas(got);
     setThinking(false);
   };
@@ -231,14 +271,18 @@ export function Pages() {
 
         {page.sections.length === 0 ? (
           <Card i={2}>
-            <CardHead title="Sections" sub="This page's layout is fixed" />
-            <p className="mt-3 text-[13.5px] text-ink/60">Sections can be arranged on the home page. Open Home to show, hide, reorder or rewrite them.</p>
+            <CardHead title="Sections" sub={page.unread ? "Couldn't read this page just now" : "Nothing to rewrite here"} />
+            <p className="mt-3 text-[13.5px] text-ink/60">
+              {page.unread
+                ? "The panel reads each page for its intro and headings. Reload the panel in a moment to try again."
+                : "This page has no intro or section headings the panel can rewrite. Its search title and description are above."}
+            </p>
           </Card>
         ) : (
           <Card i={2}>
             <CardHead
               title="Sections"
-              sub="Drag to reorder; the eye shows or hides a section"
+              sub={page.path === "/" ? "Drag to reorder; the eye shows or hides a section" : "Pick one to rewrite it; the eye shows or hides a section"}
               right={
                 <span className="text-[13px] text-ink/50 tabular-nums">
                   {page.sections.filter((s) => s.visible).length}/{page.sections.length} shown
@@ -249,7 +293,7 @@ export function Pages() {
               {page.sections.map((s, i) => (
                 <li
                   key={s.id}
-                  draggable
+                  draggable={s.movable}
                   onDragStart={() => setDrag(i)}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -266,7 +310,7 @@ export function Pages() {
                     !s.visible && "text-ink/40",
                   )}
                 >
-                  <span className="cursor-grab text-ink/30 active:cursor-grabbing" aria-hidden="true">
+                  <span className={clsx("text-ink/30", s.movable ? "cursor-grab active:cursor-grabbing" : "invisible")} aria-hidden="true">
                     <AdminIcon name="grip" className="size-5 stroke-[3]" />
                   </span>
                   <span className="w-6 text-[12px] text-ink/40 tabular-nums">{String(i + 1).padStart(2, "0")}</span>
@@ -282,33 +326,39 @@ export function Pages() {
                     <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[11px] font-medium text-ink/55">{s.kind}</span>
                   </button>
                   <span className="flex opacity-60 transition-opacity group-hover:opacity-100">
-                    <button
-                      type="button"
-                      aria-label={`Move ${s.label} up`}
-                      disabled={i === 0}
-                      onClick={() => move(i, i - 1)}
-                      className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06] disabled:opacity-25"
-                    >
-                      <AdminIcon name="up" className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Move ${s.label} down`}
-                      disabled={i === page.sections.length - 1}
-                      onClick={() => move(i, i + 1)}
-                      className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06] disabled:opacity-25"
-                    >
-                      <AdminIcon name="down" className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
-                      aria-pressed={!s.visible}
-                      onClick={() => editSection(s.id, { visible: !s.visible })}
-                      className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06]"
-                    >
-                      <AdminIcon name={s.visible ? "eye" : "eyeOff"} className="size-4" />
-                    </button>
+                    {s.movable && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label={`Move ${s.label} up`}
+                          disabled={i === 0}
+                          onClick={() => move(i, i - 1)}
+                          className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06] disabled:opacity-25"
+                        >
+                          <AdminIcon name="up" className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Move ${s.label} down`}
+                          disabled={i === page.sections.length - 1}
+                          onClick={() => move(i, i + 1)}
+                          className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06] disabled:opacity-25"
+                        >
+                          <AdminIcon name="down" className="size-4" />
+                        </button>
+                      </>
+                    )}
+                    {s.hideable && (
+                      <button
+                        type="button"
+                        aria-label={s.visible ? `Hide ${s.label}` : `Show ${s.label}`}
+                        aria-pressed={!s.visible}
+                        onClick={() => editSection(s.id, { visible: !s.visible })}
+                        className="grid size-9 place-items-center rounded-full hover:bg-ink/[0.06]"
+                      >
+                        <AdminIcon name={s.visible ? "eye" : "eyeOff"} className="size-4" />
+                      </button>
+                    )}
                   </span>
                 </li>
               ))}
@@ -321,7 +371,7 @@ export function Pages() {
       <Card i={3} className="lg:col-start-2 xl:sticky xl:top-6 xl:col-start-auto xl:self-start">
         {section ? (
           <>
-            <CardHead title={section.label} sub={`${section.kind} section on ${page.name}`} />
+            <CardHead title={section.label} sub={section.kind === "Intro" ? `The opening of ${page.name}` : `${section.kind} section on ${page.name}`} />
             {!section.copy ? (
               <p className="mt-4 text-[13.5px] text-ink/60">This section&apos;s words are part of its design. You can show, hide or move it.</p>
             ) : (
@@ -332,17 +382,19 @@ export function Pages() {
                     value={section.title}
                     max={90}
                     multiline
-                    placeholder="The section's own headline"
+                    placeholder={section.builtTitle || "The section's own headline"}
                     onChange={(v) => editSection(section.id, { title: v })}
                   />
-                  <Field
-                    label="Supporting line"
-                    value={section.sub}
-                    max={200}
-                    multiline
-                    placeholder="The section's own line"
-                    onChange={(v) => editSection(section.id, { sub: v })}
-                  />
+                  {section.builtSub !== null && (
+                    <Field
+                      label="Supporting line"
+                      value={section.sub}
+                      max={section.kind === "Intro" ? 300 : 200}
+                      multiline
+                      placeholder={section.builtSub || "The section's own line"}
+                      onChange={(v) => editSection(section.id, { sub: v })}
+                    />
+                  )}
                   <p className="-mt-2 text-[12px] text-ink/50">
                     Wrap the closing words in *asterisks* for the plum italic. Empty fields keep the site&apos;s own words.
                   </p>

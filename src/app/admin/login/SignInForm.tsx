@@ -5,13 +5,13 @@ import { signInAction, type SignInState } from "../actions";
 
 export function SignInForm() {
   const [state, action, pending] = useActionState<SignInState, FormData>(signInAction, {});
-  const code = useRef<HTMLInputElement>(null);
+  const password = useRef<HTMLInputElement>(null);
 
-  // after a wrong try the code has usually expired anyway: clear it and put the cursor there
+  // after a wrong try: clear the password and put the cursor there
   useEffect(() => {
-    if (state.error && code.current) {
-      code.current.value = "";
-      code.current.focus();
+    if (state.error && password.current) {
+      password.current.value = "";
+      password.current.focus();
     }
   }, [state]);
 
@@ -23,21 +23,7 @@ export function SignInForm() {
       </label>
       <label className="grid gap-1.5">
         <span className="text-xs font-semibold text-ink-2">Password</span>
-        <input name="password" type="password" required autoComplete="current-password" className="field" />
-      </label>
-      <label className="grid gap-1.5">
-        <span className="text-xs font-semibold text-ink-2">Authenticator code</span>
-        <input
-          ref={code}
-          name="code"
-          required
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="[0-9]{6}"
-          maxLength={6}
-          placeholder="6 digits"
-          className="field tracking-[.3em] tabular-nums"
-        />
+        <input ref={password} name="password" type="password" required autoComplete="current-password" className="field" />
       </label>
       {state.error && (
         <p role="alert" className="text-[13px] font-medium text-danger">

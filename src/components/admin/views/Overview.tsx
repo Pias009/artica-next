@@ -2,18 +2,20 @@
 
 import clsx from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { askAssistant } from "../ai";
-import { intentLabel, type View } from "../data";
-import { ago, usePanel } from "../panel-data";
+import { intentLabel } from "../data";
+import { ago, useAsk, usePanel } from "../panel-data";
 import { AdminIcon, Card, CardHead, CountUp, flash, LineChart, Meter, PinBars, Ring, Toggle } from "../ui";
 import { saveControlsAction } from "@/app/admin/content-actions";
 
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
 
 /** The dashboard: the week at a glance from the real inquiries, visitor log and site settings. */
-export function Overview({ onAsk, onGo }: { onAsk: (prompt: string) => void; onGo: (v: View) => void }) {
+export function Overview() {
   const panel = usePanel();
+  const onAsk = useAsk();
   const o = panel.overview;
   const stats = panel.inquiryStats;
   const by = stats?.byStatus ?? {
@@ -198,9 +200,9 @@ export function Overview({ onAsk, onGo }: { onAsk: (prompt: string) => void; onG
           title="Latest inquiries"
           sub="Newest first"
           right={
-            <button type="button" onClick={() => onGo("inquiries")} className="min-h-9 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-white">
+            <Link href="/admin/inquiries" className="inline-flex min-h-9 items-center rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-white">
               All inquiries
-            </button>
+            </Link>
           }
         />
         {panel.inquiries.length ? (
