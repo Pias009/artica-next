@@ -25,13 +25,17 @@ export async function POST(req: Request) {
     w?: unknown;
     q?: unknown;
     n?: unknown;
+    id?: unknown;
   };
   try {
     b = JSON.parse(raw);
   } catch {
     return none;
   }
-  const kind = b.k === "search" || b.k === "inquiry" ? b.k : "view";
+  const kind = b.k === "search" || b.k === "inquiry" || b.k === "add" ? b.k : "view";
+  // a style put on the inquiry list: its id, as the catalogue knows it
+  const pid = kind === "add" && typeof b.id === "string" && /^[\w-]{1,40}$/.test(b.id) ? b.id : undefined;
+  if (kind === "add" && !pid) return none;
   const full = typeof b.p === "string" && b.p.startsWith("/") && b.p.length <= 300 ? b.p : null;
   if (!full) return none;
   const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
@@ -48,6 +52,7 @@ export async function POST(req: Request) {
     country: cookie ?? h.get("x-vercel-ip-country") ?? null,
     device: deviceOf(ua, typeof b.w === "number" ? b.w : 0),
     source: sourceOf(typeof b.r === "string" ? b.r.slice(0, 300) : undefined, h.get("host") ?? ""),
+    ...(pid && { pid }),
   };
   // a search: typed in the site search, or the catalog opened with ?q=
   const q = (typeof b.q === "string" ? b.q : kind === "view" && url.pathname === "/catalog" ? (url.searchParams.get("q") ?? "") : "").trim().slice(0, 80);

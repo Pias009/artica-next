@@ -1,23 +1,22 @@
 "use client";
 
+import { chosen, defaultArrivals, MAX_ARRIVALS } from "@/lib/merch";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
 import { useSeason } from "../season/SeasonContext";
-import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
+import { categoryOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
 import { bySeason } from "@/lib/season-products";
 import { useInCart, useInquiry, useUI } from "@/lib/store";
 
 /** Just in for FW26 (client placeholder list). */
-const NEW_ARRIVAL_SLUGS = ["tundra", "pop", "zinnia", "lynx", "toffee", "frost", "blossom", "bluebell"];
 
 const AUTOPLAY_MS = 4200;
 
 type Filter = "all" | ProductLine;
 const FILTERS: Filter[] = ["all", "women", "men", "kids"];
 
-const ARRIVALS = NEW_ARRIVAL_SLUGS.map(getProduct).filter((p): p is Product => !!p);
 
 /**
  * New arrivals as expanding panels: every new style is a slim glass panel tinted in its own colour, side by side on
@@ -28,7 +27,8 @@ const ARRIVALS = NEW_ARRIVAL_SLUGS.map(getProduct).filter((p): p is Product => !
 export function NewArrivals() {
   const season = useSeason();
   // the drop in the visitor's season order: what suits their weather opens first. Fixed for the page's life.
-  const ALL = useMemo(() => bySeason(ARRIVALS, season), [season]);
+  // the admin's list (Products → Arrange) in its own order; otherwise the built-in one, season's best first
+  const ALL = useMemo(() => chosen("arrivals")?.slice(0, MAX_ARRIVALS) ?? bySeason(defaultArrivals(), season), [season]);
   const inFilter = useCallback((f: Filter) => (f === "all" ? ALL : ALL.filter((p) => p.line === f)), [ALL]);
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState(ALL[0]?.id ?? "");

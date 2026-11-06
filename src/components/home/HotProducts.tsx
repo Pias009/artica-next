@@ -1,5 +1,6 @@
 "use client";
 
+import { chosen, DEFAULT_HOT, defaultHot, MAX_HOT } from "@/lib/merch";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
@@ -7,7 +8,7 @@ import { Icon } from "../Icon";
 import { AddButton } from "../product/AddButton";
 import { useSeason } from "../season/SeasonContext";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
-import { categoryOf, getProduct, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
+import { categoryOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product } from "@/lib/products";
 import type { SeasonId } from "@/lib/season";
 import { inSeason, seasonPicks } from "@/lib/season-products";
 import { useUI } from "@/lib/store";
@@ -17,8 +18,7 @@ import { offTilt, onTilt } from "@/lib/tilt";
  * The season's most-reordered styles, best first (client placeholder list: the first three carry the catalogue's own
  * "Top reorder" / "Trending" tags; reorder the slugs from real sales data).
  */
-const HOT = ["nord", "mira", "mira-tall", "ember", "maple", "cedar", "raven", "sable"];
-const DECK_SIZE = HOT.length;
+const DECK_SIZE = DEFAULT_HOT.length;
 /** Where a grid taller than the window pins: just under the header. */
 const PIN_TOP = 96;
 
@@ -27,9 +27,11 @@ const PIN_TOP = 96;
  * a still grid; past that the list splits into two layers that drift in opposite directions.
  */
 function deck(season: SeasonId) {
-  const hot = HOT.map(getProduct).filter((p): p is Product => !!p);
+  // the admin's deck (Products → Arrange) as set; otherwise the season's styles first, topped up from the reorder list
+  const own = chosen("hot");
+  const hot = defaultHot();
   const fresh = seasonPicks(season, DECK_SIZE).filter((p) => inSeason(p, season));
-  const ITEMS = [...fresh, ...hot.filter((p) => !fresh.includes(p))].slice(0, DECK_SIZE);
+  const ITEMS = own?.length ? own.slice(0, MAX_HOT) : [...fresh, ...hot.filter((p) => !fresh.includes(p))].slice(0, DECK_SIZE);
   const HALF = Math.ceil(ITEMS.length / 2);
   const MOVING = HALF > 4;
   return { ITEMS, MID: (ITEMS.length - 1) / 2, HALF, MOVING, ROWS: MOVING ? [ITEMS.slice(0, HALF), ITEMS.slice(HALF)] : [] };

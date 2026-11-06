@@ -12,6 +12,8 @@ import { DUE_HOURS, historyFor, inquiryDetail, MAX_ATTEMPTS } from "@/lib/admin/
 import { MAIL_KINDS, type MailKind } from "@/lib/leads/db";
 import { DESK_STATUSES } from "@/lib/leads/desk";
 import { INTENT_LABEL } from "@/lib/leads/mail";
+import { quote, TIERS, usd } from "@/lib/admin/prices";
+import { readContent } from "@/lib/content/store";
 
 export async function generateMetadata({ params }: PageProps<"/admin/inquiries/[ref]">): Promise<Metadata> {
   return { title: (await params).ref };
@@ -30,8 +32,9 @@ const ACTION_LABEL: Record<string, string> = {
 export default async function InquiryPage({ params }: PageProps<"/admin/inquiries/[ref]">) {
   await requireAdmin();
   const { ref } = await params;
-  const [i, history] = await Promise.all([inquiryDetail(ref), historyFor(ref)]);
+  const [i, history, content] = await Promise.all([inquiryDetail(ref), historyFor(ref), readContent()]);
   if (!i) notFound();
+  const q = quote(i.lines, content.prices);
   const n = (x: number) => x.toLocaleString("en-US");
   const late = i.status === "new" && hoursSince(i.createdAt) >= DUE_HOURS;
   const unsent = MAIL_KINDS.some((k) => !i.mail[k].sentAt);
@@ -70,26 +73,50 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
                       <th className="py-2 pr-3 font-semibold">Colour</th>
                       <th className="py-2 pr-3 font-semibold">Sizes</th>
                       <th className="py-2 pr-3 text-right font-semibold">Cases</th>
-                      <th className="py-2 text-right font-semibold">Pairs</th>
+                      <th className="py-2 pr-3 text-right font-semibold">Pairs</th>
+                      <th className="py-2 pr-3 text-right font-semibold">Price / pair</th>
+                      <th className="py-2 text-right font-semibold">Line total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {i.lines.map((l) => (
+                    {q.rows.map((l) => (
                       <tr key={l.productId} className="border-t border-line">
                         <td className="py-2 pr-3 font-semibold">{l.name}</td>
                         <td className="py-2 pr-3">{l.color}</td>
                         <td className="py-2 pr-3 text-ink-2">{l.sizes}</td>
                         <td className="py-2 pr-3 text-right tabular-nums">{n(l.cases)}</td>
-                        <td className="py-2 text-right tabular-nums">{n(l.pairs)}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums">{n(l.pairs)}</td>
+                        <td className="py-2 pr-3 text-right tabular-nums">
+                          {l.price !== null ? (
+                            <>
+                              {usd(l.price)} <span className="text-[11px] text-muted">{TIERS.find((t) => t.key === l.tier)?.label}</span>
+                            </>
+                          ) : (
+                            <Link href={`/admin/products/${l.productId}`} className="text-[12px] font-semibold text-brand underline">
+                              Set price
+                            </Link>
+                          )}
+                        </td>
+                        <td className="py-2 text-right font-semibold tabular-nums">{l.total !== null ? usd(l.total) : "–"}</td>
                       </tr>
                     ))}
                   </tbody>
+                  {q.total > 0 && (
+                    <tfoot>
+                      <tr className="border-t-2 border-ink/20">
+                        <td colSpan={6} className="py-2 pr-3 text-right font-semibold">
+                          {q.complete ? "Order total, FOB" : `Priced lines (${q.missing.length} without a price)`}
+                        </td>
+                        <td className="py-2 text-right font-semibold tabular-nums">{usd(q.total)}</td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             ) : (
               <p className="text-[14px] text-ink-2">None chosen: they asked for the full line sheet.</p>
             )}
-            <p className="mt-3 text-[12px] text-muted">Styles as they were when sent; the catalog may have changed since.</p>
+            <p className="mt-3 text-[12px] text-muted">Styles as they were when sent; the catalog may have changed since. Prices are your own (Products), at the tier each line reaches.</p>
           </Card>
 
           <Card title="Reply with Kai">

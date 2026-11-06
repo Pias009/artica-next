@@ -54,4 +54,8 @@ export const pageHidden = (path: string, id: string) => !!live()?.pages?.[path]?
 export const sectionCopy = (id: string) => live()?.copy[id];
 export const controlOn = (k: "effects" | "campaign") => live()?.controls[k] ?? true;
 export const campaignLive = (s: SeasonId) => live()?.seasons.campaigns[s]?.live ?? true;
+/** A style's availability as set in the admin panel (Products); undefined: made to order, as usual. */
+/** The admin's list for a home section or the featured order (ids); empty: the built-in way. */
+export const merchList = (k: "hot" | "arrivals" | "order") => live()?.merch?.[k] ?? [];
+export const availabilityOf = (id: string) => live()?.availability?.[id];
 export const deskOn = (d: "trade" | "plan") => live()?.assistant[d] ?? true;

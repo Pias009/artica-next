@@ -7,6 +7,7 @@ import { usePanel, useSaver } from "../panel-data";
 import { AdminIcon, Card, CardHead, Field, SaveBar, Shimmer, Toggle } from "../ui";
 import { savePagesAction } from "@/app/admin/content-actions";
 import type { PanelData } from "@/lib/admin/panel";
+import type { Block } from "@/lib/admin/page-blocks";
 import type { PageEdit } from "@/lib/content/model";
 import type { CopyIdea } from "@/lib/assistant/admin-ai";
 import { homeOrder } from "@/lib/home-sections";
@@ -44,7 +45,7 @@ type AdminPage = {
  * The site's pages with the saved edits applied: the home page's sections (shown, hidden, ordered, rewritten), and on
  * every other page its intro and section headings, read from the page itself (rewritten, sections shown or hidden).
  */
-function toPages(d: PanelData): AdminPage[] {
+function toPages(d: PanelData, blocks: Record<string, Block[] | null>): AdminPage[] {
   return d.pages.map((p) => {
     const e = d.content.pages[p.path] ?? {};
     const sections =
@@ -64,7 +65,7 @@ function toPages(d: PanelData): AdminPage[] {
               movable: true,
             };
           })
-        : (p.blocks ?? []).map((b) => ({
+        : (blocks[p.path] ?? []).map((b) => ({
             id: b.id,
             label: b.label,
             kind: b.kind,
@@ -83,7 +84,7 @@ function toPages(d: PanelData): AdminPage[] {
       title: e.title ?? "",
       description: e.description ?? "",
       sections,
-      unread: p.path !== "/" && p.blocks === null,
+      unread: p.path !== "/" && !blocks[p.path],
     };
   });
 }
@@ -130,9 +131,9 @@ function toEdits(pages: AdminPage[], d: PanelData): Record<string, PageEdit> {
 const GROUPS = ["Shop", "Wholesale terms", "Buyer tools", "Company", "Legal"];
 
 /** Every page on the site: its search listing, and its sections (show, hide, reorder, edit the copy with AI help). */
-export function Pages() {
+export function Pages({ blocks }: { blocks: Record<string, Block[] | null> }) {
   const panel = usePanel();
-  const initial = useMemo(() => toPages(panel), [panel]);
+  const initial = useMemo(() => toPages(panel, blocks), [panel, blocks]);
   const [saved, setSaved] = useState<AdminPage[]>(initial);
   const [pages, setPages] = useState<AdminPage[]>(initial);
   const saver = useSaver((v: AdminPage[]) => savePagesAction(toEdits(v, panel)), setSaved);

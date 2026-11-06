@@ -10,7 +10,7 @@ import { database, dbReady } from "../leads/db";
  * address itself is never stored. Nothing is kept on the visitor's device. Deleted after 90 days (TTL index).
  */
 
-export type VisitKind = "view" | "search" | "inquiry";
+export type VisitKind = "view" | "search" | "inquiry" | "add";
 export type Device = "Desktop" | "Mobile" | "Tablet";
 export type VisitDoc = {
   sid: string;
@@ -22,6 +22,8 @@ export type VisitDoc = {
   source: string;
   q?: string;
   found?: number;
+  /** "add": the style put on the inquiry list. */
+  pid?: string;
 };
 
 export const visits = () => database().collection<VisitDoc>("visits");

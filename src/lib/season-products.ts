@@ -28,6 +28,8 @@ const text = (p: Product) => `${categoryOf(p)} ${p.type} ${p.tags.join(" ")}`.to
 export const seasonScore = (p: Product, season: SeasonId) =>
   RULES[season].reduce((n, [re, w]) => (re.test(text(p)) ? n + w : n), 0) + (p.pinnedSeasons?.includes(season) ? IN_SEASON : 0);
 export const inSeason = (p: Product, season: SeasonId) => seasonScore(p, season) >= IN_SEASON;
+/** The same score from a style's words alone ("chelsea boots leather ankle boot …"), for styles being edited. */
+export const scoreWords = (words: string, season: SeasonId) => RULES[season].reduce((n, [re, w]) => (re.test(words.toLowerCase()) ? n + w : n), 0);
 
 /** The list with the season's best first; ties keep their catalogue order. */
 export function bySeason<T extends Product>(list: T[], season: SeasonId): T[] {

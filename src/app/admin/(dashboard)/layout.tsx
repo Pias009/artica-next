@@ -1,8 +1,6 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminPanel } from "@/components/admin/AdminPanel";
 import { currentAdmin } from "@/lib/admin/auth";
-import { siteOrigin } from "@/lib/admin/page-blocks";
 import { panelData } from "@/lib/admin/panel";
 
 /**
@@ -13,7 +11,7 @@ import { panelData } from "@/lib/admin/panel";
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const who = await currentAdmin().catch(() => null);
   if (!who) redirect("/admin/login");
-  const data = await panelData(siteOrigin((await headers()).get("host")));
+  const data = await panelData();
   return (
     <AdminPanel admin={{ name: who.admin.name, email: who.admin.email }} data={data}>
       {children}

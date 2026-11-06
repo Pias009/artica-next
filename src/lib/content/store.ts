@@ -1,4 +1,5 @@
 import "server-only";
+import type { ObjectId } from "mongodb";
 import { unstable_cache } from "next/cache";
 import { EMPTY_CONTENT, publicContent, withDefaults, type SiteContent } from "./model";
 import { setLive } from "./live";
@@ -51,6 +52,27 @@ export async function loadContent() {
 }
 
 /** Saves some top-level parts of the document (each replaced whole). */
-export async function saveContent(patch: Partial<Omit<SiteContent, "updatedAt" | "updatedBy">>, by: string) {
+export async function saveContent(patch: Partial<Omit<SiteContent, "updatedAt" | "updatedBy">>, by: string, what = "edit") {
+  // keep what this save replaces, so any change can be looked back on and undone (Products → a style → History)
+  const before = await contentDoc().findOne({ _id: "site" }, { projection: Object.fromEntries(Object.keys(patch).map((k) => [k, 1])) });
   await contentDoc().updateOne({ _id: "site" }, { $set: { ...patch, updatedAt: new Date().toISOString(), updatedBy: by } }, { upsert: true });
+  await recordHistory({ at: new Date(), by, what, before: Object.fromEntries(Object.keys(patch).map((k) => [k, (before as Record<string, unknown> | null)?.[k] ?? null])) }).catch((e) =>
+    console.error("[content] history not kept", e),
+  );
+}
+
+/* ---- history: what each save replaced, kept 180 days ---- */
+
+export type HistoryEntry = { _id?: ObjectId; at: Date; by: string; what: string; before: Record<string, unknown> };
+export const historyDoc = () => database().collection<HistoryEntry>("site_content_history");
+let historyIndexed: Promise<unknown> | null = null;
+async function recordHistory(e: HistoryEntry) {
+  historyIndexed ??= historyDoc()
+    .createIndexes([
+      { key: { at: 1 }, name: "expire", expireAfterSeconds: 180 * 24 * 60 * 60 },
+      { key: { at: -1 }, name: "at" },
+    ])
+    .catch(() => (historyIndexed = null));
+  await historyIndexed;
+  await historyDoc().insertOne(e);
 }

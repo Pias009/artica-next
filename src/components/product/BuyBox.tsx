@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Icon } from "../Icon";
 import { useGroupInList } from "./ColorChooser";
 import { byId, groupOf, MOQ_CASES, PACK, STEP_CASES } from "@/lib/products";
+import { describe } from "@/lib/availability";
+import { availabilityOf } from "@/lib/content/live";
 import { useInquiry, useUI } from "@/lib/store";
 
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -57,8 +59,20 @@ export function BuyBox({ id }: { id: string }) {
     openDrawer();
   };
 
+  // set per style in the admin panel; made to order unless the desk says otherwise
+  const avail = describe(availabilityOf(id));
   return (
     <div className="rounded-card bg-tile p-4">
+      <p
+        data-availability={avail.tone}
+        className={clsx(
+          "mb-3 flex items-start gap-2 rounded-xl px-3 py-2 text-[13.5px] leading-snug",
+          avail.tone === "good" ? "bg-[#2f8f5b]/10 text-[#1f6b45]" : avail.tone === "warn" ? "bg-[#b45309]/10 text-[#8a3b0a]" : avail.tone === "info" ? "bg-[#2563eb]/8 text-[#1e40af]" : "bg-white text-ink-2",
+        )}
+      >
+        <span aria-hidden="true" className="mt-1.5 size-2 flex-none rounded-full bg-current" />
+        {avail.text}
+      </p>
       {/* 1. colours */}
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-[13px] font-semibold text-ink-2">{group.length > 1 ? "Choose colours" : "Colour"}</span>

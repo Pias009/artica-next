@@ -25,7 +25,7 @@ export const useAsk = () => useContext(AskCtx);
  * Saving a view's edits through its server action: pending while it runs, the server's error if it refuses, and on
  * success `onSaved` (the view marks its edits as saved) and a confirmation.
  */
-export function useSaver<T>(action: (v: T) => Promise<SaveResult>, onSaved: (v: T) => void) {
+export function useSaver<T>(action: (v: T) => Promise<SaveResult>, onSaved: (v: T) => void, done = "Published. The site shows it on the next page load.") {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const save = (v: T) =>
@@ -35,7 +35,7 @@ export function useSaver<T>(action: (v: T) => Promise<SaveResult>, onSaved: (v: 
         if (r.ok) {
           setError(null);
           onSaved(v);
-          flash("Published. The site shows it on the next page load.");
+          flash(done);
         } else setError(r.error);
       } catch {
         setError("Couldn't reach the server. Check your connection and try again.");

@@ -14,7 +14,7 @@ import { SEASON_IDS, type SeasonId } from "../season";
  * and the facts it may repeat. Every earlier tool result is sent again on each turn, so this is most of the input
  * tokens in a long chat.
  */
-const brief = (c: Card) => `${c.name} (${c.url}): ${c.type}, ${c.color}, ${c.line}${c.badge ? `, ${c.badge}` : ""}${c.seasons.length ? `, suits ${c.seasons.join("/")}` : ""}`;
+const brief = (c: Card) => `${c.name} (${c.url}): ${c.type}, ${c.color}, ${c.line}${c.badge ? `, ${c.badge}` : ""}${c.seasons.length ? `, suits ${c.seasons.join("/")}` : ""}${c.availability ? `. ${c.availability}` : ""}`;
 const text = (value: string) => ({ type: "text" as const, value });
 const cards = (label: string, list: Card[]) => `${label} (shown to the buyer as cards): ${list.length ? list.map(brief).join("; ") : "none"}`;
 
@@ -93,7 +93,7 @@ export function makeTools(ctx: { season?: SeasonId; requested: () => Promise<{ i
       toModelOutput: ({ output }) =>
         text(
           output.found
-            ? `${brief(output)}. ${output.description} Materials: ${output.materials.join("; ")}. Sizes ${output.sizeRange}. ${output.casePack}. MOQ ${output.moq}.${output.rating ? ` Rated ${output.rating}.` : ""} ${cards("Goes with", output.goesWith)}`
+            ? `${brief(output)}. ${output.description} Materials: ${output.materials.join("; ")}. Sizes ${output.sizeRange}. ${output.casePack}. MOQ ${output.moq}. ${output.availability}${output.rating ? ` Rated ${output.rating}.` : ""} ${cards("Goes with", output.goesWith)}`
             : cards("Not found; suggestions", output.suggestions),
         ),
     }),

@@ -6,6 +6,8 @@
 
 import type { Product } from "../products";
 import type { SeasonId } from "../season";
+import type { PriceList } from "../admin/prices";
+import type { Availability } from "../availability";
 
 /** A style made in the admin panel; shown, featured and pinned through `products`, like a built-in one. */
 export type AddedProduct = Omit<Product, "featured" | "pinnedSeasons">;
@@ -67,6 +69,12 @@ export type Tone = "plain" | "warm" | "formal";
 export type SiteContent = {
   products: Record<string, ProductEdit>;
   added: AddedProduct[];
+  /** The desk's private prices per style (admin/prices.ts). Never sent to browsers: publicContent leaves it out. */
+  prices: PriceList;
+  /** Per style: in stock, in production, sold out, or made to order with its own lead time (availability.ts). Public. */
+  availability: Record<string, Availability>;
+  /** The home page's Hot products and New arrivals (empty: the built-in way), and the order of featured styles (lib/merch.ts). */
+  merch: { hot: string[]; arrivals: string[]; order: string[] };
   pages: Record<string, PageEdit>;
   seasons: {
     /** true: each visitor sees the season in their country; false: everyone sees `fallback`. */
@@ -86,6 +94,9 @@ export type SiteContent = {
 export const EMPTY_CONTENT: SiteContent = {
   products: {},
   added: [],
+  prices: {},
+  availability: {},
+  merch: { hot: [], arrivals: [], order: [] },
   pages: {},
   seasons: { auto: true, fallback: "winter", campaigns: {} },
   controls: { effects: true, campaign: true },
@@ -100,6 +111,9 @@ export function withDefaults(raw: Partial<SiteContent> | null | undefined): Site
   return {
     products: r.products ?? {},
     added: r.added ?? [],
+    prices: r.prices ?? {},
+    availability: r.availability ?? {},
+    merch: { hot: [], arrivals: [], order: [], ...r.merch },
     pages: r.pages ?? {},
     seasons: {
       ...EMPTY_CONTENT.seasons,
@@ -120,6 +134,8 @@ export function publicContent(c: SiteContent) {
   const home = c.pages["/"]?.sections;
   return {
     products: c.products,
+    availability: c.availability,
+    merch: c.merch,
     // a hidden new style stays out of the page source until it goes live
     added: c.added.filter((p) => c.products[p.id]?.live !== false),
     copy: Object.fromEntries((home ?? []).filter((s) => s.title || s.sub).map((s) => [s.id, { title: s.title, sub: s.sub }])),

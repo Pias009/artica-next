@@ -1,3 +1,5 @@
+import { describe, notable } from "../availability";
+import { availabilityOf } from "../content/live";
 import { CONTAINERS, EXPORT_DOCS, fmtDate, load, marketOf, MARKETS, nextPlan, QUALITY_STEPS, SEASONS as SHELF_SEASONS, sizeRange, VERIFY_STEPS } from "../buyer-desk";
 import { COMPANY, whatsappLink } from "../company";
 import { FAQ } from "../faq";
@@ -29,6 +31,8 @@ export type Card = {
   url: string;
   /** Seasons the style suits, in words ("winter", "autumn"). */
   seasons: string[];
+  /** Only when it isn't the usual made to order (admin Products → Availability). */
+  availability?: string;
 };
 
 export const card = (p: Product): Card => ({
@@ -45,6 +49,7 @@ export const card = (p: Product): Card => ({
   image: p.outer,
   url: `/products/${p.slug}`,
   seasons: seasonsFor(p),
+  ...(notable(availabilityOf(p.id)) && { availability: describe(availabilityOf(p.id)).text }),
 });
 
 const words = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}\s-]/gu, " ").split(/\s+/).filter((w) => w.length > 1);
@@ -124,6 +129,7 @@ export function productDetails({ style }: { style: string }) {
     sizeRange: sizeRange(p.line),
     casePack: `${PACK} pairs per case, sizes ${CASE_PACK[p.line].map(([s, n]) => `${s}×${n}`).join(", ")}`,
     moq: `${MOQ_PAIRS} pairs (${MOQ_CASES} cases) per style and colour, then in steps of ${STEP_CASES} cases`,
+    availability: describe(availabilityOf(p.id)).text,
     ...(p.rating && { rating: p.rating }),
     goesWith: related(p, 3).map(card),
   };

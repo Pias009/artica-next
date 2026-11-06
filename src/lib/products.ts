@@ -328,7 +328,7 @@ export function mergeEdit(base: Product, e: ProductEdit): Product {
  * fields replace the built-in ones. Idempotent: it starts from the built-in values each time. Run on the server by
  * content/store.ts and in the browser below, from the edits printed into the page.
  */
-export function applyProductEdits(edits: Record<string, ProductEdit>, added: AddedProduct[] = []) {
+export function applyProductEdits(edits: Record<string, ProductEdit>, added: AddedProduct[] = [], order: string[] = []) {
   for (const p of allProducts) if (!BASE.has(p.id)) delete byId[p.id];
   const extra = added.filter((p) => !BASE.has(p.id)).map((p) => mergeEdit(p, edits[p.id] ?? {}));
   for (const p of BUILT) Object.assign(p, mergeEdit(BASE.get(p.id)!, edits[p.id] ?? {}));
@@ -337,10 +337,15 @@ export function applyProductEdits(edits: Record<string, ProductEdit>, added: Add
   regroup(allProducts);
   const shown = allProducts.filter((p) => edits[p.id]?.live !== false);
   // featured first, otherwise catalogue order
-  shown.sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || allProducts.indexOf(a) - allProducts.indexOf(b));
+  // featured first; then the admin's order (Products → Arrange); then catalogue order
+  const rank = (p: Product) => {
+    const i = order.indexOf(p.id);
+    return i < 0 ? Number.MAX_SAFE_INTEGER : i;
+  };
+  shown.sort((a, b) => Number(!!b.featured) - Number(!!a.featured) || rank(a) - rank(b) || allProducts.indexOf(a) - allProducts.indexOf(b));
   products.splice(0, products.length, ...shown);
 }
-onLive((c) => applyProductEdits(c.products, c.added));
+onLive((c) => applyProductEdits(c.products, c.added, c.merch?.order));
 
 /** One shoe per category, keeping the first of each in list order (so a filter's best match fronts its category). */
 export function collapse(list: Product[]) {

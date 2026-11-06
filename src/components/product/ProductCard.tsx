@@ -1,4 +1,6 @@
 import clsx from "clsx";
+import { describe, notable } from "@/lib/availability";
+import { availabilityOf } from "@/lib/content/live";
 import Image from "next/image";
 import { Badge } from "../ui/Badge";
 import { QuickViewLink } from "../ui/QuickViewLink";
@@ -51,6 +53,16 @@ export function ProductCard({
         )}
       >
         <Badge badge={p.badge} className="absolute top-3 left-3 z-[2]" />
+        {notable(availabilityOf(p.id)) && availabilityOf(p.id)!.status !== "order" && (
+          <span
+            className={clsx(
+              "absolute top-3 right-3 z-[2] rounded-full px-2.5 py-1 text-[11.5px] font-semibold",
+              availabilityOf(p.id)!.status === "soldout" ? "bg-[#8a3b0a] text-white" : availabilityOf(p.id)!.status === "stock" ? "bg-[#1f6b45] text-white" : "bg-white/90 text-ink",
+            )}
+          >
+            {describe(availabilityOf(p.id)).label}
+          </span>
+        )}
         {/* several colours: the + opens a colour chooser; a single style adds straight away */}
         {many ? (
           <GroupAddButton

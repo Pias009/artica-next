@@ -6,7 +6,6 @@ import { country } from "../countries";
 import { readContent } from "../content/store";
 import { aiReady, provider } from "../assistant/model";
 import { HOME_SECTIONS } from "../home-sections";
-import { pageBlocks, type Block } from "./page-blocks";
 import { database, dbReady, inquiries, type Status } from "../leads/db";
 import type { Intent } from "../leads/mail";
 import { builtInProducts, type Product } from "../products";
@@ -120,6 +119,89 @@ async function productRows() {
   }));
 }
 export type PanelProduct = Awaited<ReturnType<typeof productRows>>[number];
+
+/* ---- how each style performs ---- */
+
+export type StyleFlag = "rising" | "falling" | "looked-not-asked" | "no-views";
+export type StyleStats = {
+  /** Visits that opened its page, last 30 days. */
+  views: number;
+  /** Visits that put it on the inquiry list, last 30 days. */
+  adds: number;
+  /** Inquiries naming it: last 30 days, the 30 before, and won in the last 90. */
+  inquiries: number;
+  before: number;
+  won: number;
+  flags: StyleFlag[];
+};
+
+/**
+ * Per style: page views and list adds (visitor log), inquiries this month against last month, orders won. The flags
+ * point at what to act on: rising or falling interest, a page people look at but don't ask about, a live style nobody
+ * opens. Needs a few weeks of traffic to say much; until then most figures are 0.
+ */
+async function productStats(rows: { id: string; base: { slug: string } }[]): Promise<Record<string, StyleStats>> {
+  if (!dbReady()) return {};
+  const now = Date.now();
+  const d30 = new Date(now - 30 * DAY);
+  const bySlug = new Map(rows.map((r) => [`/products/${r.base.slug}`, r.id]));
+  const [views, adds, inq] = await Promise.all([
+    safe("style views", [] as { _id: string; n: number }[], () =>
+      visits()
+        .aggregate<{ _id: string; n: number }>([
+          { $match: { kind: "view", at: { $gte: d30 }, path: { $regex: "^/products/" } } },
+          { $group: { _id: { p: "$path", s: "$sid" } } },
+          { $group: { _id: "$_id.p", n: { $sum: 1 } } },
+        ])
+        .toArray(),
+    ),
+    safe("style adds", [] as { _id: string; n: number }[], () =>
+      visits()
+        .aggregate<{ _id: string; n: number }>([
+          { $match: { kind: "add", at: { $gte: d30 } } },
+          { $group: { _id: { p: "$pid", s: "$sid" } } },
+          { $group: { _id: "$_id.p", n: { $sum: 1 } } },
+        ])
+        .toArray(),
+    ),
+    safe("style inquiries", [] as { _id: string; now: number; before: number; won: number }[], () =>
+      inquiries()
+        .aggregate<{ _id: string; now: number; before: number; won: number }>([
+          { $match: { createdAt: { $gte: new Date(now - 90 * DAY) }, status: { $ne: "spam" } } },
+          { $unwind: "$lines" },
+          {
+            $group: {
+              _id: "$lines.productId",
+              now: { $sum: { $cond: [{ $gte: ["$createdAt", d30] }, 1, 0] } },
+              before: { $sum: { $cond: [{ $and: [{ $lt: ["$createdAt", d30] }, { $gte: ["$createdAt", new Date(now - 60 * DAY)] }] }, 1, 0] } },
+              won: { $sum: { $cond: [{ $eq: ["$status", "won"] }, 1, 0] } },
+            },
+          },
+        ])
+        .toArray(),
+    ),
+  ]);
+  const v = new Map<string, number>();
+  for (const x of views) {
+    const id = bySlug.get(x._id);
+    if (id) v.set(id, (v.get(id) ?? 0) + x.n);
+  }
+  const a = new Map(adds.map((x) => [x._id, x.n]));
+  const q = new Map(inq.map((x) => [x._id, x]));
+  // "nobody opened it" means something only once the catalogue gets real traffic: 150 product-page visits a month
+  const anyTraffic = views.reduce((t, x) => t + x.n, 0) >= 150;
+  return Object.fromEntries(
+    rows.map((r) => {
+      const st = { views: v.get(r.id) ?? 0, adds: a.get(r.id) ?? 0, inquiries: q.get(r.id)?.now ?? 0, before: q.get(r.id)?.before ?? 0, won: q.get(r.id)?.won ?? 0 };
+      const flags: StyleFlag[] = [];
+      if (st.inquiries >= 2 && st.inquiries >= st.before * 1.5 + 1) flags.push("rising");
+      if (st.before >= 3 && st.inquiries <= st.before / 2) flags.push("falling");
+      if (st.views >= 15 && st.adds + st.inquiries === 0) flags.push("looked-not-asked");
+      if (anyTraffic && st.views === 0) flags.push("no-views");
+      return [r.id, { ...st, flags }];
+    }),
+  );
+}
 
 /* ---- inquiries ---- */
 
@@ -537,29 +619,27 @@ async function agentData() {
 }
 
 /** The whole dashboard, for the signed-in admin. */
-export async function panelData(origin?: string) {
-  const paths = SITE_PAGES.filter((p) => !p.path.includes("?") && p.path !== "/").map((p) => p.path);
-  const [content, products, inq, overview, visitors, agent, blocks] = await Promise.all([
+export async function panelData() {
+  const [content, products, inq, overview, visitors, agent] = await Promise.all([
     readContent(),
     productRows(),
     inquiryData(),
     overviewData(),
     visitorData(),
     agentData(),
-    origin ? pageBlocks(origin, paths).catch(() => ({}) as Record<string, Block[] | null>) : Promise.resolve({} as Record<string, Block[] | null>),
   ]);
+  const styleStats = await productStats(products);
   return {
     ready: dbReady(),
     content,
     products,
+    styleStats,
     pages: SITE_PAGES.filter((p) => !p.path.includes("?")).map((p) => ({
       path: p.path,
       name: p.name,
       summary: p.summary,
       group: p.section,
       views: visitors?.pageViews[p.path] ?? 0,
-      /** Its intro and section headings, with the words as built (null: couldn't be read just now). */
-      blocks: p.path === "/" ? [] : (blocks[p.path] ?? null),
     })),
     homeSections: HOME_SECTIONS.map((s) => ({ ...s })),
     inquiries: inq.rows,

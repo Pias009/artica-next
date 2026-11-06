@@ -3,7 +3,7 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { audit, requireAdmin } from "@/lib/admin/auth";
-import { CONTENT_TAG, saveContent } from "@/lib/content/store";
+import { CONTENT_TAG, readContent, saveContent } from "@/lib/content/store";
 import { forgetRouting } from "@/lib/content/routing";
 import type { SiteContent } from "@/lib/content/model";
 import { HOME_SECTIONS } from "@/lib/home-sections";
@@ -91,7 +91,7 @@ async function save<T extends z.ZodType>(schema: T, input: unknown, what: string
     };
   try {
     const patch = toPatch(parsed.data);
-    await saveContent(patch, admin.email);
+    await saveContent(patch, admin.email, what);
     await audit({
       adminId: admin._id,
       email: admin.email,
@@ -115,6 +115,14 @@ async function save<T extends z.ZodType>(schema: T, input: unknown, what: string
 /** Only what differs from the site as built is stored: an empty edit is dropped. */
 const compact = <V extends object>(r: Record<string, V>) =>
   Object.fromEntries(Object.entries(r).filter(([, v]) => Object.values(v).some((x) => x !== undefined)));
+
+const ids = (max: number) => z.array(z.string().regex(/^[\w-]{1,40}$/, "Unknown style")).max(max);
+const Merch = z.object({ hot: ids(12), arrivals: ids(10), order: ids(500) });
+
+/** The home page's Hot products and New arrivals, and the featured order (Products → Arrange). */
+export async function saveMerchAction(merch: unknown) {
+  return save(Merch, merch, "arrangement", (v) => ({ merch: { hot: [...new Set(v.hot)], arrivals: [...new Set(v.arrivals)], order: [...new Set(v.order)] } }));
+}
 
 export async function saveProductsAction(payload: unknown) {
   return save(ProductsPayload, payload, "products", (v) => {
@@ -143,6 +151,71 @@ export async function saveAssistantAction(assistant: unknown) {
 }
 
 /** The dashboard's pipeline: move an inquiry to another stage. */
+const price = z.number().positive().max(10_000).optional();
+const PriceRow = z.object({ t300: price, t600: price, t1000: price });
+const Prices = z.record(z.string().regex(/^[\w-]{1,40}$/, "Unknown style"), PriceRow).refine((r) => Object.keys(r).length <= 500, "Too many styles");
+
+/**
+ * Prices for some styles (the rest keep theirs): saved straight away, private. A row with no prices clears that
+ * style's. Nothing on the public site changes, so only the panel is refreshed.
+ */
+export async function savePricesAction(rows: unknown): Promise<SaveResult> {
+  const { admin } = await requireAdmin();
+  if (!dbReady()) return { ok: false, error: "No database is connected (MONGODB_URI), so prices can't be saved." };
+  const parsed = Prices.safeParse(rows);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Some prices aren't valid." };
+  const { prices } = await readContent();
+  const next = { ...prices };
+  for (const [id, row] of Object.entries(parsed.data)) {
+    const clean = Object.fromEntries(Object.entries(row).filter(([, v]) => !!v).map(([k, v]) => [k, Math.round(v! * 100) / 100]));
+    if (Object.keys(clean).length) next[id] = clean;
+    else next[id] = {};
+  }
+  const kept = Object.fromEntries(Object.entries(next).filter(([, r]) => Object.keys(r).length));
+  try {
+    await saveContent({ prices: kept }, admin.email, "prices");
+    await audit({ adminId: admin._id, email: admin.email, action: "content_saved", detail: `prices (${Object.keys(parsed.data).length} styles)` });
+  } catch (e) {
+    console.error("[admin] prices not saved", e);
+    return { ok: false, error: "The database didn't accept the change. Try again in a moment." };
+  }
+  updateTag(CONTENT_TAG);
+  revalidatePath("/admin", "layout");
+  return { ok: true, at: new Date().toISOString() };
+}
+
+const Avail = z.object({
+  status: z.enum(["order", "stock", "production", "soldout"]),
+  shipsFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  days: z.number().int().min(1).max(365).optional(),
+  note: z.string().trim().max(120).optional(),
+});
+const Avails = z.record(z.string().regex(/^[\w-]{1,40}$/, "Unknown style"), Avail.nullable()).refine((r) => Object.keys(r).length <= 500, "Too many styles");
+
+/** Availability for some styles (null: back to made to order), saved straight away and shown on the site. */
+export async function saveAvailabilityAction(rows: unknown): Promise<SaveResult> {
+  const { admin } = await requireAdmin();
+  if (!dbReady()) return { ok: false, error: "No database is connected (MONGODB_URI), so this can't be saved." };
+  const parsed = Avails.safeParse(rows);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Some fields aren't valid." };
+  const { availability } = await readContent();
+  const next = { ...availability };
+  for (const [id, a] of Object.entries(parsed.data)) {
+    if (!a || (a.status === "order" && !a.days && !a.note)) delete next[id];
+    else next[id] = Object.fromEntries(Object.entries(a).filter(([, v]) => v !== undefined && v !== "")) as typeof a;
+  }
+  try {
+    await saveContent({ availability: next }, admin.email, "availability");
+    await audit({ adminId: admin._id, email: admin.email, action: "content_saved", detail: `availability (${Object.keys(parsed.data).length} styles)` });
+  } catch (e) {
+    console.error("[admin] availability not saved", e);
+    return { ok: false, error: "The database didn't accept the change. Try again in a moment." };
+  }
+  updateTag(CONTENT_TAG);
+  revalidatePath("/", "layout");
+  return { ok: true, at: new Date().toISOString() };
+}
+
 export async function moveInquiryAction(ref: string, status: string): Promise<SaveResult> {
   const { admin } = await requireAdmin();
   if (!dbReady()) return { ok: false, error: "No database is connected." };

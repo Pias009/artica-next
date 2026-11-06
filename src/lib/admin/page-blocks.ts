@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { BLOCKS_HEADER, blocksToken } from "../content/blocks-token";
+import { SITE_PAGES } from "../site-pages";
 
 /*
  * The words on each page that the admin panel can rewrite, read from the pages themselves: every page intro and
@@ -73,3 +74,6 @@ export function siteOrigin(host: string | null) {
 
 /** Each page's editable words, by path (null: couldn't be read just now); each page cached for 10 minutes. */
 export const pageBlocks = read;
+
+/** Every site page but the home page (whose sections are listed from code), for the Pages view. */
+export const editablePaths = () => SITE_PAGES.filter((p) => !p.path.includes("?") && p.path !== "/").map((p) => p.path);

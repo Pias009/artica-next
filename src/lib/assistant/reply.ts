@@ -7,6 +7,8 @@ import { ASSISTANT } from "./persona";
 import { productDetails, shippingInfo } from "./skills";
 import type { InquiryDoc } from "../leads/db";
 import { INTENT_LABEL } from "../leads/mail";
+import { quote, usd, type PriceList } from "../admin/prices";
+import { readContent } from "../content/store";
 import { LEAD, MOQ_PAIRS, PRIVATE_LABEL_MIN } from "../products";
 
 export type ReplyDraft = {
@@ -26,10 +28,20 @@ const SCHEMA = z.object({
 /** The facts a reply may use, gathered once for both the AI and the template. */
 const VIA_KAI = /\n?Prepared with Kai, the site assistant\.?/;
 
-function facts(i: InquiryDoc) {
-  const styles = i.lines.map((l) => {
+function facts(i: InquiryDoc, prices: PriceList = {}) {
+  const q = quote(i.lines, prices);
+  const styles = i.lines.map((l, k) => {
     const d = productDetails({ style: l.productId });
-    return { name: l.name, colour: l.color, sizes: l.sizes, cases: l.cases, pairs: l.pairs, ...(d.found && { casePack: d.casePack, materials: d.materials, url: d.url }) };
+    const r = q.rows[k];
+    return {
+      name: l.name,
+      colour: l.color,
+      sizes: l.sizes,
+      cases: l.cases,
+      pairs: l.pairs,
+      ...(r.price !== null && { pricePerPairFOB: usd(r.price), lineTotalFOB: usd(r.total!) }),
+      ...(d.found && { casePack: d.casePack, materials: d.materials, url: d.url }),
+    };
   });
   return {
     ref: i.ref,
@@ -41,6 +53,9 @@ function facts(i: InquiryDoc) {
     sentFromChat: VIA_KAI.test(i.note),
     styles,
     totalPairs: i.pairs,
+    /** The desk's own prices, where set (admin Products): FOB, USD. */
+    quoteTotalFOB: q.rows.length && q.complete ? usd(q.total) : null,
+    unpricedStyles: q.missing,
     shipping: shippingInfo({ country: i.country }),
     terms: {
       moq: `${MOQ_PAIRS} pairs per style and colour`,
@@ -55,10 +70,11 @@ function facts(i: InquiryDoc) {
 
 /**
  * A first draft of the desk's reply to an inquiry, for a person to check, price and send. The AI version writes it
- * from the facts above; without a model, a template does. Prices are never filled in: they stay [placeholders].
+ * from the facts above; without a model, a template does. Prices come from the desk's own price list (admin Products),
+ * where it has them; styles without a price keep a [tier price] placeholder.
  */
 export async function draftReply(i: InquiryDoc): Promise<ReplyDraft> {
-  const f = facts(i);
+  const f = facts(i, (await readContent()).prices);
   // the template is free; the model is used only while the day's budget allows (budget.ts)
   if (aiReady() && (await modelAllowed())) {
     try {
@@ -66,7 +82,7 @@ export async function draftReply(i: InquiryDoc): Promise<ReplyDraft> {
       spend();
       const { output, steps, totalUsage } = await generateText({
         model,
-        instructions: `You draft replies for the Chime Long wholesale footwear trade desk (Guangzhou). Write to the buyer in the language of their note if it isn't English, else English. Warm, concise, businesslike: under 200 words. Use only the facts given. Never write a price, discount or delivery date: put [tier price], [FOB price] or [date] placeholders where the desk fills them in. Confirm the styles and quantities, answer what the note asks, offer samples, and ask at most two clarifying questions that would let the desk quote (e.g. trade terms DDP/FOB, target delivery month, size curve). Sign off as "Chime Long trade desk". The summary is for the desk, not the buyer. You are ${ASSISTANT.name}.`,
+        instructions: `You draft replies for the Chime Long wholesale footwear trade desk (Guangzhou). Write to the buyer in the language of their note if it isn't English, else English. Warm, concise, businesslike: under 200 words. Use only the facts given. Prices: where a style has pricePerPairFOB, quote exactly that per pair (FOB, USD), with its line total and quoteTotalFOB if given; never change, round or discount them. For styles without a price, and for anything else not given, put a [tier price] or [date] placeholder for the desk to fill in. Never invent a price, discount or delivery date. Confirm the styles and quantities, answer what the note asks, offer samples, and ask at most two clarifying questions that would let the desk quote (e.g. trade terms DDP/FOB, target delivery month, size curve). Sign off as "Chime Long trade desk". The summary is for the desk, not the buyer. You are ${ASSISTANT.name}.`,
         prompt: JSON.stringify(f),
         output: Output.object({ schema: SCHEMA }),
         maxOutputTokens: 700,
@@ -87,7 +103,7 @@ function template(f: ReturnType<typeof facts>): ReplyDraft {
   const n = (x: number) => x.toLocaleString("en-US");
   const first = f.company;
   const lines = f.styles.length
-    ? f.styles.map((s) => `- ${s.name} (${s.colour}, ${s.sizes}): ${s.cases} cases, ${n(s.pairs)} pairs, [tier price] per pair`)
+    ? f.styles.map((s) => `- ${s.name} (${s.colour}, ${s.sizes}): ${s.cases} cases, ${n(s.pairs)} pairs, ${"pricePerPairFOB" in s ? `${s.pricePerPairFOB} per pair FOB (${s.lineTotalFOB})` : "[tier price] per pair"}`)
     : ["- Full line sheet attached, with tier pricing per style."];
   const ship = f.shipping.market
     ? `We ship to ${f.shipTo} via ${f.shipping.port} (about ${f.shipping.transit}) on ${f.shipping.terms!.join(", ")} terms.`
@@ -97,6 +113,7 @@ function template(f: ReturnType<typeof facts>): ReplyDraft {
     ``,
     `Thank you for your inquiry (${f.ref}). Here is what you asked about:`,
     ...lines,
+    ...(f.quoteTotalFOB ? [`Order total: ${f.quoteTotalFOB} FOB Guangzhou.`] : []),
     ``,
     f.totalPairs >= 1000 ? `At ${n(f.totalPairs)} pairs your order reaches our tier pricing.` : `Our MOQ is ${f.terms.moq}; tier pricing starts ${f.terms.tierPricing}.`,
     `Samples reach you in ${f.terms.samples}; bulk production takes ${f.terms.bulk} after you approve them. Payment is ${f.terms.payment}.`,
@@ -114,7 +131,10 @@ function template(f: ReturnType<typeof facts>): ReplyDraft {
       `${f.wants} from a ${f.buyerType.toLowerCase()} shipping to ${f.shipTo}: ${f.styles.length ? `${f.styles.length} style(s), ${n(f.totalPairs)} pairs` : "full line sheet"}.`,
       f.note ? `Their note: "${f.note.slice(0, 160)}${f.note.length > 160 ? "…" : ""}"` : "No note: ask what they're stocking for.",
       ...(f.sentFromChat ? ["Sent from the chat with Kai on the site."] : []),
-      "Fill in the [tier price] placeholders before sending; confirm trade terms and delivery month.",
+      f.unpricedStyles.length
+        ? `No price yet for ${f.unpricedStyles.join(", ")}: fill in the [tier price] placeholders, or set prices in Products.`
+        : "Prices are from your price list (FOB); check them before sending.",
+      "Confirm trade terms and delivery month.",
     ],
     source: "template",
   };

@@ -44,3 +44,22 @@
 - Set `CLOUDINARY_CLOUD_NAME` (`doulxmmm`, the only cloud `next.config.ts` allows), `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET` for photo uploads. Removing backgrounds needs Cloudinary's AI Background Removal add-on; without it, photos are used as uploaded. Without the keys, a new style can only reuse a catalogue photo.
 - Run `node scripts/migrate.mjs` once for the `visits` indexes. The app also creates them on first use.
 - Optional: `VISIT_SALT`, a long random secret for visit IDs. Without it, the database URI is used.
+
+## Products: performance, suggestions, bulk changes, line sheets (2026-11-05)
+
+- **Performance per style** (`productStats` in `lib/admin/panel.ts`): over 30 days, the visits that opened the style, the visits that added it to an inquiry list (a new `add` event from `components/Track.tsx`; the list loading from storage isn't counted), and its inquiries this month against last month, plus orders won in 90 days. It shows as the list's "Viewed · Added · Asked" column, with sorts (most viewed, most added, rising) and filters (rising interest, needs attention), and as a "How it's doing" card on each style's page. Flags:
+  - **Rising:** at least 2 inquiries, and 1.5× last month's plus one.
+  - **Falling:** at least 3 inquiries last month, and half that or fewer this month.
+  - **Looked at, not asked for:** 15+ views and no adds or inquiries.
+  - **Nobody opened it:** shown only once the catalogue gets 150+ product-page visits a month.
+- **Suggestions and listing quality** (`lib/admin/product-insights.ts`, pure): one-click badge, visibility and featuring changes argued by the figures; thin lines (under 6 live styles); seasons with under 4 suitable styles; site searches that found nothing. Applying one puts it in the drafts, and Discard brings it back. Each listing is scored on five checks: second photo, description of 60+ characters, 2+ materials, 2+ tags, colour.
+- **Bulk changes:** tick styles, or tick all under the current filters, then show, hide, feature, set a badge, pin or unpin a season, or delete styles added here. A selection belongs to the filters it was made under.
+- **Line sheets:** "Line sheet…" in the bulk bar opens `/admin/line-sheet?ids=…&title=…&for=…`, an A4 sheet of the ticked live styles (photo, colour, materials, sizes, case pack, link) with the terms. Print it or save it as a PDF. Admins only; no prices.
+- The Pages section now reads the site's pages for their headings itself (`pages/page.tsx`), so the other sections no longer wait on it.
+- **Private prices** (`lib/admin/prices.ts`, `savePricesAction`): for each style, the price per pair (USD, FOB) at 300+, 600+ and 1,000+ pairs. Set on the style's page or for many styles at once ("Set prices…" in the bulk bar); saved straight away. They're stored in `site_content.prices`, which `publicContent` leaves out, so prices never reach browsers or the public site. They're used in:
+  - the Products list: a Price column and a "No price yet" filter
+  - each inquiry's page: price per pair at the tier the line reaches, line totals and the order total
+  - Kai's reply drafts: real prices where set, and a `[tier price]` placeholder where a style has none
+- **Availability** (`lib/availability.ts`, `saveAvailabilityAction`): for each style, made to order (optionally with its own lead time), in stock (ships in N days), in production (ships from a date) or sold out this season, plus a short note. It's public: the line at the top of the product page's buy box, a chip on product cards, and Kai's style details. Set on the style's page or with "Availability…" in the bulk bar; filters "In stock or in production" and "Sold out".
+- **Arrange** (`/admin/products/arrange`, `lib/merch.ts`, `saveMerchAction`): the home page's "styles buyers reorder" deck (up to 12) and New arrivals (up to 10), each its own list in its own order, or automatic (the built-in lists) when empty. Also the order of featured styles, which lead the catalogue and every list.
+- **History and undo** (`content/store.ts saveContent`, `app/admin/history-actions.ts`): every save keeps what it replaced in `site_content_history` (180 days). Each style's page lists its changes (what, who, when) and can put the style back as it was before any one of them: listing, visibility, prices and availability.
