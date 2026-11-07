@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import { chosen, DEFAULT_HOT, defaultHot, MAX_HOT } from "@/lib/merch";
 import Image from "next/image";
 import Link from "next/link";
@@ -122,9 +123,10 @@ export function HotProducts() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10">
         <div>
           <p className="eyebrow">Hot this season</p>
-          <h2 id="h-hot" className="type-section mt-3">
+          <SectionText as="h2" part="title" id="h-hot" className="type-section mt-3">
             The styles buyers <em>reorder.</em>
-          </h2>
+          </SectionText>
+          <SectionText part="sub" className="mt-3 max-w-[52ch] text-[17px] text-ink-2" />
         </div>
         <div className="flex items-center gap-4">
           {MOVING && (

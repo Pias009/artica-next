@@ -43,11 +43,11 @@ export function SectionHead({
     <div className={clsx("mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10", className)}>
       {hidden && <style>{`section:has(#${id}):not(:has(section #${id})){display:none!important}`}</style>}
       <div className="max-w-[640px]">
-        <h2 id={id} className="type-section" {...(id && { "data-copy": `${id}.title`, "data-default": builtTitle })}>
+        <h2 id={id} className="type-section" {...((scope || id) && { "data-copy": `${scope ?? id}.title`, "data-default": builtTitle })}>
           {title}
         </h2>
-        {(sub || id) && (
-          <p className={clsx("mt-3 text-[17px] text-ink-2", !sub && "hidden")} {...(id && { "data-copy": `${id}.sub`, "data-default": builtSub })}>
+        {(sub || id || scope) && (
+          <p className={clsx("mt-3 text-[17px] text-ink-2", !sub && "hidden")} {...((scope || id) && { "data-copy": `${scope ?? id}.sub`, "data-default": builtSub })}>
             {sub}
           </p>
         )}

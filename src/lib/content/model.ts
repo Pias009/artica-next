@@ -8,6 +8,7 @@ import type { Product } from "../products";
 import type { SeasonId } from "../season";
 import type { PriceList } from "../admin/prices";
 import type { Availability } from "../availability";
+import type { SeasonCopyMap } from "../season-copy";
 
 /** A style made in the admin panel; shown, featured and pinned through `products`, like a built-in one. */
 export type AddedProduct = Omit<Product, "featured" | "pinnedSeasons">;
@@ -73,6 +74,8 @@ export type SiteContent = {
   prices: PriceList;
   /** Per style: in stock, in production, sold out, or made to order with its own lead time (availability.ts). Public. */
   availability: Record<string, Availability>;
+  /** Each season's hero and campaign words and photo (season-copy.ts). Public. */
+  seasonCopy: SeasonCopyMap;
   /** The home page's Hot products and New arrivals (empty: the built-in way), and the order of featured styles (lib/merch.ts). */
   merch: { hot: string[]; arrivals: string[]; order: string[] };
   pages: Record<string, PageEdit>;
@@ -96,6 +99,7 @@ export const EMPTY_CONTENT: SiteContent = {
   added: [],
   prices: {},
   availability: {},
+  seasonCopy: {},
   merch: { hot: [], arrivals: [], order: [] },
   pages: {},
   seasons: { auto: true, fallback: "winter", campaigns: {} },
@@ -113,6 +117,7 @@ export function withDefaults(raw: Partial<SiteContent> | null | undefined): Site
     added: r.added ?? [],
     prices: r.prices ?? {},
     availability: r.availability ?? {},
+    seasonCopy: r.seasonCopy ?? {},
     merch: { hot: [], arrivals: [], order: [], ...r.merch },
     pages: r.pages ?? {},
     seasons: {
@@ -135,6 +140,7 @@ export function publicContent(c: SiteContent) {
   return {
     products: c.products,
     availability: c.availability,
+    seasonCopy: c.seasonCopy,
     merch: c.merch,
     // a hidden new style stays out of the page source until it goes live
     added: c.added.filter((p) => c.products[p.id]?.live !== false),

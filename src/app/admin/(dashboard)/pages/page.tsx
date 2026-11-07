@@ -9,6 +9,6 @@ export const metadata: Metadata = { title: "Pages" };
 /** Pages: reads each site page for its intro and headings here, so the panel's other sections don't wait on it. */
 export default async function PagesPage() {
   await requireAdmin();
-  const blocks = await pageBlocks(siteOrigin((await headers()).get("host")), editablePaths()).catch(() => ({}));
+  const blocks = await pageBlocks(siteOrigin((await headers()).get("host")), ["/", ...editablePaths()]).catch(() => ({}));
   return <Pages blocks={blocks} />;
 }

@@ -5,8 +5,12 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { SEASON_IDS } from "../data";
 import { usePanel, useSaver } from "../panel-data";
-import { Card, CardHead, SaveBar, Segmented, Toggle } from "../ui";
-import { saveSeasonsAction } from "@/app/admin/content-actions";
+import { Card, CardHead, SaveBar, Segmented, Sheet, Toggle } from "../ui";
+import { SeasonEditor } from "./SeasonEditor";
+import { HERO_SEASON_COPY } from "@/components/home/HeroSpotlight";
+import { merged, type SeasonCopy, type SeasonCopyMap } from "@/lib/season-copy";
+import { LINE_LABEL } from "@/lib/products";
+import { saveSeasonCopyAction, saveSeasonsAction } from "@/app/admin/content-actions";
 import type { SiteContent } from "@/lib/content/model";
 import { SEASON_DATA } from "@/lib/season";
 import { CAMPAIGNS } from "@/components/home/EditorialCampaignBanner";
@@ -40,6 +44,21 @@ export function Seasons() {
     SEASON_IDS.filter((s) => live(s) !== (saved.campaigns[s]?.live ?? true)).length;
   const now = new Date().getMonth();
 
+  // each season's words and photo, published from its own panel
+  const [copy, setCopy] = useState<SeasonCopyMap>(() => panel.content.seasonCopy ?? {});
+  const [editing, setEditing] = useState<SeasonId | null>(null);
+  const copySaver = useSaver(
+    (v: { id: SeasonId; c: SeasonCopy }) => saveSeasonCopyAction({ ...copy, [v.id]: v.c }),
+    (v) => {
+      setCopy((cur) => ({ ...cur, [v.id]: v.c }));
+      setEditing(null);
+    },
+  );
+  const campaignOf = (s: SeasonId) => merged(CAMPAIGNS[s], copy[s]?.campaign);
+  const styles = panel.products
+    .map((p) => ({ slug: p.base.slug, name: p.name, line: LINE_LABEL[p.base.line] }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   const edit = (s: SeasonId, v: boolean) =>
     setRules((r) => ({
       ...r,
@@ -70,7 +89,7 @@ export function Seasons() {
 
       <ul className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {SEASON_IDS.map((s, i) => {
-          const c = CAMPAIGNS[s];
+          const c = campaignOf(s);
           const r = { live: live(s), months: monthsOf(s) };
           const current = r.months.includes(now);
           return (
@@ -106,6 +125,14 @@ export function Seasons() {
                       Live <Toggle label={`${c.label} campaign live`} checked={r.live} onChange={(v) => edit(s, v)} />
                     </label>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditing(s)}
+                    className="mt-3 flex min-h-10 items-center justify-center gap-2 rounded-full bg-ink text-[13px] font-semibold text-white transition-transform hover:scale-[1.01]"
+                  >
+                    Edit words and photo
+                    {copy[s] && Object.keys(copy[s]!).length > 0 && <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px]">edited</span>}
+                  </button>
                   <p className="mt-3 mb-1.5 text-[12px] text-ink/55">
                     {s === "rainy" ? "Runs in (monsoon markets)" : "Runs in (northern markets; the south is six months on)"}
                   </p>
@@ -133,6 +160,22 @@ export function Seasons() {
           );
         })}
       </ul>
+
+      <Sheet open={!!editing} onClose={() => (setEditing(null), copySaver.clearError())} title={editing ? `${CAMPAIGNS[editing].label}: words and photo` : "Season"}>
+        {editing && (
+          <SeasonEditor
+            key={editing}
+            label={CAMPAIGNS[editing].label}
+            hero={HERO_SEASON_COPY[editing]}
+            campaign={CAMPAIGNS[editing]}
+            value={copy[editing] ?? {}}
+            styles={styles}
+            pending={copySaver.pending}
+            error={copySaver.error}
+            onSave={(c) => copySaver.save({ id: editing, c })}
+          />
+        )}
+      </Sheet>
 
       <SaveBar
         count={changes}

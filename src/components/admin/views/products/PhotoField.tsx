@@ -22,7 +22,7 @@ const CUTOUT_TRIES = 24; // 2 minutes, a try every 5 seconds
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Sends one photo to Cloudinary and, if asked, waits for the transparent cutout. Falls back to the photo as uploaded. */
-async function uploadPhoto(file: File, cut: boolean, status: (s: string) => void): Promise<{ shot: Shot; note?: string }> {
+export async function uploadPhoto(file: File, cut: boolean, status: (s: string) => void): Promise<{ shot: Shot; note?: string }> {
   const sign = await signUploadAction();
   if (!sign.ok) throw new Error(sign.error);
   const form = new FormData();

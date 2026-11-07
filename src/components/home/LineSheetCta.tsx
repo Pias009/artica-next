@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Icon } from "../Icon";
@@ -92,13 +93,12 @@ export function LineSheetCta() {
     >
       <div className="grid grid-cols-[minmax(0,1fr)] items-center gap-x-16 gap-y-12 px-[clamp(20px,4vw,64px)] py-[clamp(48px,7vw,104px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
         <div data-sheet-copy>
-          <h2 id="h-sheet" className="type-section mt-3 max-w-[16ch]">
+          <SectionText as="h2" part="title" id="h-sheet" className="type-section mt-3 max-w-[16ch]">
             Get the full <em>wholesale line sheet.</em>
-          </h2>
-          <p className="mt-4 max-w-[46ch] text-[18px] text-ink-2">
-            Every style, size run and case-pack ratio, with tier pricing for
-            your volume.
-          </p>
+          </SectionText>
+          <SectionText part="sub" className="mt-4 max-w-[46ch] text-[18px] text-ink-2">
+            Every style, size run and case-pack ratio, with tier pricing for your volume.
+          </SectionText>
           <form
             className="mt-9 flex max-w-[520px] items-center gap-2 rounded-full bg-white p-1.5 pl-6 text-left shadow-soft focus-within:ring-2 focus-within:ring-ink"
             onSubmit={(e) => {

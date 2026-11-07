@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
@@ -69,10 +70,12 @@ export function RetailMerchandisingBanner() {
       <div className="glass grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-shell [--glass-bg:rgb(244_238_232/.6)] lg:h-[clamp(560px,78vh,680px)] lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12 xl:p-14">
           <p className="eyebrow">Worn in the city</p>
-          <h2 id="h-merchandising" className="type-section mt-3 max-w-[15ch]">
+          <SectionText as="h2" part="title" id="h-merchandising" className="type-section mt-3 max-w-[15ch]">
             Made to stop <em>foot traffic.</em>
-          </h2>
-          <p className="mt-4 max-w-[36ch] text-[16px] leading-relaxed text-ink-2">Real looks on real streets, to picture every pair in your windows.</p>
+          </SectionText>
+          <SectionText part="sub" className="mt-4 max-w-[36ch] text-[16px] leading-relaxed text-ink-2">
+            Real looks on real streets, to picture every pair in your windows.
+          </SectionText>
 
           <ul data-points className="mt-7 max-w-[420px] divide-y divide-ink/8 border-y border-ink/8">
             {POINTS.map((pt) => (

@@ -26,6 +26,8 @@ type Section = {
   builtSub?: string | null;
   hideable: boolean;
   movable: boolean;
+  /** Home sections whose words follow the season: edited in Seasons. */
+  seasonal?: boolean;
 };
 type AdminPage = {
   path: string;
@@ -53,14 +55,19 @@ function toPages(d: PanelData, blocks: Record<string, Block[] | null>): AdminPag
         ? homeOrder(e.sections).map(({ id, visible }) => {
             const meta = d.homeSections.find((h) => h.id === id)!;
             const copy = e.sections?.find((x) => x.id === id);
+            // the words as built, read from the home page itself
+            const built = blocks["/"]?.find((b) => b.id === id);
             return {
               id,
               label: meta.label,
               kind: meta.kind,
               copy: meta.copy,
+              seasonal: "seasonal" in meta,
               visible,
               title: copy?.title ?? "",
               sub: copy?.sub ?? "",
+              builtTitle: built?.title,
+              builtSub: built ? (built.sub ?? "") : undefined,
               hideable: true,
               movable: true,
             };
@@ -374,7 +381,17 @@ export function Pages({ blocks }: { blocks: Record<string, Block[] | null> }) {
           <>
             <CardHead title={section.label} sub={section.kind === "Intro" ? `The opening of ${page.name}` : `${section.kind} section on ${page.name}`} />
             {!section.copy ? (
-              <p className="mt-4 text-[13.5px] text-ink/60">This section&apos;s words are part of its design. You can show, hide or move it.</p>
+              section.seasonal ? (
+                <p className="mt-4 text-[13.5px] text-ink/60">
+                  Its words and photo change with the season. Edit them for each season in{" "}
+                  <a href="/admin/seasons" className="font-semibold text-ink underline">
+                    Seasons
+                  </a>
+                  . Here you can show, hide or move it.
+                </p>
+              ) : (
+                <p className="mt-4 text-[13.5px] text-ink/60">This section has no headline to rewrite. You can show, hide or move it.</p>
+              )
             ) : (
               <>
                 <div className="mt-5 grid gap-4">

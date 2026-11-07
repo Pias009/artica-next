@@ -1,5 +1,7 @@
 "use client";
 
+import { seasonCopyOf } from "@/lib/content/live";
+import { merged } from "@/lib/season-copy";
 import { campaignLive, controlOn } from "@/lib/content/live";
 import clsx from "clsx";
 import Image from "next/image";
@@ -115,6 +117,9 @@ export const CAMPAIGNS: Record<SeasonId, SeasonCampaignConfig> = {
   },
 };
 
+/** A season's campaign with the admin's edits (Seasons) over the built-in one. */
+export const campaignFor = (id: SeasonId): SeasonCampaignConfig => merged(CAMPAIGNS[id] ?? CAMPAIGNS.winter, seasonCopyOf(id)?.campaign);
+
 /**
  * EditorialCampaignBanner:
  * Renders season-based UGC editorial campaign banners with models wearing in-season footwear.
@@ -146,7 +151,7 @@ export function EditorialCampaignBanner() {
   if (!mounted.includes(activeSeason)) setMounted([...mounted, activeSeason]);
   if (loaded.has(activeSeason) && shown !== activeSeason) setShown(activeSeason);
 
-  const campaign = CAMPAIGNS[activeSeason] ?? CAMPAIGNS.winter;
+  const campaign = campaignFor(activeSeason);
 
   const wornProducts = useMemo(() => {
     return campaign.wornSlugs.map(getProduct).filter((p): p is Product => !!p);
@@ -189,7 +194,7 @@ export function EditorialCampaignBanner() {
           {/* the scroll zoom sits on this wrapper, so a photo swapped in later is zoomed the same as the first */}
           <span data-campaign-img className="absolute inset-0 block">
             {mounted.map((id) => {
-              const c = CAMPAIGNS[id];
+              const c = campaignFor(id);
               const isShown = id === shown;
               return (
                 <Image
@@ -229,7 +234,7 @@ export function EditorialCampaignBanner() {
           {/* Quick Season Navigation Pills */}
           <nav aria-label="Seasonal campaign switcher" className="flex items-center gap-1.5 overflow-x-auto p-1 rounded-full bg-black/45 backdrop-blur-sm ring-1 ring-white/20 max-w-full">
             {SEASON_IDS.map((id) => {
-              const c = CAMPAIGNS[id];
+              const c = campaignFor(id);
               const isSelected = id === activeSeason;
               return (
                 <button

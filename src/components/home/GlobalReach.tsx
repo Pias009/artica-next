@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
 import { useUI } from "@/lib/store";
@@ -53,10 +54,12 @@ export function GlobalReach() {
     <section id="worldwide" aria-labelledby="h-worldwide" className="mt-sec scroll-mt-24">
       <div className="mb-8 md:mb-10">
         <p className="eyebrow">Worldwide</p>
-        <h2 id="h-worldwide" className="type-section mt-3 max-w-[20ch]">
+        <SectionText as="h2" part="title" id="h-worldwide" className="type-section mt-3 max-w-[20ch]">
           From our factory to <em>your shelves, anywhere.</em>
-        </h2>
-        <p className="mt-3 max-w-[52ch] text-[17px] text-ink-2">Every order ships from Guangzhou, DDP, FOB or EXW, door-to-door or to your port.</p>
+        </SectionText>
+        <SectionText part="sub" className="mt-3 max-w-[52ch] text-[17px] text-ink-2">
+          Every order ships from Guangzhou, DDP, FOB or EXW, door-to-door or to your port.
+        </SectionText>
       </div>
 
       <div className="glass relative overflow-hidden rounded-[28px]">

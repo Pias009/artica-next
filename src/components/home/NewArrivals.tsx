@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import { chosen, defaultArrivals, MAX_ARRIVALS } from "@/lib/merch";
 import Image from "next/image";
 import Link from "next/link";
@@ -63,9 +64,10 @@ export function NewArrivals() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 md:mb-10">
         <div>
           <p className="eyebrow">New arrivals</p>
-          <h2 id="h-new" className="type-section mt-3">
+          <SectionText as="h2" part="title" id="h-new" className="type-section mt-3">
             Just landed for <em>FW26.</em>
-          </h2>
+          </SectionText>
+          <SectionText part="sub" className="mt-3 max-w-[52ch] text-[17px] text-ink-2" />
         </div>
         <div role="tablist" aria-label="Filter new arrivals by line" className="glass inline-flex rounded-full p-1">
           {FILTERS.map((f) => {

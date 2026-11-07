@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
 import { useId, useState } from "react";
@@ -37,12 +38,12 @@ export function PrivateLabel() {
 
         <div className="px-[clamp(24px,5vw,72px)] pt-12 md:py-16">
           <p className="eyebrow">Private label · OEM</p>
-          <h2 id="h-partner" className="type-section mt-3 max-w-[14ch]">
+          <SectionText as="h2" part="title" id="h-partner" className="type-section mt-3 max-w-[14ch]">
             Your brand <em>on our boots.</em>
-          </h2>
-          <p className="mt-4 max-w-[40ch] text-[17px] text-ink-2">
+          </SectionText>
+          <SectionText part="sub" className="mt-4 max-w-[40ch] text-[17px] text-ink-2">
             Private label from {PRIVATE_LABEL_MIN} pairs per style, made on the same lines as the Chime Long range.
-          </p>
+          </SectionText>
 
           {/* try it: the name goes straight onto the product */}
           <div className="mt-8 max-w-[420px]">

@@ -57,5 +57,7 @@ export const campaignLive = (s: SeasonId) => live()?.seasons.campaigns[s]?.live 
 /** A style's availability as set in the admin panel (Products); undefined: made to order, as usual. */
 /** The admin's list for a home section or the featured order (ids); empty: the built-in way. */
 export const merchList = (k: "hot" | "arrivals" | "order") => live()?.merch?.[k] ?? [];
+/** A season's hero and campaign edits (Seasons in the admin panel). */
+export const seasonCopyOf = (s: SeasonId) => live()?.seasonCopy?.[s];
 export const availabilityOf = (id: string) => live()?.availability?.[id];
 export const deskOn = (d: "trade" | "plan") => live()?.assistant[d] ?? true;

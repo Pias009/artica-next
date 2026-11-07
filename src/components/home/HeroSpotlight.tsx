@@ -1,5 +1,7 @@
 "use client";
 
+import { seasonCopyOf } from "@/lib/content/live";
+import { merged } from "@/lib/season-copy";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
@@ -88,7 +90,8 @@ export function HeroSpotlight() {
   const openQuickView = useUI((s) => s.openQuickView);
   const season = useSeason();
   const theme = SEASONS[season];
-  const copy = HERO_SEASON_COPY[season] ?? HERO_SEASON_COPY.winter;
+  // the season's words, with the admin's edits (Seasons) over them
+  const copy = merged(HERO_SEASON_COPY[season] ?? HERO_SEASON_COPY.winter, seasonCopyOf(season)?.hero);
   // the season's best styles, one per kind, so the spotlight opens on what this visitor's customers buy now
   const spots = useMemo(() => seasonPicks(season, SPOT_COUNT).map((p, i) => ({ p, slug: p.slug, tint: theme.tints[i % theme.tints.length] })), [season, theme]);
   const cards = useMemo(

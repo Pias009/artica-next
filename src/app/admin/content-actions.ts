@@ -124,6 +124,43 @@ export async function saveMerchAction(merch: unknown) {
   return save(Merch, merch, "arrangement", (v) => ({ merch: { hot: [...new Set(v.hot)], arrivals: [...new Set(v.arrivals)], order: [...new Set(v.order)] } }));
 }
 
+const words = (max: number) => z.string().trim().max(max).optional();
+const SeasonCopyEdit = z.object({
+  hero: z.object({ eyebrowBadge: words(40), headlineLead: words(60), headlineAccent: words(60), description: words(160) }).optional(),
+  campaign: z
+    .object({
+      seasonTag: words(30),
+      headlineLead: words(70),
+      headlineAccent: words(70),
+      description: words(200),
+      accentColor: z.union([z.literal(""), z.string().regex(/^#[0-9a-f]{6}$/i, "Accent colour must be like #f2c9ea")]).optional(),
+      image: z.union([z.literal(""), z.string().regex(/^(\/images\/[\w./-]+|https:\/\/res\.cloudinary\.com\/doulxmmm\/image\/upload\/[\w./,-]+)$/, "Use a site photo or one uploaded here")]).optional(),
+      alt: words(200),
+      wornSlugs: z.array(z.string().regex(/^[a-z0-9-]{1,60}$/)).max(4).optional(),
+    })
+    .optional(),
+});
+const SeasonCopy = z.partialRecord(season, SeasonCopyEdit);
+
+/** Each season's hero and campaign words and photo (Seasons). Only filled fields are kept. */
+export async function saveSeasonCopyAction(copy: unknown) {
+  return save(SeasonCopy, copy, "season words", (v) => {
+    // the headline's first part runs into its coloured end: it keeps the space between them
+    const spaced = (k: string, x: unknown) => (k === "headlineLead" && typeof x === "string" && x && !/\s$/.test(x) ? `${x} ` : x);
+    const clean = (o?: Record<string, unknown>) =>
+      o ? Object.fromEntries(Object.entries(o).filter(([, x]) => (Array.isArray(x) ? x.length : x !== undefined && x !== "")).map(([k, x]) => [k, spaced(k, x)])) : undefined;
+    const out = Object.fromEntries(
+      Object.entries(v).flatMap(([id, c]) => {
+        const hero = clean(c?.hero);
+        const campaign = clean(c?.campaign);
+        const keep = { ...(hero && Object.keys(hero).length && { hero }), ...(campaign && Object.keys(campaign).length && { campaign }) };
+        return Object.keys(keep).length ? [[id, keep]] : [];
+      }),
+    );
+    return { seasonCopy: out as SiteContent["seasonCopy"] };
+  });
+}
+
 export async function saveProductsAction(payload: unknown) {
   return save(ProductsPayload, payload, "products", (v) => {
     // through JSON so a field left out stays out, rather than reaching the database as null

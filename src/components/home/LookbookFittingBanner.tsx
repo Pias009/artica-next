@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
@@ -99,9 +100,10 @@ export function LookbookFittingBanner() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 md:mb-8">
         <div>
           <p className="eyebrow">Lookbook FW26</p>
-          <h2 id="h-lookbook-fit" className="type-section mt-3">
+          <SectionText as="h2" part="title" id="h-lookbook-fit" className="type-section mt-3">
             See it <em>on foot.</em>
-          </h2>
+          </SectionText>
+          <SectionText part="sub" className="mt-3 max-w-[52ch] text-[17px] text-ink-2" />
         </div>
         <div role="tablist" aria-label="Filter looks" className="glass inline-flex max-w-full overflow-x-auto rounded-full p-1 scrollbar-none">
           {FILTERS.map((f) => {
