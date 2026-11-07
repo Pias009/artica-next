@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import { useRef, useState } from "react";
@@ -127,7 +128,7 @@ export function LineSheetCta() {
               className="h-12 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
             />
             <button type="submit" className="btn btn-dark group/s">
-              Send it to me
+              <Txt k="button" label="Button">Send it to me</Txt>
               <Icon
                 name="arrow"
                 className="size-4 transition-transform duration-300 ease-soft group-hover/s:translate-x-0.5 max-sm:hidden"
@@ -135,18 +136,18 @@ export function LineSheetCta() {
             </button>
           </form>
           <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
-            {POINTS.map((t) => (
+            {POINTS.map((t, i) => (
               <li
                 key={t}
                 className="flex items-center gap-2 text-[15px] font-medium text-ink-2"
               >
                 <Icon name="check" className="size-4 text-glacier" />
-                {t}
+                <Txt k={`point${i + 1}`} label={`Point ${i + 1}`}>{t}</Txt>
               </li>
             ))}
           </ul>
           <p className="mt-8 text-[13px] text-muted">
-            Trade buyers only. No retail orders.
+            <Txt k="note" label="Note under the form">Trade buyers only. No retail orders.</Txt>
           </p>
         </div>
 

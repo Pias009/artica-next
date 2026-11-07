@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
@@ -69,7 +70,7 @@ export function RetailMerchandisingBanner() {
     <section ref={ref} id="worn" aria-labelledby="h-merchandising" className="mt-sec scroll-mt-24">
       <div className="glass grid grid-cols-[minmax(0,1fr)] overflow-hidden rounded-shell [--glass-bg:rgb(244_238_232/.6)] lg:h-[clamp(560px,78vh,680px)] lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-12 xl:p-14">
-          <p className="eyebrow">Worn in the city</p>
+          <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">Worn in the city</Txt>
           <SectionText as="h2" part="title" id="h-merchandising" className="type-section mt-3 max-w-[15ch]">
             Made to stop <em>foot traffic.</em>
           </SectionText>
@@ -78,14 +79,14 @@ export function RetailMerchandisingBanner() {
           </SectionText>
 
           <ul data-points className="mt-7 max-w-[420px] divide-y divide-ink/8 border-y border-ink/8">
-            {POINTS.map((pt) => (
+            {POINTS.map((pt, i) => (
               <li key={pt.title} data-point className="flex items-center gap-3.5 py-3.5">
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-brand shadow-[0_6px_14px_-8px_rgb(18_20_22/.35)]">
                   <Icon name={pt.icon} className="size-4" />
                 </span>
                 <span className="min-w-0">
-                  <b className="block text-[14.5px] font-semibold">{pt.title}</b>
-                  <span className="block text-[13px] text-muted">{pt.body}</span>
+                  <Txt as="b" k={`point${i + 1}.name`} label={`Point ${i + 1}: title`} className="block text-[14.5px] font-semibold">{pt.title}</Txt>
+                  <Txt k={`point${i + 1}.text`} label={`Point ${i + 1}: text`} className="block text-[13px] text-muted">{pt.body}</Txt>
                 </span>
               </li>
             ))}
@@ -96,10 +97,10 @@ export function RetailMerchandisingBanner() {
               buyerType="Retailer"
               className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-white transition-colors hover:bg-brand"
             >
-              Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+              <Txt k="button" label="Button 1">Get wholesale pricing</Txt> <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>
             <Link href="/catalog" className="inline-flex h-12 items-center rounded-full bg-white/70 px-6 text-[14px] font-semibold text-ink transition-colors hover:bg-white">
-              Shop all styles
+              <Txt k="button2" label="Button 2">Shop all styles</Txt>
             </Link>
           </div>
         </div>

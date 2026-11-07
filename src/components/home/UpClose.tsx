@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -205,7 +206,7 @@ export function UpClose() {
           <div className="flex flex-col justify-center">
             {/* Progress Bar */}
             <div className="mb-4 flex items-center justify-between text-[13px] font-boldr text-muted">
-              <span>The details</span>
+              <Txt k="details" label="Above the detail cards">The details</Txt>
               <span className="text-brand tabular-nums">
                 {activeStep === null ? "Full view" : `${activeStep + 1} / ${STEPS.length}`}
               </span>
@@ -250,7 +251,7 @@ export function UpClose() {
                             isActive ? "text-ink" : "text-ink/80 group-hover:text-ink"
                           }`}
                         >
-                          {s.title}
+                          <Txt k={`detail${i + 1}.name`} label={`Detail ${i + 1}: title`}>{s.title}</Txt>
                         </h3>
                       </div>
                       <span
@@ -258,13 +259,13 @@ export function UpClose() {
                           isActive ? "bg-brand/15 text-brand" : "bg-ink/6 text-muted"
                         }`}
                       >
-                        {s.badge}
+                        <Txt k={`detail${i + 1}.badge`} label={`Detail ${i + 1}: badge`}>{s.badge}</Txt>
                       </span>
                     </div>
 
-                    <p className="mt-1.5 pl-8.5 text-[13px] leading-relaxed text-ink-2">
+                    <Txt as="p" k={`detail${i + 1}.text`} label={`Detail ${i + 1}: text`} className="mt-1.5 pl-8.5 text-[13px] leading-relaxed text-ink-2">
                       {s.text}
-                    </p>
+                    </Txt>
 
                     {/* Expandable Spec Pill on Active Card */}
                     <div
@@ -301,13 +302,13 @@ export function UpClose() {
                 className="inline-flex h-11 items-center gap-2 rounded-full border border-ink/15 bg-white px-5 text-[13px] font-bold text-ink shadow-soft transition-all hover:border-ink/40 hover:bg-white hover:shadow-md active:scale-98"
               >
                 <Icon name="search" className="size-3.5" />
-                <span>See all Nord specs</span>
+                <Txt k="button" label="Button 1">See all Nord specs</Txt>
               </QuickViewButton>
               <OpenInquiryButton
                 note={`Sample request: Chime Long ${P.name}, one pair, mid-run size.`}
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-white transition-colors hover:bg-brand active:scale-98"
               >
-                <span>Order a sample pair</span>
+                <Txt k="button2" label="Button 2">Order a sample pair</Txt>
                 <Icon name="arrow" className="size-3.5" />
               </OpenInquiryButton>
             </div>

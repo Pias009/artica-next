@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { seasonCopyOf } from "@/lib/content/live";
 import { merged } from "@/lib/season-copy";
 import { campaignLive, controlOn } from "@/lib/content/live";
@@ -277,7 +278,7 @@ export function EditorialCampaignBanner() {
               buyerType="Retailer"
               className="group mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-semibold text-ink transition-colors hover:bg-brand hover:text-white"
             >
-              Get wholesale pricing{" "}
+              <Txt k="button" label="Button">Get wholesale pricing</Txt>{" "}
               <Icon
                 name="arrow"
                 className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"

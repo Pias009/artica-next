@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import Image from "next/image";
 import { useRef } from "react";
 import { SectionHead } from "../ui/SectionHead";
@@ -85,11 +86,11 @@ export function OrderJourney() {
           </div>
 
           <ol className="grid gap-10 pl-24 md:grid-cols-4 md:gap-8 md:pl-0">
-            {STEPS.map((s) => (
+            {STEPS.map((s, i) => (
               <li key={s.title} data-jstep>
-                <p className="text-[clamp(30px,3vw,44px)] leading-none font-semibold tracking-[-0.03em] text-glacier tabular-nums">{s.time}</p>
-                <p className="mt-3 text-[18px] font-semibold tracking-[-0.01em]">{s.title}</p>
-                <p className="mt-1 max-w-[30ch] text-[15px] text-ink-2">{s.text}</p>
+                <Txt as="p" k={`step${i + 1}.time`} label={`Step ${i + 1}: time`} className="text-[clamp(30px,3vw,44px)] leading-none font-semibold tracking-[-0.03em] text-glacier tabular-nums">{s.time}</Txt>
+                <Txt as="p" k={`step${i + 1}.name`} label={`Step ${i + 1}: title`} className="mt-3 text-[18px] font-semibold tracking-[-0.01em]">{s.title}</Txt>
+                <Txt as="p" k={`step${i + 1}.text`} label={`Step ${i + 1}: text`} className="mt-1 max-w-[30ch] text-[15px] text-ink-2">{s.text}</Txt>
               </li>
             ))}
           </ol>

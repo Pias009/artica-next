@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Icon } from "../Icon";
@@ -109,7 +110,7 @@ export function SampleRequest() {
           />
           <div className="flex items-baseline justify-between gap-3">
             <p id="sample-pick" className="text-[15px] font-semibold">
-              Choose styles <span className="font-normal text-muted">· one pair each</span>
+              <Txt k="pick" label="Above the style list">Choose styles</Txt> <Txt k="pick-note" label="Next to it" className="font-normal text-muted">· one pair each</Txt>
             </p>
             <span aria-live="polite" className="text-[13px] font-medium text-muted tabular-nums">
               {picked.length ? `${picked.length} selected` : `${products.length} styles`}
@@ -142,17 +143,17 @@ export function SampleRequest() {
           </div>
           <ul className="mt-6 grid gap-2 text-[15px] text-ink-2">
             <li className="flex items-center gap-2.5">
-              <Icon name="sample" className="size-[18px] text-glacier" /> Mid-run size by default; tell us any size in the notes
+              <Icon name="sample" className="size-[18px] text-glacier" /> <Txt k="point1" label="Point 1">Mid-run size by default; tell us any size in the notes</Txt>
             </li>
             <li className="flex items-center gap-2.5">
-              <Icon name="truck" className="size-[18px] text-glacier" /> Shipped to your office, worldwide
+              <Icon name="truck" className="size-[18px] text-glacier" /> <Txt k="point2" label="Point 2">Shipped to your office, worldwide</Txt>
             </li>
             <li className="flex items-center gap-2.5">
-              <Icon name="chat" className="size-[18px] text-glacier" /> Sample cost and shipping confirmed with your quote
+              <Icon name="chat" className="size-[18px] text-glacier" /> <Txt k="point3" label="Point 3">Sample cost and shipping confirmed with your quote</Txt>
             </li>
           </ul>
           <button type="button" onClick={request} disabled={!picked.length} className="btn btn-dark mt-8">
-            Order {picked.length || ""} sample{picked.length === 1 ? "" : "s"} <Icon name="arrow" className="size-4" />
+            <Txt k="button" label="Button">Order samples</Txt> {picked.length > 0 && `(${picked.length})`} <Icon name="arrow" className="size-4" />
           </button>
         </div>
       </div>

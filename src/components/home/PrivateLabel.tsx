@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,7 +38,7 @@ export function PrivateLabel() {
         <span aria-hidden className="absolute top-1/2 right-[-10%] -z-10 size-[min(90vw,720px)] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,#fff_0%,rgb(255_255_255/0)_65%)] opacity-80" />
 
         <div className="px-[clamp(24px,5vw,72px)] pt-12 md:py-16">
-          <p className="eyebrow">Private label · OEM</p>
+          <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">Private label · OEM</Txt>
           <SectionText as="h2" part="title" id="h-partner" className="type-section mt-3 max-w-[14ch]">
             Your brand <em>on our boots.</em>
           </SectionText>
@@ -48,7 +49,7 @@ export function PrivateLabel() {
           {/* try it: the name goes straight onto the product */}
           <div className="mt-8 max-w-[420px]">
             <label htmlFor={`${id}-brand`} className="text-[13px] font-semibold text-ink-2">
-              Try it with your brand
+              <Txt k="try" label="Brand box label">Try it with your brand</Txt>
             </label>
             <div className="mt-2 flex h-14 items-center gap-3 rounded-full bg-white pr-2 pl-5 shadow-soft transition-shadow focus-within:ring-2 focus-within:ring-ink">
               <Icon name="tag" className="size-4 flex-none text-brand" />
@@ -72,12 +73,12 @@ export function PrivateLabel() {
           </div>
 
           <ul className="mt-7 grid gap-3">
-            {POINTS.map((t) => (
+            {POINTS.map((t, i) => (
               <li key={t} className="flex items-start gap-3 text-[16px]">
                 <span className="mt-0.5 grid size-6 flex-none place-items-center rounded-full bg-white text-ink">
                   <Icon name="check" className="size-3.5" />
                 </span>
-                {t}
+                <Txt k={`point${i + 1}`} label={`Point ${i + 1}`}>{t}</Txt>
               </li>
             ))}
           </ul>
@@ -88,11 +89,11 @@ export function PrivateLabel() {
               className="btn btn-dark"
               onClick={() => openDrawer("Private label brand", undefined, typed ? `Private label brand name: ${brand.trim()}` : undefined, "private_label")}
             >
-              {typed ? `Get pricing for ${brand.trim()}` : "Get private-label pricing"}
+              {typed ? `Get pricing for ${brand.trim()}` : <Txt k="button" label="Button">Get private-label pricing</Txt>}
               <Icon name="arrow" className="size-4" />
             </button>
             <Link href="/private-label">
-              <ArrowLink>How it works</ArrowLink>
+              <ArrowLink><Txt k="link" label="Link">How it works</Txt></ArrowLink>
             </Link>
           </div>
         </div>
@@ -128,9 +129,9 @@ export function PrivateLabel() {
               <li key={title} className="rounded-[10px] px-3 py-2.5 first:bg-white">
                 <p className="flex items-center gap-1.5 text-[14px] font-semibold">
                   <span className="grid size-5 place-items-center rounded-full bg-ink text-[11px] text-white tabular-nums">{i + 1}</span>
-                  {title}
+                  <Txt k={`step${i + 1}.name`} label={`Step ${i + 1}: title`}>{title}</Txt>
                 </p>
-                <p className="mt-1 text-[12px] leading-snug text-muted">{text}</p>
+                <Txt as="p" k={`step${i + 1}.text`} label={`Step ${i + 1}: text`} className="mt-1 text-[12px] leading-snug text-muted">{text}</Txt>
               </li>
             ))}
           </ol>

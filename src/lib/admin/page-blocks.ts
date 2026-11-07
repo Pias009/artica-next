@@ -18,24 +18,33 @@ export type Block = {
   /** null: the block has no supporting line. */
   sub: string | null;
   hideable: boolean;
+  /** Every other piece of text the section marks (home page): badges, buttons, cards, list items, notes. */
+  fields: { key: string; label: string; text: string }[];
 };
 
 const unescape = (s: string) =>
   s.replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 
+const humanize = (k: string) => k.replace(/[-.]/g, " ").replace(/(\d+)/g, " $1").replace(/\s+/g, " ").trim().replace(/^./, (c) => c.toUpperCase());
+
 export function blocksIn(html: string): Block[] {
   const found = new Map<string, Block>();
-  for (const m of html.matchAll(/data-copy="([\w-]+)\.(title|sub)" data-default="([^"]*)"/g)) {
-    const [, id, part, raw] = m;
+  const block = (id: string) => {
+    let b = found.get(id);
+    if (!b) found.set(id, (b = { id, label: "", kind: id === "intro" ? "Intro" : "Section", title: "", sub: null, hideable: id !== "intro", fields: [] }));
+    return b;
+  };
+  for (const m of html.matchAll(/data-copy="([\w-]+)\.([\w.-]+)" data-default="([^"]*)"(?: data-label="([^"]*)")?/g)) {
+    const [, id, rest, raw, label] = m;
     const text = unescape(raw);
-    const b = found.get(id) ?? { id, label: "", kind: id === "intro" ? "Intro" : "Section", title: "", sub: null, hideable: id !== "intro" };
-    if (part === "title") {
+    const b = block(id);
+    if (rest === "title") {
       b.title = text;
       b.label = id === "intro" ? "Page intro" : text.replace(/\*/g, "").slice(0, 60) || id;
-    } else b.sub = text;
-    found.set(id, b);
+    } else if (rest === "sub") b.sub = text;
+    else if (!b.fields.some((f) => f.key === `${id}.${rest}`)) b.fields.push({ key: `${id}.${rest}`, label: label ? unescape(label) : humanize(rest), text });
   }
-  return [...found.values()].filter((b) => b.title);
+  return [...found.values()].filter((b) => b.title || b.fields.length);
 }
 
 /** One page's blocks. A failed read throws, so it is never cached and the next panel load tries again. */
@@ -46,7 +55,7 @@ async function readOne(origin: string, path: string) {
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return blocksIn(await res.text());
 }
-const cachedOne = unstable_cache(readOne, ["page-blocks-v2"], { revalidate: 600 });
+const cachedOne = unstable_cache(readOne, ["page-blocks-v3"], { revalidate: 600 });
 
 async function read(origin: string, paths: string[]) {
   const out: Record<string, Block[] | null> = {};

@@ -4,7 +4,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { Field } from "../ui";
-import { uploadPhoto } from "./products/PhotoField";
+import { uploadImage } from "../upload-image";
 import type { SeasonCampaignConfig } from "@/components/home/EditorialCampaignBanner";
 import type { HeroSeasonCopy } from "@/components/home/HeroSpotlight";
 import { CAMPAIGN_PHOTOS, type SeasonCopy } from "@/lib/season-copy";
@@ -48,8 +48,8 @@ export function SeasonEditor({
     setUploadError(null);
     setUploading("Uploading…");
     try {
-      const { shot } = await uploadPhoto(f, false, setUploading);
-      setC({ ...c, image: shot.src });
+      const src = await uploadImage(f);
+      setC({ ...c, image: src });
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "The photo couldn't be uploaded.");
     } finally {
@@ -72,7 +72,15 @@ export function SeasonEditor({
 
       <section aria-label={`${label} campaign`} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3">
         <h3 className="text-[14px] font-semibold">Campaign banner</h3>
-        <div className="relative aspect-[16/9] overflow-hidden rounded-[18px] bg-ink">
+        <div
+          className="relative aspect-[16/9] overflow-hidden rounded-[18px] bg-ink"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const f = e.dataTransfer.files?.[0];
+            if (f) void upload(f);
+          }}
+        >
           <Image src={image} alt="" fill sizes="480px" className="object-cover" />
           <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(0deg,rgb(12_13_14/.75),transparent_60%)]" />
           <span className="absolute top-3 left-3 rounded-full bg-black/45 px-2.5 py-1 text-[11.5px] font-semibold text-white">{c.seasonTag || campaign.seasonTag}</span>
@@ -96,13 +104,21 @@ export function SeasonEditor({
                 <Image src={src} alt="" fill sizes="96px" className="object-cover" />
               </button>
             ))}
-            <button type="button" onClick={() => file.current?.click()} disabled={!!uploading} className="h-14 w-24 flex-none rounded-lg border-2 border-dashed border-ink/20 text-[12px] font-semibold text-ink/60 hover:border-ink/40 disabled:opacity-60">
-              {uploading ?? "Upload…"}
-            </button>
             <input ref={file} type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
           </div>
+          <button
+            type="button"
+            onClick={() => file.current?.click()}
+            disabled={!!uploading}
+            className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-ink/25 bg-white/70 text-[13.5px] font-semibold hover:border-ink/50 disabled:opacity-60"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4 fill-none stroke-current stroke-2">
+              <path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {uploading ?? "Upload a photo from your computer"}
+          </button>
           {uploadError && <p className="mt-1 text-[12.5px] text-danger">{uploadError}</p>}
-          <p className="mt-1 text-[12px] text-ink/50">Wide photos work best (16:9 or wider). The first one is the built-in photo.</p>
+          <p className="mt-1 text-[12px] text-ink/50">Or drop a photo on the preview. Wide photos work best (16:9 or wider); it&apos;s resized for the web before upload. The first one above is the built-in photo.</p>
         </div>
         <Field label="Photo description (for screen readers)" value={c.alt ?? ""} max={200} multiline placeholder={campaign.alt} onChange={(v) => setC({ ...c, alt: v })} />
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">

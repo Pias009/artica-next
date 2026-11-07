@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt, TxtCatalog } from "../ui/Txt";
 import clsx from "clsx";
 import { useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Icon, type IconName } from "../Icon";
@@ -290,8 +291,8 @@ export function BuyerTypes() {
                 <Icon name={x.icon} className="size-[18px]" />
               </span>
               <span className="min-w-0">
-                <span className="block text-[16px] font-semibold whitespace-nowrap lg:whitespace-normal">{x.tab}</span>
-                <span className="hidden text-[13px] opacity-70 lg:block">{x.headline}</span>
+                <Txt k={`${x.key}.tab`} label={`${x.tab}: tab name`} className="block text-[16px] font-semibold whitespace-nowrap lg:whitespace-normal">{x.tab}</Txt>
+                <Txt k={`${x.key}.headline`} label={`${x.tab}: headline`} className="hidden text-[13px] opacity-70 lg:block">{x.headline}</Txt>
               </span>
             </button>
           ))}
@@ -303,46 +304,60 @@ export function BuyerTypes() {
             <div className="size-full max-h-[440px]">
               <Scene key={p.key} />
             </div>
-            <span data-swap className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold">
+            <Txt k={`${p.key}.tab`} label={`${p.tab}: tab name`} className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold">
               {p.tab}
-            </span>
+            </Txt>
           </div>
           <div className="flex flex-col p-[clamp(20px,3vw,36px)]">
             <h3 data-swap className="text-[clamp(22px,2.2vw,28px)] leading-tight font-semibold tracking-[-0.02em]">
-              {p.headline}
+              <Txt k={`${p.key}.headline`} label={`${p.tab}: headline`}>{p.headline}</Txt>
             </h3>
             <div data-swap className="mt-5 rounded-ph bg-tile px-4 py-3.5">
-              <p className="text-[13px] text-muted">Typical first order</p>
-              <p className="text-[28px] leading-tight font-semibold tracking-[-0.03em] tabular-nums">{p.first.value}</p>
-              <p className="text-[13px] text-ink-2">{p.first.note}</p>
+              <Txt as="p" k="first-label" label="'Typical first order' label" className="text-[13px] text-muted">Typical first order</Txt>
+              <Txt as="p" k={`${p.key}.first`} label={`${p.tab}: first order`} className="text-[28px] leading-tight font-semibold tracking-[-0.03em] tabular-nums">{p.first.value}</Txt>
+              <Txt as="p" k={`${p.key}.first-note`} label={`${p.tab}: first order note`} className="text-[13px] text-ink-2">{p.first.note}</Txt>
             </div>
             <dl data-swap className="mt-5 grid gap-2.5">
-              {p.facts.map(([k, v]) => (
+              {p.facts.map(([k, v], j) => (
                 <div key={k} className="grid grid-cols-[92px_minmax(0,1fr)] gap-3 text-[15px]">
-                  <dt className="text-muted">{k}</dt>
-                  <dd className="font-medium">{v}</dd>
+                  <Txt as="dt" k={`${p.key}.fact${j + 1}.name`} label={`${p.tab}: fact ${j + 1} name`} className="text-muted">{k}</Txt>
+                  <Txt as="dd" k={`${p.key}.fact${j + 1}.value`} label={`${p.tab}: fact ${j + 1}`} className="font-medium">{v}</Txt>
                 </div>
               ))}
             </dl>
             <ul data-swap className="mt-5 grid gap-2 border-t border-line pt-5 text-[15px]">
-              {p.perks.map((t) => (
+              {p.perks.map((t, j) => (
                 <li key={t} className="flex items-center gap-2.5">
                   <Icon name="check" className="size-4 flex-none text-glacier" />
-                  {t}
+                  <Txt k={`${p.key}.perk${j + 1}`} label={`${p.tab}: point ${j + 1}`}>{t}</Txt>
                 </li>
               ))}
             </ul>
             <div data-swap className="mt-auto pt-7">
               <OpenInquiryButton buyerType={p.buyer} className="btn btn-dark">
-                {p.cta} <Icon name="arrow" className="size-4" />
+                <Txt k={`${p.key}.button`} label={`${p.tab}: button`}>{p.cta}</Txt> <Icon name="arrow" className="size-4" />
               </OpenInquiryButton>
             </div>
           </div>
         </div>
       </div>
 
+      <TxtCatalog
+        items={PROGRAMS.flatMap((x) => [
+          [`${x.key}.tab`, `${x.tab}: tab name`, x.tab],
+          [`${x.key}.headline`, `${x.tab}: headline`, x.headline],
+          [`${x.key}.first`, `${x.tab}: first order`, x.first.value],
+          [`${x.key}.first-note`, `${x.tab}: first order note`, x.first.note],
+          ...x.facts.flatMap(([k, v], j): [string, string, string][] => [
+            [`${x.key}.fact${j + 1}.name`, `${x.tab}: fact ${j + 1} name`, k],
+            [`${x.key}.fact${j + 1}.value`, `${x.tab}: fact ${j + 1}`, v],
+          ]),
+          ...x.perks.map((t, j): [string, string, string] => [`${x.key}.perk${j + 1}`, `${x.tab}: point ${j + 1}`, t]),
+          [`${x.key}.button`, `${x.tab}: button`, x.cta],
+        ] as [string, string, string][])}
+      />
       {/* order types */}
-      <h3 className="mt-14 text-[20px] font-semibold tracking-[-0.02em]">Four ways to order</h3>
+      <Txt as="h3" k="ways" label="'Four ways to order' heading" className="mt-14 text-[20px] font-semibold tracking-[-0.02em]">Four ways to order</Txt>
       <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {ORDER_TYPES.map((o, i) => (
           <li key={o.title} data-reveal className="relative rounded-card bg-tile p-5">
@@ -354,9 +369,9 @@ export function BuyerTypes() {
                 <Icon name="arrow" className="hidden size-4 text-muted lg:block" />
               )}
             </div>
-            <p className="mt-4 text-[18px] font-semibold">{o.title}</p>
-            <p className="mt-0.5 text-[20px] font-semibold tracking-[-0.02em] text-glacier tabular-nums">{o.qty}</p>
-            <p className="mt-1.5 text-[15px] text-ink-2">{o.text}</p>
+            <Txt as="p" k={`way${i + 1}.name`} label={`Way ${i + 1}: title`} className="mt-4 text-[18px] font-semibold">{o.title}</Txt>
+            <Txt as="p" k={`way${i + 1}.qty`} label={`Way ${i + 1}: quantity`} className="mt-0.5 text-[20px] font-semibold tracking-[-0.02em] text-glacier tabular-nums">{o.qty}</Txt>
+            <Txt as="p" k={`way${i + 1}.text`} label={`Way ${i + 1}: text`} className="mt-1.5 text-[15px] text-ink-2">{o.text}</Txt>
           </li>
         ))}
       </ol>

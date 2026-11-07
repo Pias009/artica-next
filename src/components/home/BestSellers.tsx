@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -67,7 +68,7 @@ export function BestSellers() {
             {view === "list" && <MotionToggle stopped={stopped} onToggle={() => setStopped((v) => !v)} />}
             <ViewSwitch view={view} onChange={setView} />
             <Link href="/catalog">
-              <ArrowLink>View all styles</ArrowLink>
+              <ArrowLink><Txt k="link" label="Link on the right">View all styles</Txt></ArrowLink>
             </Link>
           </div>
         }

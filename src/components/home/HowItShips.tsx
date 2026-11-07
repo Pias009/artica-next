@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { useRef } from "react";
 import { byDepth, iso, IsoBox, IsoQuad, KRAFT, viewBoxFor, WHITE_BOX, WOOD } from "../ui/Iso";
 import { SectionHead } from "../ui/SectionHead";
@@ -184,9 +185,9 @@ export function HowItShips() {
                   </span>
                 )}
               </div>
-              <p className="mt-5 text-[32px] leading-none font-semibold tracking-[-0.03em] text-glacier tabular-nums">{s.n}</p>
-              <h3 className="mt-2 text-[18px] font-semibold tracking-[-0.01em]">{s.title}</h3>
-              <p className="mt-1 text-[15px] text-ink-2">{s.text}</p>
+              <Txt as="p" k={`${s.id}.figure`} label={`${s.id}: figure`} className="mt-5 text-[32px] leading-none font-semibold tracking-[-0.03em] text-glacier tabular-nums">{s.n}</Txt>
+              <Txt as="h3" k={`${s.id}.name`} label={`${s.id}: title`} className="mt-2 text-[18px] font-semibold tracking-[-0.01em]">{s.title}</Txt>
+              <Txt as="p" k={`${s.id}.text`} label={`${s.id}: text`} className="mt-1 text-[15px] text-ink-2">{s.text}</Txt>
               {s.id === "case" && (
                 <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Pairs per size in one men's case">
                   {CASE_PACK.men.map(([size, n]) => (

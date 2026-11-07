@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import clsx from "clsx";
 import Image from "next/image";
 import { backPlan, fmtDate, nextPlan, SEASONS } from "@/lib/buyer-desk";
@@ -24,11 +25,11 @@ export function SeasonCards({ className }: { className?: string }) {
             <div className="relative aspect-[16/9] overflow-hidden bg-photo">
               <Image src={s.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
               <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/55 to-transparent" />
-              <p className="absolute bottom-4 left-6 text-[17px] font-semibold text-white">{s.name}</p>
+              <Txt as="p" k={`${s.id}.name`} label={`${s.name}: name`} className="absolute bottom-4 left-6 text-[17px] font-semibold text-white">{s.name}</Txt>
             </div>
             <div className="flex flex-1 flex-col p-6 pt-5">
-              <p className="text-[13px] text-muted">{s.markets}</p>
-              <p className="mt-7 text-[14px] text-ink-2">Confirm bulk by</p>
+              <Txt as="p" k={`${s.id}.markets`} label={`${s.name}: markets`} className="text-[13px] text-muted">{s.markets}</Txt>
+              <Txt as="p" k="confirm" label="'Confirm bulk by' label" className="mt-7 text-[14px] text-ink-2">Confirm bulk by</Txt>
               <p className="mt-1 font-headline text-[clamp(34px,3.4vw,46px)] leading-none font-semibold tracking-[-0.03em] tabular-nums">
                 {p ? fmtDate(p.order, today!) : "—"}
               </p>
@@ -44,7 +45,7 @@ export function SeasonCards({ className }: { className?: string }) {
                   </li>
                 ))}
               </ol>
-              <p className="mt-auto pt-5 text-[13px] text-muted">{s.note}</p>
+              <Txt as="p" k={`${s.id}.note`} label={`${s.name}: note`} className="mt-auto pt-5 text-[13px] text-muted">{s.note}</Txt>
             </div>
           </li>
         );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import clsx from "clsx";
 import Image from "next/image";
 import { useRef } from "react";
@@ -58,10 +59,10 @@ export function OrderSheet() {
         right={
           <div className="flex flex-wrap gap-3">
             <a href="#styles" className="btn btn-line">
-              Add styles
+              <Txt k="add" label="Button 1">Add styles</Txt>
             </a>
             <button type="button" onClick={() => openDrawer()} className="btn btn-dark">
-              Get pricing for this sheet <Icon name="arrow" className="size-4" />
+              <Txt k="price" label="Button 2">Get pricing for this sheet</Txt> <Icon name="arrow" className="size-4" />
             </button>
           </div>
         }
@@ -83,8 +84,8 @@ export function OrderSheet() {
             <div>
               <Logo />
               <p className="mt-2 text-[13px] font-semibold text-brand">Guangzhou Chime Long Trading Co., Ltd</p>
-              <p className="mt-4 text-[clamp(26px,3vw,36px)] leading-none font-semibold tracking-[-0.03em]">Order sheet</p>
-              <p className="mt-1 text-[14px] text-muted">Wholesale · Trade buyers only</p>
+              <Txt as="p" k="sheet" label="Sheet title" className="mt-4 text-[clamp(26px,3vw,36px)] leading-none font-semibold tracking-[-0.03em]">Order sheet</Txt>
+              <Txt as="p" k="sheet-sub" label="Under the sheet title" className="mt-1 text-[14px] text-muted">Wholesale · Trade buyers only</Txt>
             </div>
             <dl className="grid grid-cols-[auto_minmax(140px,1fr)] gap-x-4 gap-y-1.5 text-[13px]">
               {[
@@ -94,8 +95,8 @@ export function OrderSheet() {
                 ["Case pack", `${PACK} pairs, mixed sizes`],
               ].map(([k, v]) => (
                 <div key={k} className="contents">
-                  <dt className="text-muted">{k}</dt>
-                  <dd className="border-b border-dashed border-ink/20 pb-0.5 font-medium">{v}</dd>
+                  <Txt as="dt" k={`field-${k.toLowerCase().replace(/\W+/g, "-")}`} label={`Field name: ${k}`} className="text-muted">{k}</Txt>
+                  <Txt as="dd" k={`value-${k.toLowerCase().replace(/\W+/g, "-")}`} label={`${k}: value`} className="border-b border-dashed border-ink/20 pb-0.5 font-medium">{v}</Txt>
                 </div>
               ))}
             </dl>
@@ -167,14 +168,14 @@ export function OrderSheet() {
           <div className="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
             <div className="grid gap-1.5 text-[13px] text-ink-2">
               <p>
-                <b className="font-semibold text-ink">Prices:</b> tier pricing quoted on request, within 24 hours.
+                <b className="font-semibold text-ink">Prices:</b> <Txt k="prices" label="Prices note">tier pricing quoted on request, within 24 hours.</Txt>
               </p>
               <p>
                 <b className="font-semibold text-ink">Lead time:</b> samples {LEAD.samples.replace("d", " days")}, production {LEAD.bulk.replace("d", " days")}, delivery{" "}
                 {LEAD.delivery.replace("d", " days")}.
               </p>
               <p className="mt-6 flex items-end gap-3">
-                <span className="text-muted">Buyer signature</span>
+                <Txt k="signature" label="Signature line" className="text-muted">Buyer signature</Txt>
                 <span className="inline-block w-48 border-b border-ink/40" />
               </p>
             </div>

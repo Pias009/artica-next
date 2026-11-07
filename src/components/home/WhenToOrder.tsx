@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Txt } from "../ui/Txt";
 import { SeasonCards } from "../buyer/SeasonCards";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
 import { LEAD_DAYS } from "@/lib/buyer-desk";
@@ -18,7 +19,7 @@ export function WhenToOrder() {
         sub={`Samples ${LEAD_DAYS.samples} days, production ${LEAD_DAYS.bulk}, delivery ${LEAD_DAYS.delivery}. Worked back from the day the boots should be on your shelves.`}
         right={
           <Link href="/order-calendar">
-            <ArrowLink>Plan your own date</ArrowLink>
+            <ArrowLink><Txt k="link" label="Link on the right">Plan your own date</Txt></ArrowLink>
           </Link>
         }
       />

@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt, TxtCatalog } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
@@ -99,7 +100,7 @@ export function LookbookFittingBanner() {
     <section ref={ref} id="lookbook" aria-labelledby="h-lookbook-fit" className="mt-sec scroll-mt-24">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 md:mb-8">
         <div>
-          <p className="eyebrow">Lookbook FW26</p>
+          <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">Lookbook FW26</Txt>
           <SectionText as="h2" part="title" id="h-lookbook-fit" className="type-section mt-3">
             See it <em>on foot.</em>
           </SectionText>
@@ -120,7 +121,7 @@ export function LookbookFittingBanner() {
                 }}
                 className={`h-10 shrink-0 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${on ? "bg-ink text-white" : "text-ink-2 hover:text-ink"}`}
               >
-                {f.label}
+                <Txt k={`filter-${f.key}`} label={`Filter: ${f.label}`}>{f.label}</Txt>
                 <span className={`ml-1.5 text-[11.5px] tabular-nums ${on ? "text-white/60" : "text-muted"}`}>{shown(f.key).length}</span>
               </button>
             );
@@ -207,7 +208,7 @@ export function LookbookFittingBanner() {
         </button>
 
         <div key={`${filter}-${cur.src}`} aria-live="polite" className="min-w-0 animate-rise-in text-center motion-reduce:animate-none">
-          <p className="text-[11.5px] font-semibold tracking-[0.14em] text-muted uppercase">{cur.kicker}</p>
+          <Txt as="p" k={`look-${LOOKS.indexOf(cur) + 1}.kicker`} label={`Look ${LOOKS.indexOf(cur) + 1}: small label`} className="text-[11.5px] font-semibold tracking-[0.14em] text-muted uppercase">{cur.kicker}</Txt>
           <p className="mt-1 truncate font-headline text-[24px] leading-tight font-semibold sm:text-[28px]">
             {product ? `Chime Long ${product.name}` : cur.title}
           </p>
@@ -262,6 +263,7 @@ export function LookbookFittingBanner() {
           </span>
         ))}
       </div>
+      <TxtCatalog items={LOOKS.map((l, i): [string, string, string] => [`look-${i + 1}.kicker`, `Look ${i + 1} (${l.title}): small label`, l.kicker])} />
     </section>
   );
 }

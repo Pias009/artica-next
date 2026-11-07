@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import { chosen, DEFAULT_HOT, defaultHot, MAX_HOT } from "@/lib/merch";
 import Image from "next/image";
@@ -122,7 +123,7 @@ export function HotProducts() {
     <section ref={ref} id="hot" aria-labelledby="h-hot" className="mt-sec scroll-mt-24">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-4 md:mb-10">
         <div>
-          <p className="eyebrow">Hot this season</p>
+          <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">Hot this season</Txt>
           <SectionText as="h2" part="title" id="h-hot" className="type-section mt-3">
             The styles buyers <em>reorder.</em>
           </SectionText>

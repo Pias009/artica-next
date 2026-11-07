@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { seasonCopyOf } from "@/lib/content/live";
 import { merged } from "@/lib/season-copy";
 import Image from "next/image";
@@ -245,15 +246,15 @@ export function HeroSpotlight() {
           </p>
           <div data-hero-in="cta" className="mt-9 flex flex-wrap items-center gap-3 max-lg:justify-center">
             <OpenInquiryButton className="group inline-flex h-12 items-center gap-2 rounded-full bg-ink px-7 text-[15px] font-semibold text-white shadow-[0_14px_30px_-14px_rgb(18_20_22/.6)] transition-[background-color,translate] duration-300 ease-soft hover:-translate-y-0.5 hover:bg-brand">
-              Get wholesale pricing <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+              <Txt k="button" label="Button 1">Get wholesale pricing</Txt> <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </OpenInquiryButton>
             <a href="#styles" className="inline-flex h-12 items-center rounded-full bg-white px-6 text-[15px] font-semibold text-ink ring-1 ring-ink/15 transition-[box-shadow] duration-300 ease-soft hover:ring-ink/40">
-              Browse the range
+              <Txt k="button2" label="Button 2">Browse the range</Txt>
             </a>
           </div>
-          <p data-hero-in="copy" className="mt-4 text-[13px] text-muted">
+          <Txt as="p" k="terms" label="Small line under the buttons" className="mt-4 text-[13px] text-muted">
             From {MOQ_PAIRS} pairs per style · {PACK}-pair cases
-          </p>
+          </Txt>
         </div>
 
         {/* the stage with spatial mouse tilt */}
@@ -446,7 +447,7 @@ export function HeroSpotlight() {
                 className="group/btn hit-44 pointer-events-auto relative inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-brand"
               >
                 <span className="relative z-[1] flex items-center gap-1">
-                  <span>View</span>
+                  <Txt k="view" label="Spotlight button">View</Txt>
                   <Icon name="arrow" className="size-3 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
                 </span>
               </button>
@@ -505,13 +506,13 @@ export function HeroSpotlight() {
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col justify-center px-4">
                     <span className="font-headline text-[20px] leading-tight font-semibold transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
-                    <span className="mt-0.5 truncate text-[13px] text-muted">{c.kinds}</span>
+                    <Txt k={`${c.line}.kinds`} label={`${LINE_LABEL[c.line]} card: kinds of shoe`} className="mt-0.5 truncate text-[13px] text-muted">{c.kinds}</Txt>
                     <span className="mt-2 flex items-center justify-between text-[13px] font-semibold">
                       <span>
                         {inLine(c.line).length} styles · {PACK}/case
                       </span>
                       <span className="inline-flex items-center gap-1 text-brand">
-                        Shop <Icon name="arrow" className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1.5" />
+                        <Txt k="shop" label="Line cards: link">Shop</Txt> <Icon name="arrow" className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1.5" />
                       </span>
                     </span>
                   </span>

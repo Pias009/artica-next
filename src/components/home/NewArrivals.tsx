@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt, TxtCatalog } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import { chosen, defaultArrivals, MAX_ARRIVALS } from "@/lib/merch";
 import Image from "next/image";
@@ -63,7 +64,7 @@ export function NewArrivals() {
     <section id="new" aria-labelledby="h-new" className="mt-sec scroll-mt-24">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 md:mb-10">
         <div>
-          <p className="eyebrow">New arrivals</p>
+          <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">New arrivals</Txt>
           <SectionText as="h2" part="title" id="h-new" className="type-section mt-3">
             Just landed for <em>FW26.</em>
           </SectionText>
@@ -113,7 +114,7 @@ export function NewArrivals() {
                 className={`absolute z-[2] flex items-center gap-2 text-[12px] font-bold tracking-[0.16em] tabular-nums transition-colors ${on ? "top-5 left-5 text-ink sm:top-6 sm:left-7" : "top-1/2 left-4 -translate-y-1/2 text-ink/40 lg:top-5 lg:left-1/2 lg:-translate-x-1/2 lg:translate-y-0"}`}
               >
                 {String(i + 1).padStart(2, "0")}
-                {on && <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[11.5px] font-semibold tracking-normal text-brand">New</span>}
+                {on && <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[11.5px] font-semibold tracking-normal text-brand"><Txt k="tag" label="Tag on the open panel">New</Txt></span>}
               </span>
 
               {/* the pair: small in a closed panel, large in the open one */}
@@ -165,7 +166,7 @@ export function NewArrivals() {
                       className={`inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold text-white transition-colors sm:h-12 sm:px-6 ${inList ? "bg-brand" : "bg-ink hover:bg-brand"}`}
                     >
                       <Icon name={inList ? "check" : "plus"} className="size-4" />
-                      {inList ? "On your list" : "Add to inquiry"}
+                      {inList ? <Txt k="added" label="Button once added">On your list</Txt> : <Txt k="add" label="Add button">Add to inquiry</Txt>}
                     </button>
                     <button
                       type="button"
@@ -225,6 +226,7 @@ export function NewArrivals() {
           Shop all new <Icon name="arrow" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
         </Link>
       </div>
+      <TxtCatalog items={[["tag", "Tag on the open panel", "New"], ["added", "Button once added", "On your list"], ["add", "Add button", "Add to inquiry"]]} />
     </section>
   );
 }

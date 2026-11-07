@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { deskOn } from "@/lib/content/live";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
@@ -42,7 +43,7 @@ export function BusinessPlanTeaser() {
         sub="Shoes take about two months to make and ship, more to reach your shelf. Summer stock ordered in May lands as summer ends. Our business planner works out the dates, the order and the numbers for you."
         right={
           <Link href="/business-plan">
-            <ArrowLink>Open the business planner</ArrowLink>
+            <ArrowLink><Txt k="link" label="Link on the right">Open the business planner</Txt></ArrowLink>
           </Link>
         }
       />
@@ -91,27 +92,27 @@ export function BusinessPlanTeaser() {
 
         <div className="grid gap-3.5">
           <div data-deco="card" className="rounded-shell bg-ink p-[clamp(20px,3vw,32px)] text-white">
-            <p className="text-[14px] font-semibold text-white/65">Plan it with numbers</p>
+            <Txt as="p" k="box" label="Dark box: label" className="text-[14px] font-semibold text-white/65">Plan it with numbers</Txt>
             <ul className="mt-3 grid gap-2.5 text-[15px]">
               {[
                 "When to order, for your country",
                 "What to order, for your budget",
                 "Landed cost per pair, margin, break-even",
                 "The cash it needs, month by month",
-              ].map((x) => (
+              ].map((x, i) => (
                 <li key={x} className="flex gap-2.5">
                   <Icon name="check" className="mt-1 size-4 shrink-0 text-white/70" />
-                  {x}
+                  <Txt k={`point${i + 1}`} label={`Dark box: point ${i + 1}`}>{x}</Txt>
                 </li>
               ))}
             </ul>
             <div className="mt-6 flex flex-wrap gap-2.5">
               <Link href="/business-plan" className="btn bg-white text-ink hover:bg-white/90">
-                Start my plan <Icon name="arrow" />
+                <Txt k="start" label="Button 1">Start my plan</Txt> <Icon name="arrow" />
               </Link>
               {deskOn("plan") && (
                 <button type="button" onClick={() => show("plan")} className="btn border border-white/25 text-white hover:border-white/60">
-                  <Icon name="chat" className="size-4" /> Ask the planning desk
+                  <Icon name="chat" className="size-4" /> <Txt k="ask" label="Button 2">Ask the planning desk</Txt>
                 </button>
               )}
             </div>

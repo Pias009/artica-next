@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { Txt } from "../ui/Txt";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon, type IconName } from "../Icon";
@@ -10,6 +11,9 @@ const hc = CONTAINERS[CONTAINERS.length - 1];
 
 /** A card's picture: a photo filling the frame, a cutout boot on the card ground, or the dotted world map. */
 type DeskImage = { src: string; fit: "cover" | "contain" | "map" };
+
+/** A card's key in the admin panel: its page, e.g. "size-guide". */
+const slug = (href: string) => href.replace(/^\//, "");
 
 /** Each buyer-desk page with the one fact that sells it, so the home page carries the main point of every page. */
 export const DESK: { href: string; icon: IconName; title: string; fact: string; text: string; cta: string; image: DeskImage }[] = [
@@ -85,7 +89,7 @@ export function BuyerDesk({ heading = true }: { heading?: boolean }) {
           sub="Answers to what every buyer asks a new factory, before you send a single email."
           right={
             <Link href="/buyer-desk">
-              <ArrowLink>Open the buyer desk</ArrowLink>
+              <ArrowLink><Txt k="link" label="Link on the right">Open the buyer desk</Txt></ArrowLink>
             </Link>
           }
         />
@@ -111,12 +115,12 @@ export function BuyerDesk({ heading = true }: { heading?: boolean }) {
               <span className="flex flex-1 flex-col p-6">
                 <span className="flex items-center gap-2.5 text-[15px] font-semibold">
                   <Icon name={d.icon} className="size-5! stroke-[1.5] text-brand" />
-                  {d.title}
+                  <Txt k={`${slug(d.href)}.name`} label={`${d.title}: title`}>{d.title}</Txt>
                 </span>
-                <span className="mt-6 font-headline text-[clamp(22px,2.2vw,28px)] leading-[1.15] font-semibold tracking-[-0.02em]">{d.fact}</span>
-                <span className="mt-2 text-[15px] text-ink-2">{d.text}</span>
+                <Txt k={`${slug(d.href)}.fact`} label={`${d.title}: big line`} className="mt-6 font-headline text-[clamp(22px,2.2vw,28px)] leading-[1.15] font-semibold tracking-[-0.02em]">{d.fact}</Txt>
+                <Txt k={`${slug(d.href)}.text`} label={`${d.title}: text`} className="mt-2 text-[15px] text-ink-2">{d.text}</Txt>
                 <span className="mt-auto pt-6">
-                  <ArrowLink>{d.cta}</ArrowLink>
+                  <ArrowLink><Txt k={`${slug(d.href)}.link`} label={`${d.title}: link`}>{d.cta}</Txt></ArrowLink>
                 </span>
               </span>
             </Link>

@@ -44,8 +44,8 @@ const PageEdit = z.object({
     .optional(),
   // any page's intro and section words, by "<heading id>.title|sub", and the sections hidden (by heading id)
   copy: z
-    .record(z.string().regex(/^[\w-]{1,40}\.(title|sub)$/, "Unknown text"), text(300))
-    .refine((r) => Object.keys(r).length <= 80, "Too many changes on one page")
+    .record(z.string().regex(/^[\w-]{1,40}(\.[\w-]{1,40}){1,3}$/, "Unknown text"), text(600))
+    .refine((r) => Object.keys(r).length <= 600, "Too many changes on one page")
     .optional(),
   hidden: z.array(z.string().regex(/^[\w-]{1,40}$/)).max(40).optional(),
 });
@@ -134,7 +134,7 @@ const SeasonCopyEdit = z.object({
       headlineAccent: words(70),
       description: words(200),
       accentColor: z.union([z.literal(""), z.string().regex(/^#[0-9a-f]{6}$/i, "Accent colour must be like #f2c9ea")]).optional(),
-      image: z.union([z.literal(""), z.string().regex(/^(\/images\/[\w./-]+|https:\/\/res\.cloudinary\.com\/doulxmmm\/image\/upload\/[\w./,-]+)$/, "Use a site photo or one uploaded here")]).optional(),
+      image: z.union([z.literal(""), z.string().regex(/^(\/images\/[\w./-]+|\/api\/img\/[a-f0-9]{24}|https:\/\/res\.cloudinary\.com\/doulxmmm\/image\/upload\/[\w./,-]+)$/, "Use a site photo or one uploaded here")]).optional(),
       alt: words(200),
       wornSlugs: z.array(z.string().regex(/^[a-z0-9-]{1,60}$/)).max(4).optional(),
     })

@@ -1,5 +1,6 @@
 "use client";
 
+import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
@@ -53,7 +54,7 @@ export function GlobalReach() {
   return (
     <section id="worldwide" aria-labelledby="h-worldwide" className="mt-sec scroll-mt-24">
       <div className="mb-8 md:mb-10">
-        <p className="eyebrow">Worldwide</p>
+        <Txt as="p" k="eyebrow" label="Small label above" className="eyebrow">Worldwide</Txt>
         <SectionText as="h2" part="title" id="h-worldwide" className="type-section mt-3 max-w-[20ch]">
           From our factory to <em>your shelves, anywhere.</em>
         </SectionText>
@@ -132,7 +133,7 @@ export function GlobalReach() {
               className="pointer-events-none absolute -translate-x-1/2 translate-y-2.5 rounded-full bg-ink px-2.5 py-1 text-[12px] font-bold tracking-[0.1em] whitespace-nowrap text-white uppercase max-sm:hidden"
               style={pos(ORIGIN)}
             >
-              Guangzhou · factory
+              <Txt k="origin" label="Map label: factory">Guangzhou · factory</Txt>
             </span>
             <span
               key={`l-${active}`}
@@ -147,7 +148,7 @@ export function GlobalReach() {
           {/* the lanes */}
           <div className="relative border-ink/8 p-5 max-lg:border-t lg:border-l lg:p-6">
             <div className="flex items-center justify-between">
-              <p className="text-[12px] font-bold tracking-[0.16em] text-muted uppercase">Trade lanes</p>
+              <Txt as="p" k="lanes" label="Lanes box: label" className="text-[12px] font-bold tracking-[0.16em] text-muted uppercase">Trade lanes</Txt>
               {!reduced && (
                 <button
                   type="button"
@@ -194,7 +195,7 @@ export function GlobalReach() {
             >
               Get pricing to {lane.port} <Icon name="arrow" className="size-3.5" />
             </button>
-            <p className="mt-2.5 text-center text-[12px] text-muted">Indicative ocean transit. Confirmed on every quote.</p>
+            <Txt as="p" k="note" label="Note under the lanes" className="mt-2.5 text-center text-[12px] text-muted">Indicative ocean transit. Confirmed on every quote.</Txt>
           </div>
         </div>
       </div>

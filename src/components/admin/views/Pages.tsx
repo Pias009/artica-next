@@ -28,6 +28,8 @@ type Section = {
   movable: boolean;
   /** Home sections whose words follow the season: edited in Seasons. */
   seasonal?: boolean;
+  /** Every other piece of text in the section: label, words as built, and the admin's words ("" keeps them). */
+  fields: { key: string; label: string; text: string; value: string }[];
 };
 type AdminPage = {
   path: string;
@@ -68,6 +70,7 @@ function toPages(d: PanelData, blocks: Record<string, Block[] | null>): AdminPag
               sub: copy?.sub ?? "",
               builtTitle: built?.title,
               builtSub: built ? (built.sub ?? "") : undefined,
+              fields: (built?.fields ?? []).map((f) => ({ ...f, value: e.copy?.[f.key] ?? "" })),
               hideable: true,
               movable: true,
             };
@@ -82,6 +85,7 @@ function toPages(d: PanelData, blocks: Record<string, Block[] | null>): AdminPag
             sub: e.copy?.[`${b.id}.sub`] ?? "",
             builtTitle: b.title,
             builtSub: b.sub,
+            fields: b.fields.map((f) => ({ ...f, value: e.copy?.[f.key] ?? "" })),
             hideable: b.hideable,
             movable: false,
           }));
@@ -106,14 +110,14 @@ function toEdits(pages: AdminPage[], d: PanelData): Record<string, PageEdit> {
         home &&
         p.sections.length &&
         (p.sections.map((x) => x.id).join() !== builtOrder || p.sections.some((x) => !x.visible || x.title.trim() || x.sub.trim()));
-      const copy = home
-        ? {}
-        : Object.fromEntries(
-            p.sections.flatMap((x) => [
-              ...(x.title.trim() ? [[`${x.id}.title`, x.title.trim()]] : []),
-              ...(x.sub.trim() ? [[`${x.id}.sub`, x.sub.trim()]] : []),
-            ]),
-          );
+      // every field the admin wrote; home headlines and lines live with the section order instead
+      const copy = Object.fromEntries(
+        p.sections.flatMap((x) => [
+          ...(!home && x.title.trim() ? [[`${x.id}.title`, x.title.trim()]] : []),
+          ...(!home && x.sub.trim() ? [[`${x.id}.sub`, x.sub.trim()]] : []),
+          ...x.fields.filter((f) => f.value.trim()).map((f) => [f.key, f.value.trim()]),
+        ]),
+      );
       const hidden = home ? [] : p.sections.filter((x) => !x.visible).map((x) => x.id);
       const e: PageEdit = {
         ...(!p.published && { published: false }),
@@ -380,6 +384,27 @@ export function Pages({ blocks }: { blocks: Record<string, Block[] | null> }) {
         {section ? (
           <>
             <CardHead title={section.label} sub={section.kind === "Intro" ? `The opening of ${page.name}` : `${section.kind} section on ${page.name}`} />
+            {section.fields.length > 0 && (
+              <details open className="mt-4 rounded-2xl bg-white/60 p-3 [&_summary::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer items-center justify-between text-[13px] font-semibold">
+                  All the section&apos;s text <span className="font-medium text-ink/50 tabular-nums">{section.fields.filter((f) => f.value.trim()).length}/{section.fields.length} changed</span>
+                </summary>
+                <div className="mt-3 grid max-h-[52vh] gap-3 overflow-y-auto pr-1">
+                  {section.fields.map((f) => (
+                    <Field
+                      key={f.key}
+                      label={f.label}
+                      value={f.value}
+                      max={Math.max(40, Math.ceil(f.text.length * 2.2))}
+                      multiline={f.text.length > 48}
+                      placeholder={f.text}
+                      onChange={(v) => editSection(section.id, { fields: section.fields.map((x) => (x.key === f.key ? { ...x, value: v } : x)) })}
+                    />
+                  ))}
+                  <p className="text-[12px] text-ink/50">The faded words are what shows now. An empty box keeps them.</p>
+                </div>
+              </details>
+            )}
             {!section.copy ? (
               section.seasonal ? (
                 <p className="mt-4 text-[13.5px] text-ink/60">
@@ -390,7 +415,7 @@ export function Pages({ blocks }: { blocks: Record<string, Block[] | null> }) {
                   . Here you can show, hide or move it.
                 </p>
               ) : (
-                <p className="mt-4 text-[13.5px] text-ink/60">This section has no headline to rewrite. You can show, hide or move it.</p>
+                <p className="mt-4 text-[13.5px] text-ink/60">{section.fields.length ? "Its text is above. You can also show, hide or move it." : "This section has no text to rewrite. You can show, hide or move it."}</p>
               )
             ) : (
               <>
