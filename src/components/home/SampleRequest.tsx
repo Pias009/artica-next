@@ -7,7 +7,8 @@ import { Icon } from "../Icon";
 import { iso, IsoBox, IsoQuad, KRAFT } from "../ui/Iso";
 import { SectionHead } from "../ui/SectionHead";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
-import { byId, LEAD, products } from "@/lib/products";
+import { byId, getProduct, LEAD, products } from "@/lib/products";
+import { DataCatalog, ProductsShown, useSectionData } from "../ui/SectionData";
 import { useUI } from "@/lib/store";
 
 /* Open sample box geometry (units), projected at U px per unit. */
@@ -29,13 +30,17 @@ const CLIP = `polygon(0% 0%, 100% 0%, 100% ${oR[1]}%, ${oR[0]}% ${oR[1]}%, ${oF[
 const centerX = (oB[0] + oF[0]) / 2;
 const centerY = (oB[1] + oF[1]) / 2;
 
-const SAMPLE = byId.p01;
+/** The boot rising out of the box, as built. */
+const BOOT = byId.p01;
 
 /** Samples first: the box opens and a boot rises out as you scroll; pick styles and request them. */
 export function SampleRequest() {
   const [picked, setPicked] = useState<string[]>(["p04", "p01"]);
   const openDrawer = useUI((s) => s.openDrawer);
   const ref = useRef<HTMLElement>(null);
+  // the boot in the box: the admin's style (Pages → Home → Sample request) or the built-in one
+  const boot = useSectionData().style("boot", BOOT.slug);
+  const SAMPLE = (boot && getProduct(boot)) || BOOT;
 
   useGSAP(
     () => {
@@ -157,6 +162,8 @@ export function SampleRequest() {
           </button>
         </div>
       </div>
+      <DataCatalog items={[{ k: "boot", label: "The boot rising out of the box", kind: "style", value: BOOT.slug }]} />
+      <ProductsShown ids={[SAMPLE.id]} />
     </section>
   );
 }

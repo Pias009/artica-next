@@ -2,6 +2,7 @@ import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
 import { InquiryPanel } from "@/components/inquiry/InquiryForm";
 import { PageIntro } from "@/components/PageIntro";
+import { DeskContact } from "@/components/DeskContact";
 
 export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "Inquiry list",
@@ -19,6 +20,10 @@ export default function InquiryPage() {
         text="Set cases per style (minimum 25 cases, 300 pairs), then send once. Wholesale pricing within 24 hours."
       />
       <InquiryPanel variant="page" />
+      {/* not ready to send a list: leave an email and the desk writes first (the footer's copy steps aside here) */}
+      <section aria-label="Talk to the desk" className="mt-sec">
+        <DeskContact where="page" />
+      </section>
     </>
   );
 }

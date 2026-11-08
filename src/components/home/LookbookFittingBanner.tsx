@@ -1,6 +1,7 @@
 "use client";
 
 import { Txt, TxtCatalog } from "../ui/Txt";
+import { DataCatalog, ProductsShown, useSectionData } from "../ui/SectionData";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import Link from "next/link";
@@ -38,7 +39,6 @@ const FILTERS: { key: "all" | Group; label: string }[] = [
 ];
 
 const STEP_MS = 3800;
-const shown = (f: "all" | Group) => (f === "all" ? LOOKS : LOOKS.filter((l) => l.group === f));
 
 /**
  * The lookbook as a turning ring of photos: the look in front faces you, large; the ones either side turn away and
@@ -57,7 +57,17 @@ export function LookbookFittingBanner() {
   const downX = useRef<number | null>(null);
   const swiped = useRef(false); // a swipe ends in a click on whatever is under it; that click must not count
 
-  const looks = shown(filter);
+  // each look's photo, style, name and description: the admin's (Pages → Home → Lookbook) or as shot
+  const data = useSectionData();
+  const all = LOOKS.map((l, i) => ({
+    ...l,
+    n: i + 1,
+    src: data.img(`look-${i + 1}`, l.src),
+    alt: data.text(`look-${i + 1}.alt`, l.alt),
+    title: data.text(`look-${i + 1}.title`, l.title),
+    slug: data.style(`look-${i + 1}`, l.slug),
+  }));
+  const looks = filter === "all" ? all : all.filter((l) => l.group === filter);
   const n = looks.length;
   const cur = looks[index % n];
   const product = cur.slug ? getProduct(cur.slug) : undefined;
@@ -122,7 +132,7 @@ export function LookbookFittingBanner() {
                 className={`h-10 shrink-0 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${on ? "bg-ink text-white" : "text-ink-2 hover:text-ink"}`}
               >
                 <Txt k={`filter-${f.key}`} label={`Filter: ${f.label}`}>{f.label}</Txt>
-                <span className={`ml-1.5 text-[11.5px] tabular-nums ${on ? "text-white/60" : "text-muted"}`}>{shown(f.key).length}</span>
+                <span className={`ml-1.5 text-[11.5px] tabular-nums ${on ? "text-white/60" : "text-muted"}`}>{f.key === "all" ? all.length : all.filter((l) => l.group === f.key).length}</span>
               </button>
             );
           })}
@@ -151,7 +161,7 @@ export function LookbookFittingBanner() {
             const front = d === 0;
             return (
               <li
-                key={l.src}
+                key={l.n}
                 aria-hidden={!front || undefined}
                 className="absolute top-0 left-1/2 aspect-[3/4] w-(--cw) transition-[transform,opacity] duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] will-change-transform motion-reduce:transition-none"
                 style={{
@@ -207,8 +217,8 @@ export function LookbookFittingBanner() {
           <Icon name="arrow" className="size-4 rotate-180" />
         </button>
 
-        <div key={`${filter}-${cur.src}`} aria-live="polite" className="min-w-0 animate-rise-in text-center motion-reduce:animate-none">
-          <Txt as="p" k={`look-${LOOKS.indexOf(cur) + 1}.kicker`} label={`Look ${LOOKS.indexOf(cur) + 1}: small label`} className="text-[11.5px] font-semibold tracking-[0.14em] text-muted uppercase">{cur.kicker}</Txt>
+        <div key={`${filter}-${cur.n}`} aria-live="polite" className="min-w-0 animate-rise-in text-center motion-reduce:animate-none">
+          <Txt as="p" k={`look-${cur.n}.kicker`} label={`Look ${cur.n}: small label`} className="text-[11.5px] font-semibold tracking-[0.14em] text-muted uppercase">{cur.kicker}</Txt>
           <p className="mt-1 truncate font-headline text-[24px] leading-tight font-semibold sm:text-[28px]">
             {product ? `Chime Long ${product.name}` : cur.title}
           </p>
@@ -252,7 +262,7 @@ export function LookbookFittingBanner() {
       {/* where the ring is, and how long until it turns */}
       <div aria-hidden="true" className="mx-auto mt-5 flex max-w-[640px] justify-center gap-1.5">
         {looks.map((l, i) => (
-          <span key={l.src} className={`relative h-1 overflow-hidden rounded-full bg-ink/12 transition-[width] duration-500 ${i === index ? "w-10" : "w-3"}`}>
+          <span key={l.n} className={`relative h-1 overflow-hidden rounded-full bg-ink/12 transition-[width] duration-500 ${i === index ? "w-10" : "w-3"}`}>
             {i === index && (
               <span
                 key={`${filter}-${index}-${still}`}
@@ -263,7 +273,20 @@ export function LookbookFittingBanner() {
           </span>
         ))}
       </div>
-      <TxtCatalog items={LOOKS.map((l, i): [string, string, string] => [`look-${i + 1}.kicker`, `Look ${i + 1} (${l.title}): small label`, l.kicker])} />
+      <TxtCatalog
+        items={LOOKS.flatMap((l, i): [string, string, string][] => [
+          [`look-${i + 1}.kicker`, `Look ${i + 1} (${l.title}): small label`, l.kicker],
+          [`look-${i + 1}.title`, `Look ${i + 1}: name when no style is named`, l.title],
+          [`look-${i + 1}.alt`, `Look ${i + 1}: photo description`, l.alt],
+        ])}
+      />
+      <DataCatalog
+        items={LOOKS.flatMap((l, i) => [
+          { k: `look-${i + 1}`, label: `Look ${i + 1} (${l.title}): photo`, kind: "image" as const, value: l.src },
+          { k: `look-${i + 1}`, label: `Look ${i + 1}: style on foot`, kind: "style" as const, value: l.slug ?? "" },
+        ])}
+      />
+      <ProductsShown ids={all.flatMap((l) => (l.slug ? [getProduct(l.slug)?.id ?? ""] : [])).filter(Boolean)} />
     </section>
   );
 }

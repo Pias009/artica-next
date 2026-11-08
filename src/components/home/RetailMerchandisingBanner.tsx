@@ -2,6 +2,8 @@
 
 import { Txt } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
+import { TxtCatalog } from "../ui/Txt";
+import { DataCatalog, useSectionData } from "../ui/SectionData";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
@@ -41,6 +43,14 @@ const COLUMNS: Look[][] = [
  */
 export function RetailMerchandisingBanner() {
   const ref = useRef<HTMLElement>(null);
+  // each photo, its label and description: the admin's (Pages → Home → Worn in the city) or as shot
+  const data = useSectionData();
+  const columns = COLUMNS.map((col, c) =>
+    col.map((l, i) => {
+      const k = `look-${c * COLUMNS[0].length + i + 1}`;
+      return { ...l, k, src: data.img(k, l.src), alt: data.text(`${k}.alt`, l.alt), label: data.text(`${k}.label`, l.label) };
+    }),
+  );
 
   useGSAP(
     () => {
@@ -112,10 +122,10 @@ export function RetailMerchandisingBanner() {
           role="group"
           className="relative grid h-[min(130vw,560px)] grid-cols-2 gap-3 overflow-hidden px-3 sm:gap-4 sm:px-4 lg:h-full lg:pr-4 lg:pl-0"
         >
-          {COLUMNS.map((col, c) => (
+          {columns.map((col, c) => (
             <ul key={c} data-col className={`flex flex-col gap-3 will-change-transform sm:gap-4 ${c ? "pt-10" : ""}`}>
               {col.map((l) => (
-                <li key={l.src}>
+                <li key={l.k}>
                   <Link href={l.href} className={`group relative block overflow-hidden rounded-[20px] bg-photo ${l.tall ? "aspect-[3/4]" : "aspect-[4/3]"}`}>
                     <Image
                       src={l.src}
@@ -128,8 +138,14 @@ export function RetailMerchandisingBanner() {
                     <span className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-2 text-white">
                       <span className="truncate text-[12px] font-semibold tracking-[0.12em] uppercase sm:text-[11.5px]">
                         {/* phones keep just the category ("Tall boots"); the line shows from sm up */}
-                        <span className="max-sm:hidden">{l.label.split(" · ")[0]} · </span>
-                        {l.label.split(" · ")[1]}
+                        {l.label.includes(" · ") ? (
+                          <>
+                            <span className="max-sm:hidden">{l.label.split(" · ")[0]} · </span>
+                            {l.label.split(" · ").slice(1).join(" · ")}
+                          </>
+                        ) : (
+                          l.label
+                        )}
                       </span>
                       <Icon name="arrow" className="size-3.5 shrink-0 -translate-x-1 opacity-0 transition-[opacity,translate] duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
                     </span>
@@ -140,6 +156,13 @@ export function RetailMerchandisingBanner() {
           ))}
         </div>
       </div>
+      <TxtCatalog
+        items={COLUMNS.flat().flatMap((l, i): [string, string, string][] => [
+          [`look-${i + 1}.label`, `Photo ${i + 1}: label ("Line · Kind")`, l.label],
+          [`look-${i + 1}.alt`, `Photo ${i + 1}: description`, l.alt],
+        ])}
+      />
+      <DataCatalog items={COLUMNS.flat().map((l, i) => ({ k: `look-${i + 1}`, label: `Photo ${i + 1} (${l.label}): photo`, kind: "image" as const, value: l.src }))} />
     </section>
   );
 }

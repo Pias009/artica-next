@@ -1,6 +1,7 @@
 "use client";
 
 import { Txt } from "../ui/Txt";
+import { ProductsShown } from "../ui/SectionData";
 import { SectionText } from "../ui/SectionText";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -553,6 +554,7 @@ export function UpClose() {
           </div>
         </div>
       </div>
+      <ProductsShown ids={[P.id]} />
     </section>
   );
 }

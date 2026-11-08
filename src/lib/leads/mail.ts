@@ -64,6 +64,8 @@ export const INTENT_LABEL = {
   visit: "Visit request",
   private_label: "Private label",
   shipping: "Shipping quote",
+  /** "Talk to the desk" (footer, inquiry page): an email, maybe a WhatsApp number, and a request to be contacted. */
+  contact: "Contact request",
 } as const;
 export type Intent = keyof typeof INTENT_LABEL;
 
@@ -103,12 +105,16 @@ export function deskEmail(i: Inquiry): Mail {
       `Ship to:   ${i.country}`,
       `Email:     ${i.email}   (reply to this email to answer the buyer)`,
       ``,
-      i.lines.length ? `Styles (${i.lines.length}, ${n(i.pairs)} pairs):\n${rows.join("\n")}` : `Styles: none chosen; they asked for the full line sheet.`,
+      i.lines.length
+        ? `Styles (${i.lines.length}, ${n(i.pairs)} pairs):\n${rows.join("\n")}`
+        : i.intent === "contact"
+          ? `They asked the desk to contact them directly. Write to them first.`
+          : `Styles: none chosen; they asked for the full line sheet.`,
       ``,
       `Notes:`,
       i.note || `  (none)`,
       ``,
-      `Promised on the site: tier pricing within 24 hours.`,
+      i.intent === "contact" ? `Promised on the site: a trade assistant writes within one working day.` : `Promised on the site: tier pricing within 24 hours.`,
       ...links,
     ].join("\n"),
   };
@@ -116,6 +122,7 @@ export function deskEmail(i: Inquiry): Mail {
 
 /** To the buyer: what we got and what happens next. Replying reaches the desk. */
 export function buyerEmail(i: Inquiry & { ref: string }): Mail {
+  if (i.intent === "contact") return contactEmail(i);
   const rows = i.lines.map((l) => `  - ${l.name} (${l.color}): ${l.cases} cases, ${n(l.pairs)} pairs`);
   return {
     to: [i.email],
@@ -134,6 +141,31 @@ export function buyerEmail(i: Inquiry & { ref: string }): Mail {
       `  3. When you're ready, confirm styles and sizes and production starts.`,
       ``,
       `Anything to add? Just reply to this email and quote ${i.ref}.`,
+      ``,
+      `Chime Long trade desk`,
+      absoluteUrl("/"),
+    ].join("\n"),
+  };
+}
+
+/** To a buyer who asked the desk to contact them: who will write, when, and how to reach the desk meanwhile. */
+function contactEmail(i: Inquiry & { ref: string }): Mail {
+  return {
+    to: [i.email],
+    replyTo: MAIL.to,
+    subject: `A trade assistant will write to you within one working day (${i.ref})`,
+    text: [
+      `Hello,`,
+      ``,
+      `Thank you for getting in touch with Chime Long. A trade assistant from our Guangzhou desk will write to you`,
+      `at this address within one working day. Your reference is ${i.ref}.`,
+      ``,
+      `To help us answer well, you can reply to this email with:`,
+      `  - what you sell (men, women, kids, waterproof) and where`,
+      `  - roughly how many pairs you order a season`,
+      `  - the season you're buying for`,
+      ``,
+      `Meanwhile, the full catalogue is at ${absoluteUrl("/catalog")}.`,
       ``,
       `Chime Long trade desk`,
       absoluteUrl("/"),

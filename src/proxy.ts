@@ -24,6 +24,8 @@ export async function proxy(req: NextRequest) {
   // the admin panel reading an unpublished page's text (lib/admin/page-blocks.ts) still gets the page
   const panel = req.headers.get(BLOCKS_HEADER) === blocksToken();
   if (!panel && site.hidden.has(url.pathname.replace(/\/$/, ""))) return NextResponse.rewrite(new URL("/__unpublished", req.url), { status: 404 });
+  // the home page with its hidden sections in (season/[season]/all) is for the panel only
+  if (!panel && /^\/season\/[^/]+\/all\/?$/.test(url.pathname)) return NextResponse.rewrite(new URL("/__unpublished", req.url), { status: 404 });
   const asked = url.searchParams.get("country")?.toUpperCase();
   const country =
     (asked && /^[A-Z]{2}$/.test(asked) ? asked : null) ??

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SeasonSignup } from "./buyer/SeasonSignup";
+import { DeskContact } from "./DeskContact";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
 import { COMPANY, SOCIAL, tel, whatsappLink } from "@/lib/company";
@@ -46,7 +46,7 @@ export function Footer() {
   return (
     <footer id="footer" data-deco="footer" className="mt-sec bg-tile px-(--shell-pad) pt-16 pb-10">
       <div className="wrap">
-        <SeasonSignup />
+        <DeskContact />
         <div className="mt-16 grid gap-12 lg:grid-cols-[1.4fr_2fr]">
           <div>
             <Logo className="h-14 sm:h-16" />

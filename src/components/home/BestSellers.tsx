@@ -1,6 +1,7 @@
 "use client";
 
 import { Txt } from "../ui/Txt";
+import { ProductsShown } from "../ui/SectionData";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
@@ -156,6 +157,7 @@ export function BestSellers() {
           </div>
         </div>
       )}
+      <ProductsShown ids={list.map((x) => x.id)} />
     </section>
   );
 }

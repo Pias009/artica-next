@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Txt } from "../ui/Txt";
-import Image from "next/image";
+import { DataCatalog, SectionImage } from "../ui/SectionData";
 import Link from "next/link";
 import { Icon, type IconName } from "../Icon";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
@@ -99,7 +99,8 @@ export function BuyerDesk({ heading = true }: { heading?: boolean }) {
           <li key={d.href}>
             <Link href={d.href} data-deco="card" className="group flex h-full flex-col overflow-hidden rounded-card bg-tile transition-colors hover:bg-chip-hover">
               <span className={clsx("relative block aspect-[16/10] overflow-hidden", d.image.fit === "cover" ? "bg-photo" : "bg-frost/70")}>
-                <Image
+                <SectionImage
+                  k={slug(d.href)}
                   src={d.image.src}
                   alt=""
                   fill
@@ -127,6 +128,7 @@ export function BuyerDesk({ heading = true }: { heading?: boolean }) {
           </li>
         ))}
       </ul>
+      <DataCatalog items={DESK.filter((d) => d.image.fit !== "map").map((d) => ({ k: slug(d.href), label: `${d.title}: photo`, kind: "image" as const, value: d.image.src }))} />
     </section>
   );
 }

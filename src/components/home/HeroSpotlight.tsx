@@ -1,6 +1,7 @@
 "use client";
 
 import { Txt } from "../ui/Txt";
+import { ProductsShown } from "../ui/SectionData";
 import { seasonCopyOf } from "@/lib/content/live";
 import { merged } from "@/lib/season-copy";
 import Image from "next/image";
@@ -522,6 +523,7 @@ export function HeroSpotlight() {
           })}
         </ul>
       </nav>
+      <ProductsShown ids={[...spots.map((x) => x.p.id), ...cards.map((c) => c.p.id)]} />
     </section>
   );
 }

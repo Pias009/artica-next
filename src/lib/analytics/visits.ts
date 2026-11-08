@@ -8,9 +8,12 @@ import { database, dbReady } from "../leads/db";
  * kind of device and where the visit came from. The visit id is a hash of a secret that changes every day with the
  * address and browser, so one visit's pages join up but nobody can be followed from one day to the next, and the
  * address itself is never stored. Nothing is kept on the visitor's device. Deleted after 90 days (TTL index).
+ *
+ * When a visitor sends an inquiry or signs up for the line sheet, the email they typed is noted on that day's visit
+ * (kind "contact"), so the panel can show whose footprint it is. Visits without one stay anonymous.
  */
 
-export type VisitKind = "view" | "search" | "inquiry" | "add";
+export type VisitKind = "view" | "search" | "inquiry" | "add" | "contact";
 export type Device = "Desktop" | "Mobile" | "Tablet";
 export type VisitDoc = {
   sid: string;
@@ -24,6 +27,11 @@ export type VisitDoc = {
   found?: number;
   /** "add": the style put on the inquiry list. */
   pid?: string;
+  /** "contact": the email the visitor gave, how (an inquiry or the line-sheet signup), and the inquiry's ref. */
+  email?: string;
+  via?: "inquiry" | "signup";
+  ref?: string;
+  company?: string;
 };
 
 export const visits = () => database().collection<VisitDoc>("visits");
@@ -82,3 +90,36 @@ export function visitId(ip: string, ua: string) {
 }
 
 export const BOT = /bot|crawl|spider|slurp|preview|headless|lighthouse|facebookexternalhit|embedly|monitor|curl|wget|python|axios|node-fetch/i;
+
+/**
+ * Notes on today's visit that this visitor gave their email (an inquiry sent, a line-sheet signup), so the panel's
+ * Visitors view shows whose footprint it is. Skipped for bots and browsers that ask not to be tracked, as visits are.
+ * Never throws: the visitor's form has already gone through.
+ */
+export async function noteContact(c: { email: string; via: "inquiry" | "signup"; path?: string | null; ref?: string; company?: string; country?: string | null }) {
+  if (!dbReady()) return;
+  try {
+    const { headers } = await import("next/headers");
+    const h = await headers();
+    const ua = h.get("user-agent") ?? "";
+    if (BOT.test(ua) || h.get("sec-gpc") === "1") return;
+    const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
+    const path = c.path && c.path.startsWith("/") ? new URL(c.path, "http://x").pathname.slice(0, 300) : "/";
+    await ensureVisitIndexes();
+    await visits().insertOne({
+      sid: visitId(ip, ua),
+      kind: "contact",
+      path,
+      at: new Date(),
+      country: c.country ?? h.get("x-vercel-ip-country") ?? null,
+      device: deviceOf(ua, 0),
+      source: "Direct",
+      email: c.email.toLowerCase().slice(0, 200),
+      via: c.via,
+      ...(c.ref && { ref: c.ref }),
+      ...(c.company && { company: c.company.slice(0, 120) }),
+    });
+  } catch (e) {
+    console.error("[visits] contact not noted", e);
+  }
+}

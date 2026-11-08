@@ -180,6 +180,32 @@
 }
 
 /* Rides an element along its offset-path (the hero's V shelf). */
+/* Opened from the admin panel's Pages view (/#s-hot, /faq#h-moq): the section briefly outlined so it's easy to find */
+[data-section-anchor]:target + *,
+h2[data-copy]:target {
+  animation: section-flash 2.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  border-radius: 28px;
+}
+@keyframes section-flash {
+  0%,
+  45% {
+    outline: 3px solid color-mix(in srgb, var(--color-brand) 75%, transparent);
+    outline-offset: 12px;
+  }
+  100% {
+    outline: 3px solid transparent;
+    outline-offset: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-section-anchor]:target + *,
+  h2[data-copy]:target {
+    animation: none;
+    outline: 3px solid color-mix(in srgb, var(--color-brand) 75%, transparent);
+    outline-offset: 12px;
+  }
+}
+
 @keyframes ride {
   from {
     offset-distance: 0%;

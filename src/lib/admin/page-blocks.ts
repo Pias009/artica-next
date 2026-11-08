@@ -18,8 +18,13 @@ export type Block = {
   /** null: the block has no supporting line. */
   sub: string | null;
   hideable: boolean;
-  /** Every other piece of text the section marks (home page): badges, buttons, cards, list items, notes. */
-  fields: { key: string; label: string; text: string }[];
+  /**
+   * Every other piece the section marks (home page): its words (badges, buttons, cards, list items, notes), its photos
+   * (kind "image": the text is the photo's address) and the styles it names (kind "style": the style's slug).
+   */
+  fields: { key: string; label: string; text: string; kind: "text" | "image" | "style" }[];
+  /** The styles the section shows now (ids, in order), when it shows styles. */
+  products?: string[];
 };
 
 const unescape = (s: string) =>
@@ -34,17 +39,21 @@ export function blocksIn(html: string): Block[] {
     if (!b) found.set(id, (b = { id, label: "", kind: id === "intro" ? "Intro" : "Section", title: "", sub: null, hideable: id !== "intro", fields: [] }));
     return b;
   };
-  for (const m of html.matchAll(/data-copy="([\w-]+)\.([\w.-]+)" data-default="([^"]*)"(?: data-label="([^"]*)")?/g)) {
-    const [, id, rest, raw, label] = m;
+  for (const m of html.matchAll(/data-copy="([\w-]+)\.([\w.-]+)" data-default="([^"]*)"(?: data-label="([^"]*)")?(?: data-kind="(image|style)")?/g)) {
+    const [, id, rest, raw, label, kind] = m;
     const text = unescape(raw);
     const b = block(id);
     if (rest === "title") {
       b.title = text;
       b.label = id === "intro" ? "Page intro" : text.replace(/\*/g, "").slice(0, 60) || id;
     } else if (rest === "sub") b.sub = text;
-    else if (!b.fields.some((f) => f.key === `${id}.${rest}`)) b.fields.push({ key: `${id}.${rest}`, label: label ? unescape(label) : humanize(rest), text });
+    else if (!b.fields.some((f) => f.key === `${id}.${rest}`)) b.fields.push({ key: `${id}.${rest}`, label: label ? unescape(label) : humanize(rest), text, kind: (kind as "image" | "style") ?? "text" });
   }
-  return [...found.values()].filter((b) => b.title || b.fields.length);
+  for (const m of html.matchAll(/data-products="([\w-]+)" data-ids="([^"]*)"/g)) {
+    const b = block(m[1]);
+    b.products = [...new Set([...(b.products ?? []), ...m[2].split(",").filter(Boolean)])];
+  }
+  return [...found.values()].filter((b) => b.title || b.fields.length || b.products?.length);
 }
 
 /** One page's blocks. A failed read throws, so it is never cached and the next panel load tries again. */
@@ -55,7 +64,7 @@ async function readOne(origin: string, path: string) {
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return blocksIn(await res.text());
 }
-const cachedOne = unstable_cache(readOne, ["page-blocks-v3"], { revalidate: 600 });
+const cachedOne = unstable_cache(readOne, ["page-blocks-v4"], { revalidate: 600 });
 
 async function read(origin: string, paths: string[]) {
   const out: Record<string, Block[] | null> = {};

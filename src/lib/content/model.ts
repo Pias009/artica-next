@@ -67,6 +67,9 @@ export type PageEdit = {
 
 export type Tone = "plain" | "warm" | "formal";
 
+/** The home page's product showcases, as style ids in order; an empty or missing list: the built-in way. */
+export type Merch = { hot: string[]; arrivals: string[]; order: string[]; seasonEdit?: Partial<Record<SeasonId, string[]>> };
+
 export type SiteContent = {
   products: Record<string, ProductEdit>;
   added: AddedProduct[];
@@ -76,8 +79,11 @@ export type SiteContent = {
   availability: Record<string, Availability>;
   /** Each season's hero and campaign words and photo (season-copy.ts). Public. */
   seasonCopy: SeasonCopyMap;
-  /** The home page's Hot products and New arrivals (empty: the built-in way), and the order of featured styles (lib/merch.ts). */
-  merch: { hot: string[]; arrivals: string[]; order: string[] };
+  /**
+   * The home page's Hot products, New arrivals and each season's edit (empty: the built-in way), and the order of
+   * featured styles (lib/merch.ts).
+   */
+  merch: Merch;
   pages: Record<string, PageEdit>;
   seasons: {
     /** true: each visitor sees the season in their country; false: everyone sees `fallback`. */

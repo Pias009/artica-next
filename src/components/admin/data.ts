@@ -31,6 +31,7 @@ const INTENTS: Record<Intent, string> = {
   visit: "Visit",
   private_label: "Private label",
   shipping: "Shipping",
+  contact: "Contact me",
 };
 export const intentLabel = (i: Intent) => INTENTS[i];
 

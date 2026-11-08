@@ -39,7 +39,7 @@ const SECTIONS = [
     title: "Visit statistics",
     body: [
       "We count visits to improve the site: the page, the time, the country, the kind of device, the site you came from and searches you make on this site. We set no cookie for this and store nothing on your device.",
-      "We don't keep your IP address. A visit is joined up with an anonymous code made from your address and browser and a secret that changes every day, so you can't be followed from one day to the next. Browsers that send Global Privacy Control or Do Not Track aren't counted. These records are deleted after 90 days.",
+      "We don't keep your IP address. A visit is joined up with an anonymous code made from your address and browser and a secret that changes every day, so you can't be followed from one day to the next. If you send an inquiry or sign up for the line sheet, the email you give is noted with that day's visit, so our sales desk can see which pages you looked at. Browsers that send Global Privacy Control or Do Not Track aren't counted. These records are deleted after 90 days.",
     ],
   },
   {

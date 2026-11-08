@@ -24,6 +24,8 @@ export type SaveResult = { ok: true; at: string } | { ok: false; error: string }
 
 const text = (max: number) => z.string().trim().max(max);
 const season = z.enum(SEASON_IDS);
+/** A photo on the site (public/images), one uploaded in the panel, or one on the site's Cloudinary. */
+const IMAGE_SRC = /^(\/images\/[\w./-]+|\/api\/img\/[a-f0-9]{24}|https:\/\/res\.cloudinary\.com\/doulxmmm\/image\/upload\/[\w./,-]+)$/;
 const PATHS = new Set(SITE_PAGES.map((p) => p.path.split("?")[0]));
 const SECTION_IDS = new Set<string>(HOME_SECTIONS.map((s) => s.id));
 
@@ -42,10 +44,14 @@ const PageEdit = z.object({
     )
     .max(40)
     .optional(),
-  // any page's intro and section words, by "<heading id>.title|sub", and the sections hidden (by heading id)
+  // any page's intro and section words, by "<heading id>.title|sub", and the sections hidden (by heading id); on the
+  // home page also each section's photos ("<section>.img-<k>": a site photo or one uploaded here) and the styles it
+  // names ("<section>.style-<k>": a style's address, or "none")
   copy: z
     .record(z.string().regex(/^[\w-]{1,40}(\.[\w-]{1,40}){1,3}$/, "Unknown text"), text(600))
     .refine((r) => Object.keys(r).length <= 600, "Too many changes on one page")
+    .refine((r) => Object.entries(r).every(([k, v]) => !/\.img-[\w-]+$/.test(k) || IMAGE_SRC.test(v)), "Use a site photo or one uploaded here")
+    .refine((r) => Object.entries(r).every(([k, v]) => !/\.style-[\w-]+$/.test(k) || /^[a-z0-9-]{1,60}$/.test(v)), "Unknown style")
     .optional(),
   hidden: z.array(z.string().regex(/^[\w-]{1,40}$/)).max(40).optional(),
 });
@@ -117,11 +123,17 @@ const compact = <V extends object>(r: Record<string, V>) =>
   Object.fromEntries(Object.entries(r).filter(([, v]) => Object.values(v).some((x) => x !== undefined)));
 
 const ids = (max: number) => z.array(z.string().regex(/^[\w-]{1,40}$/, "Unknown style")).max(max);
-const Merch = z.object({ hot: ids(12), arrivals: ids(10), order: ids(500) });
+const Merch = z.object({ hot: ids(12), arrivals: ids(10), order: ids(500), seasonEdit: z.partialRecord(season, ids(6)).optional() });
 
-/** The home page's Hot products and New arrivals, and the featured order (Products → Arrange). */
+/**
+ * The home page's Hot products, New arrivals and each season's edit, and the featured order (Pages → Home, Products →
+ * Arrange). A season's edit left empty goes back to the season's own picks.
+ */
 export async function saveMerchAction(merch: unknown) {
-  return save(Merch, merch, "arrangement", (v) => ({ merch: { hot: [...new Set(v.hot)], arrivals: [...new Set(v.arrivals)], order: [...new Set(v.order)] } }));
+  return save(Merch, merch, "arrangement", (v) => {
+    const seasonEdit = Object.fromEntries(Object.entries(v.seasonEdit ?? {}).flatMap(([s, list]) => (list?.length ? [[s, [...new Set(list)]]] : [])));
+    return { merch: { hot: [...new Set(v.hot)], arrivals: [...new Set(v.arrivals)], order: [...new Set(v.order)], seasonEdit } };
+  });
 }
 
 const words = (max: number) => z.string().trim().max(max).optional();
@@ -134,7 +146,7 @@ const SeasonCopyEdit = z.object({
       headlineAccent: words(70),
       description: words(200),
       accentColor: z.union([z.literal(""), z.string().regex(/^#[0-9a-f]{6}$/i, "Accent colour must be like #f2c9ea")]).optional(),
-      image: z.union([z.literal(""), z.string().regex(/^(\/images\/[\w./-]+|\/api\/img\/[a-f0-9]{24}|https:\/\/res\.cloudinary\.com\/doulxmmm\/image\/upload\/[\w./,-]+)$/, "Use a site photo or one uploaded here")]).optional(),
+      image: z.union([z.literal(""), z.string().regex(IMAGE_SRC, "Use a site photo or one uploaded here")]).optional(),
       alt: words(200),
       wornSlugs: z.array(z.string().regex(/^[a-z0-9-]{1,60}$/)).max(4).optional(),
     })

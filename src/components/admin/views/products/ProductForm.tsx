@@ -368,7 +368,8 @@ export function ProductAside({ item: p, others, adding, missing }: { item: Item;
 }
 
 /** Covers the whole screen, the panel's own bars included, with its top bar always in reach. */
-export function FullPage({ title, sub, actions, children }: { title: string; sub?: string; actions: ReactNode; children: ReactNode }) {
+/** `back`: where the arrow goes; a label and a handler when opened over another view (Pages), else the product list. */
+export function FullPage({ title, sub, actions, back, children }: { title: string; sub?: string; actions: ReactNode; back?: { label: string; onClick: () => void }; children: ReactNode }) {
   const head = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     head.current?.focus();
@@ -381,12 +382,21 @@ export function FullPage({ title, sub, actions, children }: { title: string; sub
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-[#eeede9] text-ink">
       <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-ink/10 bg-[#eeede9]/90 px-4 py-3 backdrop-blur-xl sm:px-6">
-        <Link href="/admin/products" prefetch={false} scroll={false} className="flex min-h-10 items-center gap-1.5 rounded-full pr-3 pl-2 text-[13.5px] font-semibold text-ink/65 hover:bg-ink/[0.06] hover:text-ink">
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4.5 fill-none stroke-current stroke-[1.9]">
-            <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          All products
-        </Link>
+        {back ? (
+          <button type="button" onClick={back.onClick} className="flex min-h-10 items-center gap-1.5 rounded-full pr-3 pl-2 text-[13.5px] font-semibold text-ink/65 hover:bg-ink/[0.06] hover:text-ink">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4.5 fill-none stroke-current stroke-[1.9]">
+              <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {back.label}
+          </button>
+        ) : (
+          <Link href="/admin/products" prefetch={false} scroll={false} className="flex min-h-10 items-center gap-1.5 rounded-full pr-3 pl-2 text-[13.5px] font-semibold text-ink/65 hover:bg-ink/[0.06] hover:text-ink">
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4.5 fill-none stroke-current stroke-[1.9]">
+              <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            All products
+          </Link>
+        )}
         <div className="min-w-0 flex-1 basis-40">
           <h2 ref={head} tabIndex={-1} className="truncate text-[20px] leading-tight font-semibold tracking-[-0.01em] outline-none">
             {title}

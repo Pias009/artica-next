@@ -1,6 +1,7 @@
 /** The home page's sections, in their built-in order: what the admin panel's Pages view lists, shows, hides and reorders. */
 export const HOME_SECTIONS = [
   { id: "hero", label: "Hero spotlight", kind: "Hero", copy: false, seasonal: true },
+  { id: "season-pick", label: "Choose your season", kind: "Tool", copy: true },
   { id: "season-edit", label: "Season edit", kind: "Products", copy: true },
   { id: "hot", label: "Hot products", kind: "Products", copy: true },
   { id: "new", label: "New arrivals", kind: "Products", copy: true },
@@ -25,10 +26,24 @@ export const HOME_SECTIONS = [
 
 export type HomeSectionId = (typeof HOME_SECTIONS)[number]["id"];
 
-/** The sections in the admin's order with their visibility; sections added to the site later are appended, shown. */
+/**
+ * The sections in the admin's order with their visibility. Sections added to the site after the order was saved
+ * join it shown, right after the section they follow on the built-in page (a new one after the hero stays there).
+ */
 export function homeOrder(edits?: { id: string; visible: boolean }[]) {
   const known = new Set<string>(HOME_SECTIONS.map((s) => s.id));
-  const listed = (edits ?? []).filter((e) => known.has(e.id));
-  const rest = HOME_SECTIONS.filter((s) => !listed.some((e) => e.id === s.id)).map((s) => ({ id: s.id, visible: true }));
-  return [...listed, ...rest] as { id: HomeSectionId; visible: boolean }[];
+  const out = (edits ?? []).filter((e) => known.has(e.id)).map((e) => ({ id: e.id, visible: e.visible }));
+  HOME_SECTIONS.forEach((s, i) => {
+    if (out.some((e) => e.id === s.id)) return;
+    const before = HOME_SECTIONS.slice(0, i).reverse().find((b) => out.some((e) => e.id === b.id));
+    const at = before ? out.findIndex((e) => e.id === before.id) + 1 : 0;
+    out.splice(at, 0, { id: s.id, visible: true });
+  });
+  return out as { id: HomeSectionId; visible: boolean }[];
 }
+
+/**
+ * The footer's "Talk to the desk" box (components/DeskContact.tsx): on every page, its words kept once, with the home
+ * page's (Pages → Home lists it after the sections; other pages leave it out).
+ */
+export const FOOTER_BLOCK = { id: "talk", label: "Footer: talk to the desk", kind: "Footer" } as const;

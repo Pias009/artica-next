@@ -400,6 +400,20 @@ async function overviewData() {
 
 const clock = (ms: number) => `${Math.floor(ms / 60_000)}:${String(Math.floor((ms % 60_000) / 1000)).padStart(2, "0")}`;
 
+/*
+ * Each visit gets a name made from its anonymous id, so two visitors are never confused in the panel: the same visit
+ * always has the same name and colour, and nothing in it says who they are. A visitor who gave their email (an
+ * inquiry, the line-sheet signup) is shown by it instead.
+ */
+const ADJECTIVES = ["Amber", "Brisk", "Cedar", "Coral", "Dusky", "Ember", "Fable", "Frost", "Golden", "Hazel", "Indigo", "Jade", "Lunar", "Maple", "Misty", "Navy", "Olive", "Pebble", "Quiet", "Rusty", "Sage", "Scarlet", "Silver", "Stormy", "Sunny", "Teal", "Velvet", "Willow"];
+const ANIMALS = ["Badger", "Crane", "Deer", "Falcon", "Finch", "Fox", "Hare", "Heron", "Ibis", "Jay", "Lark", "Lynx", "Marten", "Moose", "Otter", "Owl", "Panda", "Puffin", "Raven", "Robin", "Seal", "Sparrow", "Stoat", "Swan", "Tern", "Wolf", "Wren", "Yak"];
+const nickname = (sid: string) => {
+  const n = parseInt(sid.slice(0, 8), 16) || 0;
+  return { name: `${ADJECTIVES[n % ADJECTIVES.length]} ${ANIMALS[Math.floor(n / ADJECTIVES.length) % ANIMALS.length]}`, tag: sid.slice(-4).toUpperCase(), hue: parseInt(sid.slice(8, 12), 16) % 360 || 0 };
+};
+/** What a step in a footprint was, in the panel's words. */
+const STEP_KIND = { view: "Opened", search: "Searched", add: "Added to list", inquiry: "Opened the inquiry form", contact: "Gave their email" } as const;
+
 async function visitorData() {
   if (!dbReady()) return null;
   return safe("visitors", null, async () => {
@@ -413,12 +427,12 @@ async function visitorData() {
       country: string | null;
       device: string;
       source: string;
-      steps: { path: string; at: Date; kind: string; q?: string }[];
+      steps: { path: string; at: Date; kind: keyof typeof STEP_KIND; q?: string; pid?: string; email?: string; via?: "inquiry" | "signup"; ref?: string; company?: string }[];
     };
     const [recent, facets] = await Promise.all([
       visits()
         .aggregate<Session>([
-          { $match: { at: { $gte: new Date(now - 2 * 3_600_000) } } },
+          { $match: { at: { $gte: new Date(now - DAY) } } },
           { $sort: { at: 1 } },
           {
             $group: {
@@ -429,12 +443,12 @@ async function visitorData() {
               device: { $first: "$device" },
               source: { $first: "$source" },
               steps: {
-                $push: { path: "$path", at: "$at", kind: "$kind", q: "$q" },
+                $push: { path: "$path", at: "$at", kind: "$kind", q: "$q", pid: "$pid", email: "$email", via: "$via", ref: "$ref", company: "$company" },
               },
             },
           },
           { $sort: { last: -1 } },
-          { $limit: 24 },
+          { $limit: 60 },
         ])
         .toArray(),
       visits()
@@ -526,11 +540,34 @@ async function visitorData() {
         .slice(0, 6)
         .map((p) => ({ page: p._id, n: p.n })),
       live: recent.filter((s) => now - s.last.getTime() < 5 * 60_000).length,
-      people: recent.slice(0, 12).map((s) => {
+      people: recent.map((s) => {
         const c = country(s.country);
         const steps = s.steps.filter((x) => x.kind === "view");
+        const contact = [...s.steps].reverse().find((x) => x.kind === "contact" && x.email);
+        const nick = nickname(s._id);
+        const name = (id?: string) => (id && builtInProducts().find((p) => p.id === id)?.name) || id;
         return {
           id: s._id,
+          name: nick.name,
+          tag: nick.tag,
+          hue: nick.hue,
+          email: contact?.email ?? null,
+          gmail: !!contact?.email && /@(gmail|googlemail)\.com$/i.test(contact.email),
+          company: contact?.company ?? null,
+          via: contact?.via ?? null,
+          ref: contact?.ref ?? null,
+          pages: steps.length,
+          minutes: Math.max(1, Math.round((s.last.getTime() - s.first.getTime()) / 60_000)),
+          firstSeen: s.first.toISOString(),
+          /** Everything the visit did, in order: pages, searches, styles added, the form, the email given. */
+          footprint: s.steps.map((x) => ({
+            kind: x.kind,
+            label: STEP_KIND[x.kind] ?? "Opened",
+            page: x.path,
+            detail: x.kind === "search" ? `“${x.q}”` : x.kind === "add" ? name(x.pid) : x.kind === "contact" ? `${x.email}${x.via === "signup" ? " · line-sheet signup" : x.ref ? ` · inquiry ${x.ref}` : ""}` : undefined,
+            at: x.at.toISOString(),
+            after: clock(x.at.getTime() - s.first.getTime()),
+          })),
           flag: flag(c?.code),
           country: c?.name ?? "Unknown",
           device: s.device as "Desktop" | "Mobile" | "Tablet",

@@ -2,9 +2,7 @@ import Link from "next/link";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
 import { SeasonIndex } from "./SeasonIndex";
 import { SEASONS, type SeasonId } from "@/lib/season";
-import { seasonPicks } from "@/lib/season-products";
-
-const PICKS = 6;
+import { seasonEditList } from "@/lib/merch";
 
 /**
  * The season's edit, straight after the hero: the season's promise as the section heading, and on the season's own
@@ -13,7 +11,8 @@ const PICKS = 6;
  */
 export function SeasonShowcase({ season }: { season: SeasonId }) {
   const t = SEASONS[season];
-  const picks = seasonPicks(season, PICKS);
+  // the admin's styles for this season (Pages → Home → Season edit), else the season's own best
+  const picks = seasonEditList(season);
 
   return (
     <section id="season-edit" aria-labelledby="h-season" className="mt-sec scroll-mt-24">

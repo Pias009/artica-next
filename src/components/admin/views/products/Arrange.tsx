@@ -9,7 +9,8 @@ import type { Item } from "@/lib/admin/product-draft";
 import { DEFAULT_ARRIVALS, DEFAULT_HOT, MAX_ARRIVALS, MAX_HOT } from "@/lib/merch";
 import { LINE_LABEL } from "@/lib/products";
 
-export type Merch = { hot: string[]; arrivals: string[]; order: string[] };
+import type { Merch } from "@/lib/content/model";
+export type { Merch };
 
 /**
  * Products → Arrange: which styles the home page's two showcases hold, and the order featured styles come in across the

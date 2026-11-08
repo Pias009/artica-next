@@ -36,8 +36,16 @@ export function Visitors() {
   const data = panel.visitors ?? EMPTY;
   const visitors = data.people;
   const [selected, setSelected] = useState<string | null>(null);
+  const [show, setShow] = useState<"all" | "live" | "email">("all");
+  const [query, setQuery] = useState("");
   const on = useEntered();
-  const current = visitors.find((v) => v.id === selected) ?? visitors[0];
+  const words = query.trim().toLowerCase();
+  const list = visitors.filter(
+    (v) =>
+      (show === "all" || (show === "live" ? v.live : !!v.email)) &&
+      (!words || [v.name, v.tag, v.email ?? "", v.company ?? "", v.country, ...v.footprint.map((s) => s.page)].join(" ").toLowerCase().includes(words)),
+  );
+  const current = visitors.find((v) => v.id === selected) ?? list[0];
   const router = useRouter();
   const PEAK = Math.max(1, ...data.hours);
 
@@ -70,36 +78,68 @@ export function Visitors() {
         </Card>
       ))}
 
-      {/* live footprints */}
+      {/* every visitor, each on their own */}
       <Card i={4} className="lg:col-span-7">
         <CardHead
-          title="Footprints"
-          sub="Visits in the last two hours and their trail; pick one to follow it"
-          right={<span className="text-[12.5px] text-ink/50">anonymous</span>}
+          title="Visitors"
+          sub="Everyone on the site in the last 24 hours, one card each. Pick one to follow their footprint."
+          right={<span className="text-[12.5px] text-ink/50 tabular-nums">{visitors.length} visitors</span>}
         />
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Show" className="flex flex-wrap gap-1 rounded-full bg-ink/[0.05] p-1">
+            {(
+              [
+                ["all", "All", visitors.length],
+                ["live", "On the site", visitors.filter((v) => v.live).length],
+                ["email", "Gave email", visitors.filter((v) => v.email).length],
+              ] as const
+            ).map(([id, label, n]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={show === id}
+                onClick={() => setShow(id)}
+                className={clsx("min-h-8 rounded-full px-3 text-[12.5px] font-semibold transition-colors", show === id ? "bg-ink text-white" : "text-ink/65 hover:text-ink")}
+              >
+                {label} <span className={clsx("tabular-nums", show === id ? "text-white/60" : "text-ink/40")}>{n}</span>
+              </button>
+            ))}
+          </div>
+          <label className="flex min-w-40 flex-1 items-center rounded-full bg-white/80 px-3.5 ring-1 ring-ink/10 focus-within:ring-2 focus-within:ring-ink">
+            <span className="sr-only">Find a visitor</span>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find by name, email, country or page" className="min-h-9 w-full bg-transparent text-[13px] outline-none placeholder:text-ink/40" />
+          </label>
+        </div>
         {!visitors.length && (
-          <p className="mt-4 text-[14px] text-ink/55">{panel.ready ? "No visits in the last two hours." : "No database connected: nothing is logged."}</p>
+          <p className="mt-4 text-[14px] text-ink/55">{panel.ready ? "No visits in the last 24 hours." : "No database connected: nothing is logged."}</p>
         )}
-        <ul className="mt-4 grid gap-2">
-          {visitors.map((v) => (
+        {visitors.length > 0 && !list.length && <p className="mt-4 text-[13.5px] text-ink/55">No visitor matches.</p>}
+        <ul className="mt-3 grid max-h-[720px] gap-2.5 overflow-y-auto pr-1">
+          {list.map((v) => (
             <li key={v.id}>
               <button
                 type="button"
-                aria-pressed={v.id === selected}
+                aria-pressed={v.id === current?.id}
                 onClick={() => setSelected(v.id)}
+                style={{ borderLeftColor: `hsl(${v.hue} 55% 55%)` }}
                 className={clsx(
-                  "w-full rounded-3xl p-3.5 text-left transition-[background-color,box-shadow] duration-200",
-                  v.id === selected ? "bg-white shadow-[0_8px_22px_-14px_rgb(18_20_22/.45)]" : "bg-white/50 hover:bg-white/80",
+                  "w-full rounded-3xl border-l-4 p-3.5 text-left transition-[background-color,box-shadow] duration-200",
+                  v.id === current?.id ? "bg-white shadow-[0_8px_22px_-14px_rgb(18_20_22/.45)] ring-1 ring-ink/10" : "bg-white/50 hover:bg-white/80",
                 )}
               >
-                <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[13px]">
-                  <span className="flex items-center gap-2 font-semibold">
-                    <span aria-hidden="true">{v.flag}</span> {v.country}
-                    <span className="font-normal text-ink/45">· {v.device}</span>
-                  </span>
-                  <span className={clsx("flex items-center gap-1.5 text-[12px] font-semibold", v.live ? "text-emerald-600" : "text-danger")}>
-                    <span className={clsx("size-1.5 rounded-full", v.live ? "bg-emerald-500 motion-safe:animate-pulse" : "bg-danger")} />
-                    {v.live ? "On the site" : `Left from ${v.left ?? "–"} · ${ago(v.lastSeen)}`}
+                <span className="flex items-start gap-3">
+                  <Avatar v={v} />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                      <Who v={v} />
+                      <span className={clsx("flex items-center gap-1.5 text-[12px] font-semibold", v.live ? "text-emerald-600" : "text-ink/45")}>
+                        <span className={clsx("size-1.5 rounded-full", v.live ? "bg-emerald-500 motion-safe:animate-pulse" : "bg-ink/30")} />
+                        {v.live ? "On the site" : `Left ${ago(v.lastSeen)}`}
+                      </span>
+                    </span>
+                    <span className="mt-0.5 block truncate text-[12px] text-ink/55">
+                      <span aria-hidden="true">{v.flag}</span> {v.country} · {v.device} · from {v.source} · {v.pages} {v.pages === 1 ? "page" : "pages"} in {v.minutes} min
+                    </span>
                   </span>
                 </span>
                 <Trail v={v} />
@@ -110,48 +150,73 @@ export function Visitors() {
       </Card>
 
       {/* one visitor, followed */}
-      <Card i={5} tone="dark" className="lg:col-span-5">
+      <Card i={5} tone="dark" className="lg:col-span-5 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto">
         {!current ? (
-          <CardHead dark title="Following one visitor" sub="Pick a visit when one comes in" />
+          <CardHead dark title="Footprint" sub="Pick a visitor when one comes in" />
         ) : (
-          <>
-            <CardHead dark title="Following one visitor" sub={`${current.flag} ${current.country} · ${current.device}`} />
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
-              <div className="rounded-2xl bg-white/8 p-3">
-                <dt className="text-white/55">Came from</dt>
-                <dd className="mt-0.5 font-semibold">{current.source}</dd>
+          <div key={current.id}>
+            <div className="flex items-center gap-3">
+              <Avatar v={current} big />
+              <div className="min-w-0">
+                <p className="text-[12px] font-semibold text-white/50">Footprint of</p>
+                <p className="truncate text-[18px] font-semibold">{current.email ?? current.name}</p>
+                <p className="truncate text-[12.5px] text-white/55">
+                  {current.email ? `${current.name} · ` : "Anonymous · "}#{current.tag}
+                </p>
               </div>
-              <div className="rounded-2xl bg-white/8 p-3">
-                <dt className="text-white/55">Searched for</dt>
-                <dd className="mt-0.5 font-semibold">{current.searched ? `“${current.searched}”` : "Not known"}</dd>
+            </div>
+            {current.email && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {current.gmail && <GmailBadge dark />}
+                {current.company && <span className="rounded-full bg-white/10 px-2.5 py-1 text-[12px] font-semibold">{current.company}</span>}
+                <span className="rounded-full bg-white/10 px-2.5 py-1 text-[12px] text-white/70">{current.via === "signup" ? "Signed up for the line sheet" : "Sent an inquiry"}</span>
+                {current.ref && (
+                  <Link href={`/admin/inquiries/${current.ref}`} className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-ink">
+                    Open {current.ref}
+                  </Link>
+                )}
               </div>
+            )}
+            <dl className="mt-4 grid grid-cols-2 gap-2.5 text-[13px]">
+              {(
+                [
+                  ["From", `${current.flag} ${current.country}`],
+                  ["On", current.device],
+                  ["Came from", current.source],
+                  ["Searched for", current.searched ? `“${current.searched}”` : "Nothing"],
+                  ["First seen", new Date(current.firstSeen).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })],
+                  ["On the site", `${current.minutes} min · ${current.pages} ${current.pages === 1 ? "page" : "pages"}`],
+                ] as const
+              ).map(([k, val]) => (
+                <div key={k} className="rounded-2xl bg-white/8 p-3">
+                  <dt className="text-white/55">{k}</dt>
+                  <dd className="mt-0.5 truncate font-semibold">{val}</dd>
+                </div>
+              ))}
             </dl>
-            <ol key={current.id} className="relative mt-5 grid gap-4 pl-6">
+            <ol className="relative mt-5 grid gap-4 pl-6">
               <span aria-hidden="true" className="absolute top-2 bottom-2 left-[5px] w-px bg-white/20" />
-              {current.trail.map((s, i) => {
-                const last = i === current.trail.length - 1;
+              {current.footprint.map((s, i) => {
+                const last = i === current.footprint.length - 1;
                 return (
-                  <li
-                    key={s.page + s.at}
-                    className="relative motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]"
-                    style={{ animationDelay: `${i * 70}ms` }}
-                  >
+                  <li key={s.at + s.kind + i} className="relative motion-safe:animate-[admin-in_.4s_cubic-bezier(.22,1,.36,1)_both]" style={{ animationDelay: `${Math.min(i, 12) * 50}ms` }}>
                     <span
                       className={clsx(
                         "absolute top-1.5 -left-6 size-[11px] rounded-full ring-4 ring-[#3a3c3f]",
-                        last ? (current.live ? "bg-emerald-400" : "bg-danger") : "bg-white",
+                        last && s.kind === "view" ? (current.live ? "bg-emerald-400" : "bg-danger") : STEP_DOT[s.kind] ?? "bg-white",
                       )}
                     />
-                    <p className="text-[14px] font-semibold">{s.page}</p>
-                    <p className="text-[12px] text-white/55">
-                      {i === 0 ? "Landed" : "Opened"} at {s.at}
-                      {last && (current.live ? " · here now" : " · left the site")}
+                    <p className="text-[12px] font-semibold text-white/55">
+                      {s.label} · +{s.after}
                     </p>
+                    <p className="text-[14px] font-semibold break-all">{s.detail ?? s.page}</p>
+                    {s.detail && <p className="text-[12px] text-white/50">on {s.page}</p>}
+                    {last && <p className="text-[12px] text-white/55">{current.live ? "Here now" : "Left the site"}</p>}
                   </li>
                 );
               })}
             </ol>
-          </>
+          </div>
         )}
       </Card>
 
@@ -311,22 +376,69 @@ export function Visitors() {
       </Card>
 
       <p className="px-2 text-[12.5px] text-ink/50 lg:col-span-12">
-        From the site&apos;s own visitor log: no cookies, nothing stored on visitors&apos; devices, no IP addresses kept; a visit&apos;s id changes every day,
-        and browsers that ask not to be tracked aren&apos;t. Kept 90 days.
+        From the site&apos;s own visitor log: no cookies, nothing stored on visitors&apos; devices, no IP addresses kept. Each visit gets a made-up name; its id
+        changes every day, so the same person shows as a new visitor the next day. A visitor who sends an inquiry or signs up is shown by the email they
+        gave. Browsers that ask not to be tracked aren&apos;t. Kept 90 days.
       </p>
     </div>
   );
 }
 
-/** A visitor's pages as a row of steps, the current one pulsing. */
+/** The dot on each kind of step in a footprint. */
+const STEP_DOT: Record<string, string> = { search: "bg-sky-300", add: "bg-amber-300", inquiry: "bg-brand", contact: "bg-emerald-400" };
+
+const initials = (v: Visitor) => (v.email ? v.email.slice(0, 2) : v.name.split(" ").map((w) => w[0]).join("")).toUpperCase();
+
+/** The visitor's colour and initials: the same visit always looks the same. */
+function Avatar({ v, big = false }: { v: Visitor; big?: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{ background: `hsl(${v.hue} 55% 88%)`, color: `hsl(${v.hue} 45% 28%)` }}
+      className={clsx("relative grid flex-none place-items-center rounded-full font-semibold", big ? "size-12 text-[15px]" : "size-10 text-[13px]")}
+    >
+      {initials(v)}
+      {v.live && <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full bg-emerald-500 ring-2 ring-white" />}
+    </span>
+  );
+}
+
+/** Who it is: the email they gave (with a Gmail mark for Gmail addresses), else the visit's name. */
+function Who({ v }: { v: Visitor }) {
+  return v.email ? (
+    <span className="flex min-w-0 items-center gap-2">
+      <span className="truncate text-[14px] font-semibold">{v.email}</span>
+      {v.gmail && <GmailBadge />}
+    </span>
+  ) : (
+    <span className="flex min-w-0 items-center gap-1.5">
+      <span className="truncate text-[14px] font-semibold">{v.name}</span>
+      <span className="text-[12px] text-ink/40 tabular-nums">#{v.tag}</span>
+    </span>
+  );
+}
+
+function GmailBadge({ dark = false }: { dark?: boolean }) {
+  return (
+    <span className={clsx("inline-flex flex-none items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold", dark ? "bg-white text-ink" : "bg-[#ea4335]/10 text-[#c5221f]")}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-3">
+        <path d="M3 6.5V18a1 1 0 001 1h3V10l5 3.8L17 10v9h3a1 1 0 001-1V6.5L12 13z" fill="#ea4335" />
+      </svg>
+      Gmail
+    </span>
+  );
+}
+
+/** A visitor's pages as a row of steps, the current one pulsing; long visits show the last few. */
 function Trail({ v }: { v: Visitor }) {
   return (
     <span className="mt-2.5 flex flex-wrap items-center gap-1.5">
-      {v.trail.map((s, i) => {
-        const last = i === v.trail.length - 1;
+      {v.trail.length > 7 && <span className="rounded-full bg-ink/[0.04] px-2.5 py-1 text-[11.5px] text-ink/50">+{v.trail.length - 6} earlier</span>}
+      {v.trail.slice(v.trail.length > 7 ? -6 : 0).map((s, i, shown) => {
+        const last = i === shown.length - 1;
         return (
           <span key={s.page + s.at} className="flex items-center gap-1.5 motion-safe:animate-[admin-in_.45s_cubic-bezier(.22,1,.36,1)_both]">
-            {i > 0 && <span aria-hidden="true" className="h-px w-3 bg-ink/25" />}
+            {(i > 0 || v.trail.length > 7) && <span aria-hidden="true" className="h-px w-3 bg-ink/25" />}
             <span
               className={clsx(
                 "relative rounded-full px-2.5 py-1 text-[11.5px] font-medium",

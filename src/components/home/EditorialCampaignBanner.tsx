@@ -1,6 +1,7 @@
 "use client";
 
 import { Txt } from "../ui/Txt";
+import { ProductsShown } from "../ui/SectionData";
 import { seasonCopyOf } from "@/lib/content/live";
 import { merged } from "@/lib/season-copy";
 import { campaignLive, controlOn } from "@/lib/content/live";
@@ -324,6 +325,7 @@ export function EditorialCampaignBanner() {
           </div>
         </div>
       </div>
+      <ProductsShown ids={wornProducts.map((p) => p.id)} />
     </section>
   );
 }

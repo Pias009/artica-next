@@ -2,14 +2,13 @@
 
 import { Txt, TxtCatalog } from "../ui/Txt";
 import { SectionText } from "../ui/SectionText";
-import { chosen, defaultArrivals, MAX_ARRIVALS } from "@/lib/merch";
+import { arrivalsList } from "@/lib/merch";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Icon } from "../Icon";
 import { useSeason } from "../season/SeasonContext";
 import { categoryOf, LINE_LABEL, MOQ_PAIRS, PACK, type Product, type ProductLine } from "@/lib/products";
-import { bySeason } from "@/lib/season-products";
 import { useInCart, useInquiry, useUI } from "@/lib/store";
 
 /** Just in for FW26 (client placeholder list). */
@@ -29,8 +28,8 @@ const FILTERS: Filter[] = ["all", "women", "men", "kids"];
 export function NewArrivals() {
   const season = useSeason();
   // the drop in the visitor's season order: what suits their weather opens first. Fixed for the page's life.
-  // the admin's list (Products → Arrange) in its own order; otherwise the built-in one, season's best first
-  const ALL = useMemo(() => chosen("arrivals")?.slice(0, MAX_ARRIVALS) ?? bySeason(defaultArrivals(), season), [season]);
+  // the admin's list (Pages → Home → New arrivals) in its own order; otherwise the built-in one, season's best first
+  const ALL = useMemo(() => arrivalsList(season), [season]);
   const inFilter = useCallback((f: Filter) => (f === "all" ? ALL : ALL.filter((p) => p.line === f)), [ALL]);
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState(ALL[0]?.id ?? "");
