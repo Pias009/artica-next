@@ -1,5 +1,6 @@
 import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, isStepCount, smoothStream, streamText, toUIMessageStream, validateUIMessages } from "ai";
 import { cookies, headers } from "next/headers";
+import { after } from "next/server";
 import { allow } from "@/lib/assistant/limit";
 import { backOff, modelAllowed, record, spend } from "@/lib/assistant/budget";
 import { localFirst, localReply, type LocalReply } from "@/lib/assistant/local";
@@ -7,6 +8,8 @@ import { planFirst, planReply } from "@/lib/assistant/plan-local";
 import type { PlanProfile } from "@/lib/assistant/plan-skills";
 import { aiReady, kaiModel } from "@/lib/assistant/model";
 import { instructions } from "@/lib/assistant/persona";
+import { countQuestion } from "@/lib/assistant/questions";
+import { topicOf, type SourceId } from "@/lib/assistant/topics";
 import { country, visitorSeason } from "@/lib/assistant/skills";
 import { makeTools, MODE_TOOLS, type KaiMessage, type KaiMode } from "@/lib/assistant/tools";
 import { LEVELS, type Level } from "@/lib/planner";
@@ -29,15 +32,25 @@ const MAX_TEXT = 2000;
  *   2. the AI model (Gemini, with a fallback model), if the budget allows (budget.ts);
  *   3. the offline engine again, when there's no model, the budget is spent, the provider is pausing us, or the
  *      client asks after an AI error.
- * Nothing is stored: the conversation lives in the visitor's browser.
+ * Nothing of the conversation is stored (it lives in the visitor's browser); each message only adds one to its topic's
+ * count for the day (questions.ts), for the admin panel.
  */
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as { messages?: unknown; page?: unknown; list?: unknown; offline?: unknown; mode?: unknown; plan?: unknown } | null;
   if (!body || !Array.isArray(body.messages) || !body.messages.length) return new Response("Bad request", { status: 400 });
 
+  // one more message on this topic today, counted after the response (never the text: assistant/questions.ts)
+  const deskOf = body.mode === "plan" ? "plan" : "trade";
+  const count = (text: string, source: SourceId, first: boolean) => after(() => countQuestion({ desk: deskOf, topic: topicOf(text, deskOf), source, first }));
+  const rawLast = (() => {
+    const m = (body.messages as { role?: unknown; parts?: { type?: unknown; text?: unknown }[] }[]).at(-1);
+    return m?.role === "user" && Array.isArray(m.parts) ? m.parts.flatMap((p) => (p?.type === "text" ? [String(p.text ?? "").slice(0, MAX_TEXT)] : [])).join(" ") : "";
+  })();
+  const rawFirst = (body.messages as { role?: unknown }[]).filter((m) => m?.role === "user").length === 1;
+
   const h = await headers();
   const ip = h.get("x-real-ip") ?? h.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-  if (!(await allow(`ip:${ip}`))) return new Response("You've sent a lot of messages. Please wait a few minutes, or send us an inquiry.", { status: 429 });
+  if (!(await allow(`ip:${ip}`))) return count(rawLast, "limited", rawFirst), new Response("You've sent a lot of messages. Please wait a few minutes, or send us an inquiry.", { status: 429 });
 
   // the visitor, as the site already knows them (proxy cookies, the page, their inquiry list)
   const jar = await cookies();
@@ -52,7 +65,7 @@ export async function POST(req: Request) {
   const mode: KaiMode = body.mode === "plan" ? "plan" : "trade";
   // the admin panel's switches (AI agent view): each desk on or off, and whether Kai may use the AI model at all
   const { assistant } = await loadContent();
-  if (!assistant[mode]) return new Response("This desk is closed for now. Please send us an inquiry.", { status: 503 });
+  if (!assistant[mode]) return count(rawLast, "closed", rawFirst), new Response("This desk is closed for now. Please send us an inquiry.", { status: 503 });
   const profile = mode === "plan" ? planProfile(body.plan) : {};
   const tools = makeTools({ season, requested, profile });
 
@@ -74,7 +87,11 @@ export async function POST(req: Request) {
   const turns = messages.filter((m) => m.role === "user").length;
   const [answer, first] = mode === "plan" ? [planReply, planFirst] : [localReply, localFirst];
   const local = !aiReady() || !assistant.model || body.offline === true ? answer(text, ctx) : (first(text, turns, ctx) ?? ((await modelAllowed()) ? null : answer(text, ctx)));
-  if (local) return offline(local);
+  if (local) {
+    count(text, "rules", turns === 1);
+    return offline(local);
+  }
+  count(text, "model", turns === 1);
 
   const { model, providerOptions } = kaiModel();
   spend();

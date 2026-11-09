@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useInquiry, useUI } from "@/lib/store";
+import { tagEvent } from "@/lib/marketing/tags";
 
 /*
  * The visitor log (src/lib/analytics/visits.ts): one beacon per page view, search and opened inquiry form. Nothing is
@@ -18,6 +19,8 @@ const optedOut = () => {
 let first = true;
 export function track(k: "view" | "search" | "inquiry" | "add", extra: { q?: string; n?: number; id?: string } = {}) {
   if (typeof window === "undefined" || optedOut()) return;
+  // the Social team's tags, if the visitor agreed to them (lib/marketing/tags.ts)
+  tagEvent(k, extra);
   const body = JSON.stringify({
     k,
     p: location.pathname + location.search,

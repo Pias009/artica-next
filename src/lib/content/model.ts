@@ -9,6 +9,7 @@ import type { SeasonId } from "../season";
 import type { PriceList } from "../admin/prices";
 import type { Availability } from "../availability";
 import type { SeasonCopyMap } from "../season-copy";
+import { TRACKER_IDS, trackerIdOk, normalTrackerId, type TrackerId } from "../marketing/model";
 
 /** A style made in the admin panel; shown, featured and pinned through `products`, like a built-in one. */
 export type AddedProduct = Omit<Product, "featured" | "pinnedSeasons">;
@@ -96,6 +97,11 @@ export type SiteContent = {
   contact: { email?: string; phone?: string; hours?: string };
   assistant: { trade: boolean; plan: boolean; model: boolean; tone: Tone };
   alerts: { notifyNew: boolean; notifyOverdue: boolean; weekly: boolean };
+  /**
+   * The Social team's tracking tags (Meta Pixel, GA4…), each with its id and an on switch, and whether the site's
+   * events (lead, add to list…) are sent to them. Tags load only after the visitor agrees (components/MarketingTags).
+   */
+  tracking: { tags: Partial<Record<TrackerId, { id: string; on: boolean }>>; events: boolean };
   updatedAt?: string;
   updatedBy?: string;
 };
@@ -113,6 +119,7 @@ export const EMPTY_CONTENT: SiteContent = {
   contact: {},
   assistant: { trade: true, plan: true, model: true, tone: "warm" },
   alerts: { notifyNew: true, notifyOverdue: true, weekly: false },
+  tracking: { tags: {}, events: true },
 };
 
 /** A stored document (possibly old or partial) filled out with the defaults. */
@@ -135,6 +142,7 @@ export function withDefaults(raw: Partial<SiteContent> | null | undefined): Site
     contact: { ...r.contact },
     assistant: { ...EMPTY_CONTENT.assistant, ...r.assistant },
     alerts: { ...EMPTY_CONTENT.alerts, ...r.alerts },
+    tracking: { ...EMPTY_CONTENT.tracking, ...r.tracking, tags: { ...r.tracking?.tags } },
     updatedAt: r.updatedAt,
     updatedBy: r.updatedBy,
   };
@@ -159,6 +167,16 @@ export function publicContent(c: SiteContent) {
     controls: c.controls,
     contact: c.contact,
     assistant: { trade: c.assistant.trade, plan: c.assistant.plan },
+    /** The tags switched on with a valid id: these ids are public anyway (every tag prints its id in the page). */
+    tracking: {
+      tags: Object.fromEntries(
+        TRACKER_IDS.flatMap((t) => {
+          const tag = c.tracking.tags[t];
+          return tag?.on && trackerIdOk(t, tag.id) ? [[t, normalTrackerId(t, tag.id)]] : [];
+        }),
+      ) as Partial<Record<TrackerId, string>>,
+      events: c.tracking.events,
+    },
     stamp: c.updatedAt ?? "",
   };
 }

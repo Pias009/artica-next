@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DeskContact } from "./DeskContact";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
+import { CookieSettingsButton } from "./MarketingTags";
 import { COMPANY, SOCIAL, tel, whatsappLink } from "@/lib/company";
 
 const COLS: { title: string; links: [string, string][] }[] = [
@@ -127,6 +128,7 @@ export function Footer() {
                 {label}
               </Link>
             ))}
+            <CookieSettingsButton className="hover:text-ink" />
           </span>
         </div>
       </div>

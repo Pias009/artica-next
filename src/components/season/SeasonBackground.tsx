@@ -1,6 +1,5 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { useEffectsOn } from "./effects";
 import { useReducedMotion, useShownSeason } from "./live";
 import { DEFAULT_SEASON, type SeasonId } from "@/lib/season";

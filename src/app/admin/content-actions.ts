@@ -11,6 +11,7 @@ import { dbReady } from "@/lib/leads/db";
 import { setStatus } from "@/lib/leads/inquiries";
 import { isDeskStatus } from "@/lib/leads/desk";
 import { ProductsPayload } from "@/lib/admin/product-schema";
+import { normalTrackerId, TRACKER_IDS, trackerIdOk, type TrackerId } from "@/lib/marketing/model";
 import { SEASON_IDS } from "@/lib/season";
 import { SITE_PAGES } from "@/lib/site-pages";
 
@@ -197,6 +198,24 @@ export async function saveSettingsAction(settings: unknown) {
 }
 export async function saveAssistantAction(assistant: unknown) {
   return save(Assistant, assistant, "assistant", (v) => ({ assistant: v }));
+}
+
+/** The Social team's tracking tags: each id must match its vendor's format to be switched on. */
+const Tracking = z
+  .object({
+    tags: z.partialRecord(z.enum(TRACKER_IDS as [TrackerId, ...TrackerId[]]), z.object({ id: text(40), on: z.boolean() })),
+    events: z.boolean(),
+  })
+  .refine((t) => Object.entries(t.tags).every(([k, v]) => !v?.on || trackerIdOk(k as TrackerId, v.id)), "Check the id of each tag that's switched on.");
+export async function saveTrackingAction(tracking: unknown) {
+  return save(Tracking, tracking, "tracking", (v) => ({
+    tracking: {
+      events: v.events,
+      tags: Object.fromEntries(
+        Object.entries(v.tags).flatMap(([k, t]) => (t && (t.id || t.on) ? [[k, { id: t.id ? normalTrackerId(k as TrackerId, t.id) : "", on: t.on }]] : [])),
+      ),
+    },
+  }));
 }
 
 /** The dashboard's pipeline: move an inquiry to another stage. */

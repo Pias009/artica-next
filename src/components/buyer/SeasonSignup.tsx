@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useActionState, useId } from "react";
+import { useActionState, useEffect, useId } from "react";
 import { Icon } from "../Icon";
 import { subscribe, type SignupResult } from "@/app/actions";
+import { tagEvent } from "@/lib/marketing/tags";
 
 /**
  * "Next line sheet first": one email field, for buyers who aren't ready to order this season. `heading` sets the title's
@@ -14,6 +15,9 @@ export function SeasonSignup({ heading: Heading = "h2" }: { heading?: "h2" | "h3
   const uid = useId();
   const pathname = usePathname();
   const [state, action, pending] = useActionState<SignupResult, FormData>(subscribe, { status: "idle" });
+  useEffect(() => {
+    if (state.status === "success") tagEvent("signup");
+  }, [state]);
 
   return (
     <div data-deco="card" className="grid items-center gap-6 rounded-shell bg-white p-[clamp(20px,4vw,40px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-12">

@@ -8,6 +8,7 @@ import { submitInquiry, type InquiryResult } from "@/app/actions";
 import { whatsappLink } from "@/lib/company";
 import { LEAD } from "@/lib/products";
 import { useInquiry, useUI, type BuyerType } from "@/lib/store";
+import { tagEvent } from "@/lib/marketing/tags";
 
 /** Where the order ships: the main markets first, then "Other" for anywhere else. */
 const SHIP_TO = [
@@ -73,6 +74,11 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
   useEffect(() => {
     if (prefillNote && noteRef.current) noteRef.current.value = prefillNote.value;
   }, [prefillNote]);
+
+  // a sent inquiry: the ad tags' conversion (only if the visitor agreed to them)
+  useEffect(() => {
+    if (state.status === "success") tagEvent("lead");
+  }, [state]);
 
   // After a failed submit, move focus to the first field with an error.
   useEffect(() => {
@@ -234,6 +240,13 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         <Icon name="arrow" />
       </button>
       <small className="text-center text-[12px] text-muted">Free quote · no payment · tier pricing within 24 hours</small>
+      {/* the notice that lets the desk send existing buyers trade updates (soft opt-in; Admin → Marketing) */}
+      <small className="text-center text-[11.5px] text-muted">
+        We may send you occasional trade updates; every one has an unsubscribe link.{" "}
+        <a href="/privacy" className="underline hover:text-ink">
+          Privacy
+        </a>
+      </small>
       {whatsappLink() && (
         <a href={whatsappLink()!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-ink-2 hover:text-ink">
           <Icon name="whatsapp" className="size-4" /> Or message us on WhatsApp

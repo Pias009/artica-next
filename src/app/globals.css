@@ -970,6 +970,38 @@ html[data-season] .bg-season-field {
   }
 }
 
+/* Admin panel: Vela's orb breathes, ripples while she speaks, and its voice bars move. */
+@keyframes vela-breathe {
+  50% {
+    transform: scale(1.08);
+    opacity: 0.85;
+  }
+}
+@keyframes vela-ripple {
+  from {
+    transform: scale(0.9);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+@keyframes vela-wave {
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+@keyframes vela-working {
+  50% {
+    box-shadow: 0 0 0 6px rgb(185 140 255 / 0.18);
+  }
+}
+
 /* A freight scene coming in when the mode changes (Shipping page). */
 @keyframes scene-in {
   from {

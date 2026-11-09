@@ -5,9 +5,11 @@ import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { InquiryDrawer } from "./inquiry/InquiryDrawer";
 import { JsonLd } from "./JsonLd";
+import { MarketingTags } from "./MarketingTags";
 import { QuickView } from "./product/QuickView";
 import { SeasonBackground } from "./season/SeasonBackground";
 import { SeasonPreview } from "./season/SeasonPreview";
+import { SiteHealth } from "./SiteHealth";
 import { StoreHydrator } from "./StoreHydrator";
 import { Toast } from "./Toast";
 import { Track } from "./Track";
@@ -83,6 +85,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <Suspense fallback={null}>
         <Track />
       </Suspense>
+      {/* real-visitor speed and errors, for Vela's Engineering team (admin panel) */}
+      <SiteHealth />
+      {/* the Social team's tags (Admin → Social), behind a cookie banner; nothing at all while none is on */}
+      <MarketingTags />
       <QuickView />
       <InquiryDrawer />
       <Toast />

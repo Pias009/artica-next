@@ -7,10 +7,13 @@ import { overdue, purgeSpam } from "@/lib/leads/inquiries";
 import { deskInbox, INTENT_LABEL, mailReady, sendMail } from "@/lib/leads/mail";
 import { drain, stuck } from "@/lib/leads/outbox";
 import { absoluteUrl } from "@/lib/site";
+import { runDueCampaigns } from "@/lib/marketing/send";
+import { refreshScores } from "@/lib/marketing/store";
 
 /**
  * Once a day: send anything still waiting, tell the desk which inquiries are close to the 24-hour promise and which
- * emails gave up, and delete spam marked over 30 days ago. Runs on every plan (Hobby allows daily crons only).
+ * emails gave up, and delete spam marked over 30 days ago. Also re-scores the subscriber list's priorities from the
+ * day's inquiries and sends any campaign still due (Admin → Marketing). Runs on every plan (Hobby allows daily crons only).
  */
 export async function GET(req: Request) {
   if (!cronAuthorized(req)) return new Response("Unauthorized", { status: 401 });
@@ -18,7 +21,13 @@ export async function GET(req: Request) {
 
   const sent = await drain({ limit: 100 });
   const { alerts } = await readContent();
-  const [lateAll, failing, purged] = await Promise.all([overdue(), stuck(), purgeSpam()]);
+  const [lateAll, failing, purged, rescored, campaigns] = await Promise.all([
+    overdue(),
+    stuck(),
+    purgeSpam(),
+    refreshScores().catch((e) => (console.error("[marketing] daily re-score failed", e), 0)),
+    runDueCampaigns({ budget: 5000 }).catch((e) => (console.error("[marketing] daily campaign run failed", e), null)),
+  ]);
   // "No reply after 24 hours" off in the admin panel (Settings → Alerts): the digest only reports stuck emails
   const late = alerts.notifyOverdue ? lateAll : [];
 
@@ -51,5 +60,5 @@ export async function GET(req: Request) {
     const error = await sendMail({ to: deskInbox(), replyTo: deskInbox(), subject: "Chime Long: the week in numbers", text: await weeklySummary(), idempotencyKey: `weekly-${new Date().toISOString().slice(0, 10)}` });
     if (error) console.error("[weekly] not sent", error);
   }
-  return Response.json({ ...sent, overdue: late.length, stuck: failing.length, purged });
+  return Response.json({ ...sent, overdue: late.length, stuck: failing.length, purged, rescored, campaigns });
 }

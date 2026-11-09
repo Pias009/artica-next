@@ -251,6 +251,7 @@ export function policies({ topic }: { topic: PolicyTopic }) {
       `Phone: ${COMPANY.phone}, ${COMPANY.hours}`,
       ...(whatsappLink() ? [`WhatsApp: ${whatsappLink()}`] : []),
       "Factory visits and video tours: /meet.",
+      'Or leave your email in "Talk to the desk" at the foot of any page: a trade assistant writes back within one working day.',
     ],
   };
   return { topic, answers: faq.map((f) => ({ q: f.q, a: f.a })), notes: extra[topic] };

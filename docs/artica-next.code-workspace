@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "artica-next",
+			"path": ".."
+		},
+		{
+			"name": "kira-sesi-agents",
+			"path": "../../kira-sesi-agents"
+		}
+	],
+	"settings": {}
+}

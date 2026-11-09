@@ -1,12 +1,15 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { noteContact } from "@/lib/analytics/visits";
 import { dbReady } from "@/lib/leads/db";
 import { recordInquiry } from "@/lib/leads/inquiries";
 import { addContact, contactsReady, deskEmail, deskInbox, INTENT_LABEL, mailReady, sendMail, type Inquiry, type Intent } from "@/lib/leads/mail";
 import { drain } from "@/lib/leads/outbox";
+import { recordSubscriber, setSubscriberStatus } from "@/lib/marketing/store";
+import { unsubscribeTokenOk } from "@/lib/marketing/unsubscribe";
 import { byId, MOQ_CASES, PACK } from "@/lib/products";
 import { SEASON_COOKIE } from "@/lib/season";
 
@@ -123,8 +126,17 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
 
 export type SignupResult = { status: "idle" } | { status: "error"; error: string } | { status: "success"; delivered: boolean };
 
-/** Joins the season mailing: Resend's contacts (RESEND_SEGMENT_ID), or, until that is set, an email to the desk. */
-async function joinList(email: string, from: string) {
+/**
+ * Joins the season mailing: Resend's contacts (RESEND_SEGMENT_ID), or, until that is set, an email to the desk. With a
+ * database the signup is also kept on the panel's subscriber list (Admin → Marketing), with its SUB- id and priority.
+ */
+async function joinList(email: string, from: string, source: "line-sheet" | "talk-to-desk" = "line-sheet", company?: string) {
+  if (dbReady())
+    after(() =>
+      recordSubscriber({ email, source, ...(company && { company }), tags: [source === "line-sheet" ? "line-sheet" : "desk-contact"] }).catch((e) =>
+        console.error("[signup] not kept on the subscriber list", e),
+      ),
+    );
   return contactsReady()
     ? addContact(email)
     : mailReady()
@@ -181,7 +193,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
 
   const failed = { status: "error", error: "We couldn't send that just now. Please try again in a minute." } as const;
   if (updates) {
-    const error = await joinList(email, from);
+    const error = await joinList(email, from, "talk-to-desk", company || undefined);
     // a failed signup only fails the form when it was all they asked for
     if (error) {
       console.error("[talk] signup failed", error);
@@ -248,4 +260,12 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms))]);
+}
+
+/** The unsubscribe page's button (app/(site)/unsubscribe): takes the signed subscriber id off the campaign list. */
+export async function unsubscribeAction(formData: FormData) {
+  const sid = String(formData.get("s") ?? "");
+  if (!unsubscribeTokenOk(sid, String(formData.get("t") ?? ""))) redirect("/unsubscribe");
+  if (dbReady()) await setSubscriberStatus({ sid }, "unsubscribed");
+  redirect("/unsubscribe?done=1");
 }

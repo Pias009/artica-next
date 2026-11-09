@@ -7,15 +7,18 @@ import type { Status } from "@/lib/leads/db";
 import type { Intent } from "@/lib/leads/mail";
 import { SEASON_IDS } from "@/lib/season";
 
-export type View = "overview" | "visitors" | "agent" | "pages" | "products" | "inquiries" | "seasons" | "settings";
+export type View = "overview" | "vela" | "visitors" | "agent" | "pages" | "products" | "inquiries" | "marketing" | "social" | "seasons" | "settings";
 
 export const VIEWS: { id: View; label: string; title: string }[] = [
   { id: "overview", label: "Overview", title: "Dashboard" },
+  { id: "vela", label: "Vela", title: "Vela HQ" },
   { id: "visitors", label: "Visitors", title: "Visitors" },
   { id: "agent", label: "AI agent", title: "AI agent" },
   { id: "pages", label: "Pages", title: "Pages" },
   { id: "products", label: "Products", title: "Products" },
   { id: "inquiries", label: "Inquiries", title: "Inquiries" },
+  { id: "marketing", label: "Marketing", title: "Marketing" },
+  { id: "social", label: "Social", title: "Social & ads" },
   { id: "seasons", label: "Seasons", title: "Seasons" },
   { id: "settings", label: "Settings", title: "Settings" },
 ];

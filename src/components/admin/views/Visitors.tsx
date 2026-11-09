@@ -79,7 +79,7 @@ export function Visitors() {
       ))}
 
       {/* every visitor, each on their own */}
-      <Card i={4} className="lg:col-span-7">
+      <Card i={4} className="lg:col-span-7 lg:min-h-[600px]">
         <CardHead
           title="Visitors"
           sub="Everyone on the site in the last 24 hours, one card each. Pick one to follow their footprint."
@@ -150,7 +150,7 @@ export function Visitors() {
       </Card>
 
       {/* one visitor, followed */}
-      <Card i={5} tone="dark" className="lg:col-span-5 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:self-start lg:overflow-y-auto">
+      <Card i={5} tone="dark" className="lg:col-span-5 lg:h-0 lg:min-h-full lg:overflow-y-auto">
         {!current ? (
           <CardHead dark title="Footprint" sub="Pick a visitor when one comes in" />
         ) : (

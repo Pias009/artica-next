@@ -101,8 +101,17 @@ try {
     { key: { sid: 1, at: 1 }, name: "sid_at" },
     { key: { kind: 1, at: -1 }, name: "kind_at" },
   ]);
+  // the marketing desk (src/lib/marketing/store.ts): subscribers with SUB- ids, the mail schedule, the ideas board
+  await db.collection("subscribers").createIndexes([
+    { key: { email: 1 }, name: "email_unique", unique: true },
+    { key: { sid: 1 }, name: "sid_unique", unique: true },
+    { key: { status: 1, priority: 1, seq: 1 }, name: "audience" },
+    { key: { createdAt: -1 }, name: "created" },
+  ]);
+  await db.collection("mail_campaigns").createIndexes([{ key: { status: 1, scheduledAt: 1 }, name: "due" }]);
+  await db.collection("marketing_ideas").createIndexes([{ key: { stage: 1, updatedAt: -1 }, name: "board" }]);
   // the admin panel's site edits (src/lib/content): one document, nothing to index
-  console.log(`Database "${dbName}" ready: inquiries (validator + ${made.length} indexes), counters, admins, admin_sessions, admin_attempts, admin_audit`);
+  console.log(`Database "${dbName}" ready: inquiries (validator + ${made.length} indexes), counters, admins, admin_sessions, admin_attempts, admin_audit, subscribers, mail_campaigns, marketing_ideas`);
 } finally {
   await client.close();
 }

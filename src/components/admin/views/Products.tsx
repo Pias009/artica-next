@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePanel, useSaver } from "../panel-data";
 import { AdminIcon, SaveBar, Segmented, Toggle } from "../ui";
@@ -93,7 +93,9 @@ export function Products() {
   const sub = usePathname().split("/")[3] ?? "";
   const [line, setLine] = useState<ProductLine | "all">("all");
   const [category, setCategory] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>("all");
+  // a link can open the list already filtered: /admin/products?status=noprice (Kai's suggestions use it)
+  const asked = useSearchParams().get("status");
+  const [status, setStatus] = useState<Status>(asked && asked in STATUS ? (asked as Status) : "all");
   const [sort, setSort] = useState<Sort>("name");
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState(blankDraft);

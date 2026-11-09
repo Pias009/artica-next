@@ -41,6 +41,27 @@ export async function sendMail({ to, replyTo, subject, text, idempotencyKey }: M
   return `${res.status}: ${(await res.text().catch(() => "")).slice(0, 280)}`;
 }
 
+/** A campaign email: one recipient, its own HTML and text, and its own unsubscribe headers. */
+export type BulkMail = { to: string; subject: string; text: string; html: string; headers: Record<string, string> };
+
+/**
+ * Up to 100 campaign emails in one call (Resend's batch endpoint). They go from MARKETING_FROM if set, else from the
+ * inquiry sender; replies go to the trade desk. Resolves with null when Resend accepted the batch, else a reason.
+ */
+export async function sendMailBatch(mails: BulkMail[], idempotencyKey: string): Promise<string | null> {
+  if (!mails.length) return null;
+  const from = process.env.MARKETING_FROM || MAIL.from;
+  const res = await fetch("https://api.resend.com/emails/batch", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${MAIL.key}`, "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify(mails.slice(0, 100).map((m) => ({ from, to: [m.to], reply_to: MAIL.to, subject: m.subject, text: m.text, html: m.html, headers: m.headers }))),
+    signal: AbortSignal.timeout(15_000),
+  }).catch((e: Error) => e);
+  if (res instanceof Error) return `network: ${res.message}`.slice(0, 300);
+  if (res.ok) return null;
+  return `${res.status}: ${(await res.text().catch(() => "")).slice(0, 280)}`;
+}
+
 /** Adds a line-sheet signup to Resend's contacts (and the segment, if set). Null when done, else a reason. */
 export async function addContact(email: string): Promise<string | null> {
   const res = await fetch("https://api.resend.com/contacts", {

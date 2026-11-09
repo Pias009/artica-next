@@ -1,10 +1,12 @@
 import "server-only";
+import { cache } from "react";
 import { dashboard } from "./inquiries";
 import { auditLog } from "./auth";
 import { ensureVisitIndexes, visits } from "../analytics/visits";
 import { country } from "../countries";
 import { readContent } from "../content/store";
 import { aiReady, provider } from "../assistant/model";
+import { askStats, type AskStats } from "../assistant/questions";
 import { HOME_SECTIONS } from "../home-sections";
 import { database, dbReady, inquiries, type Status } from "../leads/db";
 import type { Intent } from "../leads/mail";
@@ -624,6 +626,7 @@ export type PanelVisitors = NonNullable<Awaited<ReturnType<typeof visitorData>>>
 
 const ACTIONS: Record<string, string> = {
   reply_drafted: "Drafted a reply",
+  vela_team: "Vela team switched",
   content_saved: "Site edits saved",
   status: "Inquiry moved",
   retry_emails: "Emails resent",
@@ -632,9 +635,11 @@ const ACTIONS: Record<string, string> = {
 };
 
 async function agentData() {
-  if (!dbReady()) return { log: [], today: null };
+  const noAsks: AskStats = { days: 7, chats: 0, messages: 0, topics: [], sources: [] };
+  if (!dbReady()) return { log: [], today: null, week: [] as { day: string; calls: number; tokens: number }[], asks: noAsks };
   const day = new Date().toISOString().slice(0, 10);
-  const [log, today] = await Promise.all([
+  const week = Array.from({ length: 7 }, (_, i) => new Date(Date.now() - (6 - i) * 86_400_000).toISOString().slice(0, 10));
+  const [log, today, used, asks] = await Promise.all([
     safe("audit", [], () =>
       auditLog()
         .find({ action: { $in: Object.keys(ACTIONS) } })
@@ -643,6 +648,13 @@ async function agentData() {
         .toArray(),
     ),
     safe("usage", null, () => database().collection<{ _id: string; calls: number; tokens: number }>("assistant_usage").findOne({ _id: day })),
+    safe("usage week", [], () =>
+      database()
+        .collection<{ _id: string; calls: number; tokens: number }>("assistant_usage")
+        .find({ _id: { $gte: week[0] } })
+        .toArray(),
+    ),
+    safe("kai topics", noAsks, () => askStats(7)),
   ]);
   return {
     log: log.map((e) => ({
@@ -652,11 +664,17 @@ async function agentData() {
       kind: e.action,
     })),
     today: today ? { calls: today.calls, tokens: today.tokens } : { calls: 0, tokens: 0 },
+    /** Model calls and tokens per day, the last 7 days (oldest first, days with none included). */
+    week: week.map((d) => {
+      const u = used.find((x) => x._id === d);
+      return { day: d, calls: u?.calls ?? 0, tokens: u?.tokens ?? 0 };
+    }),
+    /** What buyers asked Kai, the last 7 days: topics and how they were answered (counts only). */
+    asks,
   };
 }
 
-/** The whole dashboard, for the signed-in admin. */
-export async function panelData() {
+async function readPanel() {
   const [content, products, inq, overview, visitors, agent] = await Promise.all([
     readContent(),
     productRows(),
@@ -693,4 +711,6 @@ export async function panelData() {
     homePin: HOME_PIN,
   };
 }
-export type PanelData = Awaited<ReturnType<typeof panelData>>;
+/** The whole dashboard, for the signed-in admin. Read once per request: the layout, a page and Vela's teams share it. */
+export const panelData = cache(readPanel);
+export type PanelData = Awaited<ReturnType<typeof readPanel>>;

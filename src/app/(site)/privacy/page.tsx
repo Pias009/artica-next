@@ -32,6 +32,7 @@ const SECTIONS = [
     body: [
       "Kai, the chat assistant on this site, is an AI model. What you type is sent to our AI provider (Google's Gemini API) to write the answer.",
       "We don't keep chat conversations. The conversation stays in your browser tab until you close it. If you send an inquiry from the chat, it reaches us like any other inquiry, marked as prepared with Kai.",
+      "To see what buyers need, we count how many questions each day are about each topic (for example shipping or samples). Only the count is kept, for 90 days: never what you typed, your address or anything that identifies you.",
       "To keep the service fair we count how many messages each address sends for up to a day. Please don't share sensitive personal information in the chat.",
     ],
   },
@@ -73,7 +74,7 @@ const SECTIONS = [
   {
     title: "How long we keep it",
     body: [
-      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Inquiries we mark as spam: 30 days. Line-sheet signups: until you unsubscribe.",
+      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Inquiries we mark as spam: 30 days. Line-sheet signups, and buyers who sent an inquiry and get our occasional trade updates: until you unsubscribe.",
     ],
   },
   {
@@ -85,7 +86,10 @@ const SECTIONS = [
   },
   {
     title: "Cookies",
-    body: ["This site does not use advertising or tracking cookies. If that changes, we will ask for your consent first and update this page."],
+    body: [
+      "Our own visit count uses no cookies. We may use measurement and advertising tags from Meta, Google, LinkedIn, TikTok or Microsoft Clarity to see which ads and posts bring buyers to the site. They load only after you choose “Accept” in the cookie banner, and never if your browser sends Global Privacy Control or Do Not Track.",
+      "You can change your choice at any time with “Cookie settings” at the bottom of every page. Every line-sheet email has an unsubscribe link that takes you off the list straight away.",
+    ],
   },
 ];
 
@@ -93,7 +97,7 @@ export default function PrivacyPage() {
   return (
     <>
       <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "Privacy policy" }]} title="Privacy policy." text="What we collect, why, and what you can ask us to do with it." />
-      <LegalText updated="October 22, 2026" sections={SECTIONS} />
+      <LegalText updated="November 8, 2026" sections={SECTIONS} />
     </>
   );
 }

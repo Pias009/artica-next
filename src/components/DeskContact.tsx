@@ -3,11 +3,12 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useActionState, useId, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useId, useState, type ReactNode } from "react";
 import { Icon } from "./Icon";
 import { SectionScope } from "./ui/SectionScope";
 import { Txt, TxtCatalog, useTxt } from "./ui/Txt";
 import { requestContact, type ContactResult } from "@/app/actions";
+import { tagEvent } from "@/lib/marketing/tags";
 import { FOOTER_BLOCK } from "@/lib/home-sections";
 
 
@@ -30,6 +31,11 @@ export function DeskContact({ where = "footer" }: { where?: "footer" | "page" })
 function Box({ source }: { source: string }) {
   const uid = useId();
   const [state, action, pending] = useActionState<ContactResult, FormData>(requestContact, { status: "idle" });
+  useEffect(() => {
+    if (state.status !== "success") return;
+    if (state.contact) tagEvent("lead");
+    if (state.updates) tagEvent("signup");
+  }, [state]);
   const [contact, setContact] = useState(true);
   const [updates, setUpdates] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);

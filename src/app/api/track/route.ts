@@ -1,4 +1,6 @@
 import { headers } from "next/headers";
+import { after } from "next/server";
+import { maybeRunCampaigns } from "@/lib/marketing/send";
 import { BOT, deviceOf, ensureVisitIndexes, sourceOf, visitId, visits, type VisitDoc } from "@/lib/analytics/visits";
 import { dbReady } from "@/lib/leads/db";
 import { filterProducts, products } from "@/lib/products";
@@ -13,6 +15,8 @@ import { SEASON_COOKIE } from "@/lib/season";
 export async function POST(req: Request) {
   const none = new Response(null, { status: 204 });
   if (!dbReady()) return none;
+  // scheduled campaigns ride along on traffic (at most every two minutes per server), as the inquiry outbox does
+  after(maybeRunCampaigns);
   const h = await headers();
   const ua = h.get("user-agent") ?? "";
   if (BOT.test(ua) || h.get("sec-gpc") === "1") return none;
