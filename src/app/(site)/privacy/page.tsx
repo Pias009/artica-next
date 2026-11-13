@@ -40,7 +40,7 @@ const SECTIONS = [
     title: "Visit statistics",
     body: [
       "We count visits to improve the site: the page, the time, the country, the kind of device, the site you came from and searches you make on this site. We set no cookie for this and store nothing on your device.",
-      "We don't keep your IP address. A visit is joined up with an anonymous code made from your address and browser and a secret that changes every day, so you can't be followed from one day to the next. If you send an inquiry or sign up for the line sheet, the email you give is noted with that day's visit, so our sales desk can see which pages you looked at. Browsers that send Global Privacy Control or Do Not Track aren't counted. These records are deleted after 90 days.",
+      "We don't keep your IP address. A visit is joined up with an anonymous code made from your address and browser and a secret that changes every day, so you can't be followed from one day to the next. If you send an inquiry or sign up for the line sheet, the email you give is noted with that day's visit, so our sales desk can see which pages you looked at. Browsers that send Global Privacy Control or Do Not Track aren't counted. We keep these records with no fixed end date, to see how buyers use the site over time; if you gave us your email, ask us and we delete the records noted with it.",
     ],
   },
   {
@@ -74,7 +74,7 @@ const SECTIONS = [
   {
     title: "How long we keep it",
     body: [
-      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Inquiries we mark as spam: 30 days. Line-sheet signups, and buyers who sent an inquiry and get our occasional trade updates: until you unsubscribe.",
+      "Inquiries and order records: as long as we trade with you, then as long as tax and trade law requires. Inquiries we mark as spam: 30 days. Line-sheet signups, and buyers who sent an inquiry and get our occasional trade updates: until you unsubscribe. The visitor log: no fixed end date, until you ask us to delete yours.",
     ],
   },
   {
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
   return (
     <>
       <PageIntro crumbs={[{ href: "/", label: "Home" }, { label: "Privacy policy" }]} title="Privacy policy." text="What we collect, why, and what you can ask us to do with it." />
-      <LegalText updated="November 8, 2026" sections={SECTIONS} />
+      <LegalText updated="November 10, 2026" sections={SECTIONS} />
     </>
   );
 }

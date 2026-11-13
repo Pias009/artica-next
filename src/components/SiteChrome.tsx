@@ -8,7 +8,7 @@ import { JsonLd } from "./JsonLd";
 import { MarketingTags } from "./MarketingTags";
 import { QuickView } from "./product/QuickView";
 import { SeasonBackground } from "./season/SeasonBackground";
-import { SeasonPreview } from "./season/SeasonPreview";
+import { SeasonDock } from "./season/SeasonDock";
 import { SiteHealth } from "./SiteHealth";
 import { StoreHydrator } from "./StoreHydrator";
 import { Toast } from "./Toast";
@@ -80,7 +80,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       </div>
       <Fab />
       <KaiLauncher />
-      <SeasonPreview />
+      <SeasonDock />
       {/* the visitor log for the admin panel; useSearchParams needs a boundary on prerendered pages */}
       <Suspense fallback={null}>
         <Track />

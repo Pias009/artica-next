@@ -12,8 +12,6 @@ export const isSeason = (v: unknown): v is SeasonId => (SEASON_IDS as readonly u
 /** Shown while nothing is known about the visitor (and on the plain "/" fallback). */
 export const DEFAULT_SEASON: SeasonId = "winter";
 
-/** The floating "Preview seasons" button, for checking the themes. Set NEXT_PUBLIC_SEASON_PREVIEW=off to hide it. */
-export const SEASON_PREVIEW = process.env.NEXT_PUBLIC_SEASON_PREVIEW !== "off";
 
 /** Cookies: the country we detected, the season it gives, and a season the visitor picked by hand (wins over both). */
 export const SEASON_COOKIE = { country: "cl-country", season: "cl-season", pick: "cl-season-pick" } as const;

@@ -416,6 +416,10 @@ const nickname = (sid: string) => {
 /** What a step in a footprint was, in the panel's words. */
 const STEP_KIND = { view: "Opened", search: "Searched", add: "Added to list", inquiry: "Opened the inquiry form", contact: "Gave their email" } as const;
 
+/** The Visitors list: the newest this many visits, from at most this many logged steps (older ones stay in the log). */
+const VISITOR_CARDS = 300;
+const VISIT_STEPS = 20_000;
+
 async function visitorData() {
   if (!dbReady()) return null;
   return safe("visitors", null, async () => {
@@ -434,7 +438,9 @@ async function visitorData() {
     const [recent, facets] = await Promise.all([
       visits()
         .aggregate<Session>([
-          { $match: { at: { $gte: new Date(now - DAY) } } },
+          // every visitor the log holds, newest first: the latest VISIT_STEPS steps (index "at"), joined into visits
+          { $sort: { at: -1 } },
+          { $limit: VISIT_STEPS },
           { $sort: { at: 1 } },
           {
             $group: {
@@ -450,8 +456,8 @@ async function visitorData() {
             },
           },
           { $sort: { last: -1 } },
-          { $limit: 60 },
-        ])
+          { $limit: VISITOR_CARDS },
+        ], { allowDiskUse: true })
         .toArray(),
       visits()
         .aggregate<{

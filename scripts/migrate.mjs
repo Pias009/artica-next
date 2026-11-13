@@ -95,9 +95,12 @@ try {
     { key: { key: 1, at: 1 }, name: "key_at" },
     { key: { at: 1 }, name: "expire", expireAfterSeconds: 24 * 60 * 60 },
   ]);
-  // the visitor log (src/lib/analytics/visits.ts): 90 days, no IP addresses
+  // the visitor log (src/lib/analytics/visits.ts): kept for good, no IP addresses. It used to expire after 90 days;
+  // drop that TTL index where a database still has it, or MongoDB keeps deleting visits.
+  const visitIndexes = await db.collection("visits").indexes().catch(() => []);
+  for (const ix of visitIndexes) if (ix.expireAfterSeconds !== undefined) await db.collection("visits").dropIndex(ix.name);
   await db.collection("visits").createIndexes([
-    { key: { at: 1 }, name: "expire", expireAfterSeconds: 90 * 24 * 60 * 60 },
+    { key: { at: -1 }, name: "at" },
     { key: { sid: 1, at: 1 }, name: "sid_at" },
     { key: { kind: 1, at: -1 }, name: "kind_at" },
   ]);

@@ -31,6 +31,13 @@ const EMPTY: PanelVisitors = {
  * each visit leaves, where visits come from, where the buying path loses people, which pages they leave from and what
  * they look for. Refreshes itself every 30 seconds while open.
  */
+/** When a visit began: the time for today's, the day and time for older ones (the list now reaches back past today). */
+function seen(iso: string) {
+  const d = new Date(iso);
+  const time = { hour: "2-digit", minute: "2-digit" } as const;
+  return d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString("en-GB", time) : d.toLocaleString("en-GB", { day: "numeric", month: "short", ...time });
+}
+
 export function Visitors() {
   const panel = usePanel();
   const data = panel.visitors ?? EMPTY;
@@ -82,7 +89,7 @@ export function Visitors() {
       <Card i={4} className="lg:col-span-7 lg:min-h-[600px]">
         <CardHead
           title="Visitors"
-          sub="Everyone on the site in the last 24 hours, one card each. Pick one to follow their footprint."
+          sub="Everyone who has visited, newest first, one card each. Pick one to follow their footprint."
           right={<span className="text-[12.5px] text-ink/50 tabular-nums">{visitors.length} visitors</span>}
         />
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -111,7 +118,7 @@ export function Visitors() {
           </label>
         </div>
         {!visitors.length && (
-          <p className="mt-4 text-[14px] text-ink/55">{panel.ready ? "No visits in the last 24 hours." : "No database connected: nothing is logged."}</p>
+          <p className="mt-4 text-[14px] text-ink/55">{panel.ready ? "No visits logged yet." : "No database connected: nothing is logged."}</p>
         )}
         {visitors.length > 0 && !list.length && <p className="mt-4 text-[13.5px] text-ink/55">No visitor matches.</p>}
         <ul className="mt-3 grid max-h-[720px] gap-2.5 overflow-y-auto pr-1">
@@ -184,7 +191,7 @@ export function Visitors() {
                   ["On", current.device],
                   ["Came from", current.source],
                   ["Searched for", current.searched ? `“${current.searched}”` : "Nothing"],
-                  ["First seen", new Date(current.firstSeen).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })],
+                  ["First seen", seen(current.firstSeen)],
                   ["On the site", `${current.minutes} min · ${current.pages} ${current.pages === 1 ? "page" : "pages"}`],
                 ] as const
               ).map(([k, val]) => (
@@ -378,7 +385,7 @@ export function Visitors() {
       <p className="px-2 text-[12.5px] text-ink/50 lg:col-span-12">
         From the site&apos;s own visitor log: no cookies, nothing stored on visitors&apos; devices, no IP addresses kept. Each visit gets a made-up name; its id
         changes every day, so the same person shows as a new visitor the next day. A visitor who sends an inquiry or signs up is shown by the email they
-        gave. Browsers that ask not to be tracked aren&apos;t. Kept 90 days.
+        gave. Browsers that ask not to be tracked aren&apos;t. Kept for good: nothing is deleted on a timer. The list shows the newest 300 visits.
       </p>
     </div>
   );

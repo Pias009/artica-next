@@ -7,7 +7,8 @@ import { database, dbReady } from "../leads/db";
  * search or opened inquiry form: the path, when, an anonymous visit id, the country the proxy already worked out, the
  * kind of device and where the visit came from. The visit id is a hash of a secret that changes every day with the
  * address and browser, so one visit's pages join up but nobody can be followed from one day to the next, and the
- * address itself is never stored. Nothing is kept on the visitor's device. Deleted after 90 days (TTL index).
+ * address itself is never stored. Nothing is kept on the visitor's device. Kept with no expiry, so the admin panel's
+ * history never thins out (it once expired after 90 days; ensureVisitIndexes drops that TTL index where it's left).
  *
  * When a visitor sends an inquiry or signs up for the line sheet, the email they typed is noted on that day's visit
  * (kind "contact"), so the panel can show whose footprint it is. Visits without one stay anonymous.
@@ -40,16 +41,22 @@ let indexed: Promise<unknown> | null = null;
 /** The indexes, made once per server (scripts/migrate.mjs makes them too). */
 export function ensureVisitIndexes() {
   if (!dbReady()) return Promise.resolve();
-  return (indexed ??= visits()
-    .createIndexes([
-      { key: { at: 1 }, name: "expire", expireAfterSeconds: 90 * 24 * 60 * 60 },
+  return (indexed ??= (async () => {
+    // a database made before visits were kept for good still has the TTL index that deleted them after 90 days:
+    // drop it, or MongoDB keeps deleting. (A collection that doesn't exist yet has no indexes.)
+    const existing = await visits()
+      .indexes()
+      .catch(() => []);
+    for (const ix of existing) if (ix.expireAfterSeconds !== undefined && ix.name) await visits().dropIndex(ix.name);
+    await visits().createIndexes([
+      { key: { at: -1 }, name: "at" },
       { key: { sid: 1, at: 1 }, name: "sid_at" },
       { key: { kind: 1, at: -1 }, name: "kind_at" },
-    ])
-    .catch((e) => {
-      indexed = null;
-      console.error("[visits] indexes", e);
-    }));
+    ]);
+  })().catch((e) => {
+    indexed = null;
+    console.error("[visits] indexes", e);
+  }));
 }
 
 const ENGINES: [RegExp, string][] = [

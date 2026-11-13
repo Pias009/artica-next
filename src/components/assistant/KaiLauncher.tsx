@@ -96,6 +96,7 @@ export function KaiLauncher() {
 
       <button
         ref={button}
+        id="kai-launcher"
         type="button"
         onClick={() => (open ? setOpen(false) : show())}
         aria-expanded={open}
