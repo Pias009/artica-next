@@ -16,13 +16,20 @@ export const dbReady = () => !!process.env.MONGODB_URI;
 
 function client() {
   if (!g.leadsMongo) {
-    g.leadsMongo = new MongoClient(process.env.MONGODB_URI!, {
+    const c = new MongoClient(process.env.MONGODB_URI!, {
       appName: "chime-long-site",
       // fail fast: past this the inquiry goes straight to the desk by email instead
       serverSelectionTimeoutMS: 3500,
       maxIdleTimeMS: 10_000,
     });
-    attachDatabasePool(g.leadsMongo);
+    // A closed client can't be used again ("MongoTopologyClosedError: Topology is closed"). attachDatabasePool closes
+    // it when the instance goes idle, and Fluid compute then reuses the instance, so forget it once it closes and the
+    // next request makes a fresh one instead of failing (this broke admin sign-in on Vercel).
+    c.on("topologyClosed", () => {
+      if (g.leadsMongo === c) g.leadsMongo = undefined;
+    });
+    g.leadsMongo = c;
+    attachDatabasePool(c);
   }
   return g.leadsMongo;
 }
