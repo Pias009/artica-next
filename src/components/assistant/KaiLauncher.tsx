@@ -5,6 +5,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { InDock, useDockHold } from "../Dock";
 import { Icon } from "../Icon";
 import { useShownSeason } from "../season/live";
 import "./kai.css";
@@ -31,6 +32,8 @@ export function KaiLauncher() {
   const [nudge, setNudge] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const hidden = pathname === "/assistant";
+  // the chat's own button stays on screen while the chat is open
+  useDockHold(open);
 
   // invite once per tab, only if they haven't opened the chat
   useEffect(() => {
@@ -80,7 +83,7 @@ export function KaiLauncher() {
   return (
     <>
       {nudge && !open && (
-        <div role="status" className="kai-glass kai-dense kai-rise fixed right-[clamp(16px,3vw,32px)] bottom-[calc(150px+env(safe-area-inset-bottom,0px))] z-40 w-[min(300px,calc(100vw-32px))] rounded-[20px] p-4 text-[13.5px]">
+        <div role="status" className="kai-glass kai-dense kai-rise fixed right-[clamp(16px,3vw,32px)] bottom-[calc(86px+env(safe-area-inset-bottom,0px))] z-[39] w-[min(300px,calc(100vw-32px))] lg:bottom-[calc(150px+env(safe-area-inset-bottom,0px))] compact-dock:bottom-[calc(86px+env(safe-area-inset-bottom,0px))] rounded-[20px] p-4 text-[13.5px]">
           <button type="button" onClick={() => setNudge(false)} aria-label="Dismiss" className="absolute top-1 right-1 grid size-10 place-items-center rounded-full text-muted hover:bg-white/60">
             <Icon name="close" className="size-3.5" />
           </button>
@@ -94,29 +97,31 @@ export function KaiLauncher() {
         </div>
       )}
 
-      <button
-        ref={button}
-        id="kai-launcher"
-        type="button"
-        onClick={() => (open ? setOpen(false) : show())}
-        aria-expanded={open}
-        aria-controls="kai-panel"
-        className={clsx(
-          "kai-glass fixed right-[clamp(16px,3vw,32px)] bottom-[calc(84px+env(safe-area-inset-bottom,0px))] z-40 flex h-[54px] items-center gap-2 rounded-full p-1.5 transition-[opacity,transform] duration-300 hover:-translate-y-0.5 md:pr-4",
-          open && "max-md:pointer-events-none max-md:opacity-0",
-        )}
-      >
-        <KaiAvatar className="size-10 text-[16px]" state={open ? undefined : nudge ? "thinking" : undefined} />
-        <span className="hidden text-[14px] font-semibold md:inline">{open ? "Close" : `Ask ${ASSISTANT.name}`}</span>
-        <span className="sr-only md:hidden">{open ? `Close ${ASSISTANT.name}` : `Ask ${ASSISTANT.name}, the trade assistant`}</span>
-      </button>
+      <InDock slot="kai">
+        <button
+          ref={button}
+          id="kai-launcher"
+          type="button"
+          onClick={() => (open ? setOpen(false) : show())}
+          aria-expanded={open}
+          aria-controls="kai-panel"
+          className={clsx(
+            "kai-glass flex h-[54px] items-center gap-2 rounded-full p-1.5 transition-[opacity,transform] duration-300 hover:-translate-y-0.5 md:pr-4",
+            open && "max-md:pointer-events-none max-md:opacity-0",
+          )}
+        >
+          <KaiAvatar className="size-10 text-[16px]" state={open ? undefined : nudge ? "thinking" : undefined} />
+          <span className="hidden text-[14px] font-semibold md:inline">{open ? "Close" : `Ask ${ASSISTANT.name}`}</span>
+          <span className="sr-only md:hidden">{open ? `Close ${ASSISTANT.name}` : `Ask ${ASSISTANT.name}, the trade assistant`}</span>
+        </button>
+      </InDock>
 
       {open && (
         <section
           id="kai-panel"
           role="dialog"
           aria-label={`${ASSISTANT.name}, ${ASSISTANT.role}`}
-          className="kai-glass kai-dense kai-open fixed isolate z-50 flex flex-col overflow-hidden max-md:inset-0 max-md:rounded-none max-md:border-0 md:right-[clamp(16px,3vw,32px)] md:bottom-[calc(150px+env(safe-area-inset-bottom,0px))] md:h-[min(660px,calc(100dvh-180px))] md:w-[410px] md:rounded-[28px]"
+          className="kai-glass kai-dense kai-open fixed isolate z-50 flex flex-col overflow-hidden max-md:inset-0 max-md:rounded-none max-md:border-0 md:right-[clamp(16px,3vw,32px)] md:bottom-[calc(86px+env(safe-area-inset-bottom,0px))] lg:bottom-[calc(150px+env(safe-area-inset-bottom,0px))] compact-dock:bottom-[calc(86px+env(safe-area-inset-bottom,0px))] md:h-[min(660px,calc(100dvh-180px))] md:w-[410px] md:rounded-[28px]"
         >
           <span aria-hidden="true" className="kai-ambient" />
           <header className="flex items-center gap-2.5 border-b border-white/60 px-4 py-2.5 max-md:pt-[max(10px,env(safe-area-inset-top))]">

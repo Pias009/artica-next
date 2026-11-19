@@ -145,7 +145,7 @@ export function GroupAddButton({ id, className }: { id: string; className?: stri
             })}
           </ul>
 
-          <div className="mt-2 grid gap-1">
+          <div data-dock-avoid className="mt-2 grid gap-1">
             <button type="button" onClick={send} disabled={!picked.length} className="btn btn-dark h-10! px-4! text-[13px]!">
               Send inquiry <Icon name="arrow" className="size-3.5" />
             </button>

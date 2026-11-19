@@ -1,9 +1,9 @@
 "use client";
 
 import clsx from "clsx";
-import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useKai } from "../assistant/kai";
+import { InDock, useDockHold } from "../Dock";
 import { Icon } from "../Icon";
 import { EffectsToggle } from "./EffectsToggle";
 import { onSeason, whenIdle } from "./live";
@@ -51,7 +51,7 @@ function DockFace({ season }: { season: SeasonTheme }) {
 }
 
 /**
- * The season switch, bottom right beside Kai. On a visitor's first visit it arrives as a welcome card: the card drops
+ * The season switch, in the floating row beside Kai (components/Dock.tsx). On a visitor's first visit it arrives as a welcome card: the card drops
  * from the top to just above the middle, says the range is sorted by season, and offers the six. On "Show", a pick,
  * Escape, a click outside or after AUTO_FOLD seconds it folds into a strip, pinches to the dock's size and drops on an
  * arc into the corner, where it becomes the button. Reduced motion gets a plain fade. Later visits find the button already there.
@@ -66,8 +66,6 @@ export function SeasonDock() {
   const [phase, setPhase] = useState<"wait" | "intro" | "docked">("wait");
   const [arrival, setArrival] = useState<"rise" | "land">("rise");
   const [open, setOpen] = useState(false);
-  const [kaiW, setKaiW] = useState(0);
-  const pathname = usePathname();
 
   const root = useRef<HTMLDivElement>(null);
   const dock = useRef<HTMLDivElement>(null);
@@ -166,18 +164,8 @@ export function SeasonDock() {
       .to(flyer.current, { scaleX: 1, scaleY: 1, duration: 0.5, ease: "elastic.out(1, 0.42)" }, 1.67);
   };
 
-  // the dock sits in Kai's row, just left of it, so follow the launcher's width (it has a label from tablet up)
-  useEffect(() => {
-    const kai = document.getElementById("kai-launcher");
-    if (!kai) {
-      const id = requestAnimationFrame(() => setKaiW(0));
-      return () => cancelAnimationFrame(id);
-    }
-    const ro = new ResizeObserver(() => setKaiW(kai.offsetWidth));
-    ro.observe(kai);
-    return () => ro.disconnect();
-  }, [pathname]);
-  const gap = kaiW ? kaiW + 10 : 0;
+  // the floating row stays put while its menu is open or the welcome card is flying into it
+  useDockHold(open || phase === "intro");
 
   // the drop-in, the countdown, and Escape to fold
   useGSAP(
@@ -346,94 +334,93 @@ export function SeasonDock() {
         </>
       )}
 
-      <div
-        ref={dock}
-        style={{ right: `calc(clamp(16px, 3vw, 32px) + ${gap}px)` }}
-        className={clsx(
-          // open, the menu rises above Kai's invitation bubble (z-40); the chat panel (z-50) still covers it
-          // no transitions here: globals.css gives every element a 0.01ms one under reduced motion, and on this
-          // wrapper that would tween `visibility`, leaving the dock hidden (and unfocusable) as it lands
-          "fixed bottom-[calc(84px+env(safe-area-inset-bottom,0px))] transition-none",
-          open ? "z-[45]" : "z-30",
-          phase !== "docked" && "invisible",
-          phase === "docked" && arrival === "rise" && "animate-rise-in",
-        )}
-      >
-        {open && (
-          <div
-            id={`${uid}-panel`}
-            role="dialog"
-            aria-labelledby={`${uid}-title`}
-            style={{ right: -gap }}
-            className="absolute bottom-full mb-3 w-[min(calc(100vw-32px),380px)] animate-rise-in rounded-shell bg-white p-4 shadow-float ring-1 ring-ink/8"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 id={`${uid}-title`} className="text-[16px] font-semibold">
-                  Shop by season
-                </h2>
-                <p className="mt-0.5 text-[13px] text-ink-2">
-                  Showing the <b className="font-semibold text-ink">{season.edit.toLowerCase()}</b>
-                  {mode === "auto" ? ` (auto${where})` : " (picked)"}
-                </p>
-              </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-tile">
-                <Icon name="close" className="size-4!" />
-              </button>
-            </div>
-
-            <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {SEASON_IDS.map((id) => {
-                const t = SEASONS[id];
-                const on = id === shown;
-                return (
-                  <li key={id}>
-                    <button
-                      type="button"
-                      data-season-swatch={id}
-                      aria-pressed={on}
-                      onClick={() => choose(id)}
-                      className={clsx(
-                        "bg-season-field flex min-h-[84px] w-full flex-col items-start justify-between rounded-card p-3 text-left ring-1 transition-shadow",
-                        on ? "ring-2 ring-ink" : "ring-ink/8 hover:ring-ink/30",
-                      )}
-                    >
-                      <Icon name={t.icon} className="size-5! text-season" />
-                      <span className="text-[14px] font-semibold">{loading(id) ? "Loading…" : t.name}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <button
-              type="button"
-              onClick={() => choose("auto")}
-              className={clsx("mt-2 flex min-h-11 w-full items-center gap-2.5 rounded-card px-3 text-[14px] hover:bg-tile", mode === "auto" && "font-semibold")}
-            >
-              <Icon name="pin" className="size-4!" />
-              <span className="flex-1 text-left">{loading("auto") ? "Loading…" : `Auto${country ? ` (${country})` : ", by location"}`}</span>
-              {mode === "auto" && <Icon name="check" className="size-4! text-brand" />}
-            </button>
-            <EffectsToggle />
-            <p className="mt-2 px-1 text-[12px] text-muted">Colours change at once; the products re-sort a moment later.</p>
-          </div>
-        )}
-
-        <button
-          ref={dockBtn}
-          type="button"
-          aria-expanded={open}
-          aria-controls={`${uid}-panel`}
-          tabIndex={phase === "docked" ? 0 : -1}
-          onClick={() => setOpen((v) => !v)}
-          className={clsx(PILL, "relative transition-[translate,box-shadow] duration-300 ease-soft hover:-translate-y-0.5")}
+      <InDock slot="season">
+        <div
+          ref={dock}
+          className={clsx(
+            // in the floating row beside Kai (components/Dock.tsx). No transitions here: globals.css gives every
+            // element a 0.01ms one under reduced motion, and on this wrapper that would tween `visibility`, leaving
+            // the dock hidden (and unfocusable) as it lands
+            "relative transition-none",
+            phase !== "docked" && "invisible",
+            phase === "docked" && arrival === "rise" && "animate-rise-in",
+          )}
         >
-          <span ref={ring} aria-hidden="true" data-season-swatch={season.id} className="pointer-events-none absolute inset-0 rounded-full border-2 border-current text-season opacity-0" />
-          <DockFace season={season} />
-          <span className="sr-only">{`, ${season.name} styles first. Change season`}</span>
-        </button>
-      </div>
+          {open && (
+            <div
+              id={`${uid}-panel`}
+              role="dialog"
+              aria-labelledby={`${uid}-title`}
+              className="fixed right-[clamp(16px,3vw,32px)] bottom-[calc(86px+env(safe-area-inset-bottom,0px))] w-[min(calc(100vw-32px),380px)] lg:bottom-[calc(150px+env(safe-area-inset-bottom,0px))] compact-dock:bottom-[calc(86px+env(safe-area-inset-bottom,0px))] animate-rise-in rounded-shell bg-white p-4 shadow-float ring-1 ring-ink/8"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 id={`${uid}-title`} className="text-[16px] font-semibold">
+                    Shop by season
+                  </h2>
+                  <p className="mt-0.5 text-[13px] text-ink-2">
+                    Showing the <b className="font-semibold text-ink">{season.edit.toLowerCase()}</b>
+                    {mode === "auto" ? ` (auto${where})` : " (picked)"}
+                  </p>
+                </div>
+                <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-tile">
+                  <Icon name="close" className="size-4!" />
+                </button>
+              </div>
+
+              <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {SEASON_IDS.map((id) => {
+                  const t = SEASONS[id];
+                  const on = id === shown;
+                  return (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        data-season-swatch={id}
+                        aria-pressed={on}
+                        onClick={() => choose(id)}
+                        className={clsx(
+                          "bg-season-field flex min-h-[84px] w-full flex-col items-start justify-between rounded-card p-3 text-left ring-1 transition-shadow",
+                          on ? "ring-2 ring-ink" : "ring-ink/8 hover:ring-ink/30",
+                        )}
+                      >
+                        <Icon name={t.icon} className="size-5! text-season" />
+                        <span className="text-[14px] font-semibold">{loading(id) ? "Loading…" : t.name}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <button
+                type="button"
+                onClick={() => choose("auto")}
+                className={clsx("mt-2 flex min-h-11 w-full items-center gap-2.5 rounded-card px-3 text-[14px] hover:bg-tile", mode === "auto" && "font-semibold")}
+              >
+                <Icon name="pin" className="size-4!" />
+                <span className="flex-1 text-left">{loading("auto") ? "Loading…" : `Auto${country ? ` (${country})` : ", by location"}`}</span>
+                {mode === "auto" && <Icon name="check" className="size-4! text-brand" />}
+              </button>
+              <EffectsToggle />
+              <p className="mt-2 px-1 text-[12px] text-muted">Colours change at once; the products re-sort a moment later.</p>
+            </div>
+          )}
+
+          <button
+            ref={dockBtn}
+            type="button"
+            aria-expanded={open}
+            aria-controls={`${uid}-panel`}
+            tabIndex={phase === "docked" ? 0 : -1}
+            onClick={() => setOpen((v) => !v)}
+            className={clsx(PILL, "relative transition-[translate,box-shadow] duration-300 ease-soft hover:-translate-y-0.5")}
+          >
+            <span ref={ring} aria-hidden="true" data-season-swatch={season.id} className="pointer-events-none absolute inset-0 rounded-full border-2 border-current text-season opacity-0" />
+            <DockFace season={season} />
+            <span className="sr-only">{`, ${season.name} styles first. Change season`}</span>
+          </button>
+        </div>
+      </InDock>
     </div>
   );
 }

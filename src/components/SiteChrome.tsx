@@ -1,5 +1,6 @@
 import { Suspense, type ReactNode } from "react";
 import { KaiLauncher } from "./assistant/KaiLauncher";
+import { DockState, FloatDock } from "./Dock";
 import { Fab } from "./Fab";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
@@ -78,6 +79,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         </main>
         <Footer />
       </div>
+      {/* the floating buttons' shared row; Fab, Kai and the season switch render into it */}
+      <FloatDock />
+      <DockState />
       <Fab />
       <KaiLauncher />
       <SeasonDock />

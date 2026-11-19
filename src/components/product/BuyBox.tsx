@@ -132,8 +132,8 @@ export function BuyBox({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* 3. actions */}
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      {/* 3. actions (the floating buttons step aside while these are near the bottom of the screen) */}
+      <div data-dock-avoid className="mt-4 grid gap-2 sm:grid-cols-2">
         {dirty ? (
           <button type="button" onClick={save} disabled={!picked.length && !inList.length} className="btn btn-line h-12">
             <Icon name={inList.length ? "check" : "plus"} />

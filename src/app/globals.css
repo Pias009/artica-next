@@ -1,4 +1,10 @@
 @import "tailwindcss";
+/* Where the floating buttons share one row and tuck away on scroll (components/Dock.tsx: COMPACT_DOCK). */
+@custom-variant compact-dock {
+  @media (max-width: 1023px), (pointer: coarse) {
+    @slot;
+  }
+}
 
 /*
  * Chime Long: "Fresh snow" system.
@@ -1369,5 +1375,36 @@ html[data-effects="off"] [data-deco]::after {
 @media print {
   body:has([data-plan]) :is(header[data-deco="bar"], footer, .fixed) {
     display: none !important;
+  }
+}
+
+/*
+ * The floating buttons' row (components/Dock.tsx) tucked below the screen while the visitor scrolls down or an
+ * important button is under it. Not while a menu from it is open (data-dock-hold) or one of its buttons has
+ * keyboard focus. Hidden from clicks and the keyboard once it has slid away.
+ */
+#float-dock {
+  transition:
+    translate 0.4s var(--ease-soft),
+    opacity 0.3s ease,
+    visibility 0s;
+}
+html[data-dock="tucked"]:not([data-dock-hold]) #float-dock:not(:has(:focus-visible)) {
+  translate: 0 calc(100% + 28px + env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    translate 0.4s var(--ease-soft),
+    opacity 0.3s ease,
+    visibility 0s 0.4s;
+}
+
+/* The catalog's toolbar, three rows tall on phones, makes room while the visitor scrolls down (components/Dock.tsx). */
+@media (max-width: 767px) {
+  [data-catalog-toolbar] {
+    transition: translate 0.35s var(--ease-soft);
+  }
+  html[data-scroll="down"] [data-catalog-toolbar][data-stuck]:not(:focus-within) {
+    translate: 0 calc(-100% - 90px);
   }
 }

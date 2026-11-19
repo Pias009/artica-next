@@ -260,7 +260,7 @@ export function HeroSpotlight() {
 
         {/* the stage with spatial mouse tilt */}
         <div
-          className="relative min-h-[clamp(320px,56vh,620px)] max-lg:min-h-[380px]"
+          className="relative min-h-[clamp(320px,56vh,620px)] max-lg:min-h-[380px] sm:max-lg:mt-8 sm:max-lg:min-h-[400px]"
           onPointerMove={handleStagePointerMove}
           onPointerLeave={handleStagePointerLeave}
         >
@@ -399,7 +399,7 @@ export function HeroSpotlight() {
           </div>
 
           {/* what is on show, and the controls */}
-          <div className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-2 max-lg:right-1/2 max-lg:translate-x-1/2 animate-[hero-float-counter_5.8s_ease-in-out_infinite] motion-reduce:animate-none">
+          <div data-dock-avoid className="absolute bottom-1 z-[3] flex items-center gap-2.5 lg:right-2 max-lg:right-1/2 max-lg:translate-x-1/2 animate-[hero-float-counter_5.8s_ease-in-out_infinite] motion-reduce:animate-none">
             <button
               type="button"
               onClick={() => go(cur - 1)}
@@ -489,7 +489,7 @@ export function HeroSpotlight() {
                   data-deco="card"
                   className="group relative flex h-[116px] overflow-hidden rounded-2xl border border-ink/[0.05] bg-tile text-ink shadow-[0_12px_32px_-20px_rgb(18_20_22/.25)] transition-all duration-400 ease-soft hover:-translate-y-2 hover:shadow-[0_24px_48px_-16px_rgb(18_20_22/.32),0_0_0_1px_rgb(152_64_128/.15)] hover:border-brand/25"
                 >
-                  <span className="relative block w-[42%] shrink-0 overflow-hidden" style={{ background: c.block }}>
+                  <span className="relative block w-[38%] shrink-0 overflow-hidden" style={{ background: c.block }}>
                     {/* Subtle light sheen on hover */}
                     <span
                       aria-hidden="true"
@@ -508,11 +508,11 @@ export function HeroSpotlight() {
                   <span className="flex min-w-0 flex-1 flex-col justify-center px-4">
                     <span className="font-headline text-[20px] leading-tight font-semibold transition-colors duration-200 group-hover:text-brand">{LINE_LABEL[c.line]}</span>
                     <Txt k={`${c.line}.kinds`} label={`${LINE_LABEL[c.line]} card: kinds of shoe`} className="mt-0.5 truncate text-[13px] text-muted">{c.kinds}</Txt>
-                    <span className="mt-2 flex items-center justify-between text-[13px] font-semibold">
-                      <span>
+                    <span className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-[13px] font-semibold">
+                      <span className="whitespace-nowrap">
                         {inLine(c.line).length} styles · {PACK}/case
                       </span>
-                      <span className="inline-flex items-center gap-1 text-brand">
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap text-brand">
                         <Txt k="shop" label="Line cards: link">Shop</Txt> <Icon name="arrow" className="size-3.5 transition-transform duration-300 ease-soft group-hover:translate-x-1.5" />
                       </span>
                     </span>

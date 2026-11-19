@@ -548,7 +548,8 @@ export function UpClose() {
               </div>
 
               <span className="text-[13px] font-medium text-muted">
-                Move cursor over boot to inspect
+                <span className="pointer-coarse:hidden">Move the cursor over the boot to inspect it</span>
+                <span className="pointer-fine:hidden">Drag a finger over the boot to inspect it</span>
               </span>
             </div>
           </div>

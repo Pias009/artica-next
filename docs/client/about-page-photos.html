@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>About page photos · Chime Long</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 14mm 14mm 16mm; }
+  :root { --ink: #121416; --ink-2: #3d4247; --muted: #6b7178; --line: #e3e7ea; --brand: #984080; --brand-soft: #f6ecf3; --frost: #eef3f5; --sky: #dfe9ee; --tile: #f5f5f2; --nice: #2d5d6f; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Inter, system-ui, sans-serif; font-size: 9.6pt; line-height: 1.45; color: var(--ink); }
+  h1, h2 { font-family: "Source Serif 4", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  h1 { font-size: 25pt; line-height: 1.08; }
+  h2 { font-size: 14pt; margin: 6mm 0 3mm; break-after: avoid; }
+  em { font-style: italic; color: var(--brand); font-weight: 500; }
+  p { margin: 0 0 2mm; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 8mm; padding: 9mm 9mm 8mm; border-radius: 5mm;
+    background: radial-gradient(70% 90% at 100% 0%, #f2dcea 0%, transparent 70%), linear-gradient(160deg, var(--frost), var(--sky)); }
+  .head p { margin: 3mm 0 0; max-width: 60ch; color: var(--ink-2); font-size: 10pt; }
+  .head .who { flex: none; text-align: right; font-size: 8.4pt; color: var(--ink-2); line-height: 1.6; }
+
+  .pill { display: inline-block; font-size: 7.2pt; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border-radius: 99px; padding: .4mm 2mm; vertical-align: 2px; margin-left: 1.5mm; font-family: Inter, sans-serif; }
+  .must { background: var(--brand); color: #fff; }
+  .nice { background: #d9e6ea; color: var(--nice); }
+
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .shot { display: grid; grid-template-columns: 22mm 1fr; gap: 3mm; align-items: start; background: var(--tile); border-radius: 3mm; padding: 3mm; break-inside: avoid; }
+  .frame { border: .35mm solid var(--ink-2); border-radius: 1.2mm; background: linear-gradient(135deg, #fff, var(--sky)); display: grid; place-items: center; font-weight: 700; font-size: 9pt; color: var(--ink-2); position: relative; justify-self: center; }
+  .frame span { position: absolute; bottom: .6mm; right: 1mm; font-size: 6pt; font-weight: 600; color: var(--muted); }
+  .r169 { width: 22mm; height: 12.4mm; } .r43 { width: 22mm; height: 16.5mm; } .r32 { width: 22mm; height: 14.7mm; } .r45 { width: 15mm; height: 18.8mm; }
+  .shot b { display: block; font-size: 9.6pt; }
+  .shot .spec { font-size: 7.8pt; font-weight: 600; color: var(--brand); margin: .4mm 0 .8mm; }
+  .shot .what { font-size: 8.6pt; color: var(--ink-2); margin: 0; }
+
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; break-inside: avoid; }
+  .rules > div { background: var(--tile); border-radius: 3mm; padding: 3.5mm 4mm; }
+  .rules ul { margin: 1.5mm 0 0; padding-left: 4.5mm; }
+  .rules li { margin-bottom: 1mm; font-size: 9pt; }
+  .do li::marker { content: "✓  "; color: #2f7d4f; font-weight: 700; }
+  .dont li::marker { content: "✕  "; color: #a64b34; font-weight: 700; }
+
+  .send { display: grid; grid-template-columns: 1.15fr 1fr; gap: 4mm; margin-top: 4mm; break-inside: avoid; }
+  .send .box { background: var(--brand-soft); border-left: 1.2mm solid var(--brand); border-radius: 0 3mm 3mm 0; padding: 3.5mm 4mm; }
+  pre { margin: 1.5mm 0 0; font-family: ui-monospace, Menlo, monospace; font-size: 7.8pt; line-height: 1.55; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <h1>About page photos: <em>what to shoot.</em></h1>
+    <p>The new About page needs real photos of your company so buyers can see you are a real business that makes good boots. A good phone camera is enough. Below is every shot, its shape and size, and how to send them.</p>
+  </div>
+  <div class="who">For: Owner, Chime Long<br>From: Website team<br>15 November 2026</div>
+</div>
+
+<h2>The 6 key shots <span class="pill must">Must have</span></h2>
+<div class="shots">
+  <div class="shot"><div class="frame r169">A1<span>16:9</span></div><div><b>Showroom or factory floor, wide</b><div class="spec">Landscape 16:9 · min 2400 × 1350 px</div><p class="what">The top of the page. Shoes on showroom shelves, or a wide view of production. Leave empty space on the left for the headline.</p></div></div>
+  <div class="shot"><div class="frame r45">A2<span>4:5</span></div><div><b>Owner portrait</b><div class="spec">Portrait 4:5 · min 1600 × 2000 px</div><p class="what">Waist up, smiling at the camera, window light, plain light background. Take 10–20; we pick the best.</p></div></div>
+  <div class="shot"><div class="frame r43">A3<span>4:3</span></div><div><b>Materials close-up</b><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">Leather, suede, shearling or soles on a table, very close so the texture is sharp.</p></div></div>
+  <div class="shot"><div class="frame r43">A4<span>4:3</span></div><div><b>Cutting and stitching</b><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">Hands cutting leather or sewing an upper. Focus on hands and shoe, not faces.</p></div></div>
+  <div class="shot"><div class="frame r43">A5<span>4:3</span></div><div><b>Lasting and soles</b><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">A boot on the last (foot form), or a sole being pressed or attached.</p></div></div>
+  <div class="shot"><div class="frame r43">A6<span>4:3</span></div><div><b>Finishing and packing</b><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">Cleaning or boxing finished pairs; boxes going into a 12-pair case is ideal.</p></div></div>
+</div>
+
+<h2>The extra shots <span class="pill nice">Nice to have</span></h2>
+<div class="shots">
+  <div class="shot"><div class="frame r43">A7<span>4:3</span></div><div><b>Quality inspection</b><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">An inspector measuring, checking stitches or a zip, or an inspection sheet.</p></div></div>
+  <div class="shot"><div class="frame r43">A8<span>4:3</span></div><div><b>Testing</b> <span class="what">(only if it really happens)</span><div class="spec">Landscape 4:3 · min 2000 × 1500 px</div><p class="what">A flex, water or cold test, or a lab report on a desk.</p></div></div>
+  <div class="shot"><div class="frame r169">A9<span>16:9</span></div><div><b>The team together</b><div class="spec">Landscape 16:9 · min 2400 × 1350 px</div><p class="what">The office team in the showroom, looking at the camera. Plus one square headshot of each sales person.</p></div></div>
+  <div class="shot"><div class="frame r32">A10<span>3:2</span></div><div><b>Showroom detail</b><div class="spec">Landscape 3:2 · min 2400 × 1600 px</div><p class="what">Sample shelves, or the table where buyers sit.</p></div></div>
+  <div class="shot"><div class="frame r32">A11<span>3:2</span></div><div><b>Building entrance</b><div class="spec">Landscape 3:2 · min 2400 × 1600 px</div><p class="what">The entrance with the company name visible, so visitors recognise it.</p></div></div>
+  <div class="shot"><div class="frame r32">A12<span>3:2</span></div><div><b>Packed cases in the warehouse</b><div class="spec">Landscape 3:2 · min 2400 × 1600 px</div><p class="what">Stacked export cartons. Cover any customer's name on the boxes.</p></div></div>
+  <div class="shot"><div class="frame r169">A13<span>16:9</span></div><div><b>Container loading</b><div class="spec">Landscape 16:9 · min 2400 × 1350 px</div><p class="what">Cartons going into a container, or a loaded, sealed container.</p></div></div>
+  <div class="shot"><div class="frame r169">▶<span>16:9</span></div><div><b>Short video</b> <span class="what">(optional)</span><div class="spec">Landscape · 1080p or better · 20–40 s</div><p class="what">A slow walk through the showroom and production floor. No music needed.</p></div></div>
+</div>
+
+<h2>Rules for every photo</h2>
+<div class="rules">
+  <div><b>Please do</b>
+    <ul class="do"><li>Shoot in daylight, flash off.</li><li>Tidy the area first.</li><li>Hold the phone sideways for landscape shots.</li><li>Take several of each shot.</li><li>Send the <b>original files</b>.</li><li>Ask people in the photo for permission.</li></ul>
+  </div>
+  <div><b>Please don't</b>
+    <ul class="dont"><li>Send through WeChat or WhatsApp chat (it shrinks photos). Use "send as file".</li><li>Use filters, beauty mode, text or watermarks.</li><li>Show other brands' logos or customers' products.</li><li>Use stock photos or other companies' photos.</li></ul>
+  </div>
+</div>
+
+<div class="send">
+  <div class="box"><b>How to send</b>
+    <p style="margin-top:1.5mm">Put all photos in one shared folder (Google Drive, WeTransfer or Baidu Netdisk) and send us the link. Start each file name with its shot number:</p>
+    <pre>A1-showroom-01.jpg
+A2-owner-01.jpg
+A9-team-01.jpg  ...</pre>
+  </div>
+  <div class="box" style="background:var(--frost);border-color:var(--nice)"><b>The look we want</b>
+    <p style="margin-top:1.5mm">Bright, calm and clean: white, light blue and warm daylight, with the boots as the hero. Dark, yellow-lit or messy photos won't fit the site.</p>
+    <p style="margin:0">Reply by: ____________________</p>
+  </div>
+</div>
+
+</body>
+</html>

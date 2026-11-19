@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../Icon";
 import { ActiveChips, FilterPanel, LineSwitch } from "./CatalogFilters";
 import { EmptyResults } from "./EmptyResults";
@@ -20,6 +20,20 @@ export function CatalogView({ initial, season = null }: { initial: CatalogState;
   const [s, setS] = useState(initial);
   const gridRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDialogElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const toolbarTop = useRef<HTMLSpanElement>(null);
+
+  // marks the toolbar once it is stuck under the header, the only time it may slide away (globals.css)
+  useEffect(() => {
+    const bar = toolbarRef.current;
+    const mark = toolbarTop.current;
+    if (!bar || !mark) return;
+    const io = new IntersectionObserver(([e]) => bar.toggleAttribute("data-stuck", !e.isIntersecting && e.boundingClientRect.top < 80), {
+      rootMargin: "-71px 0px 0px 0px",
+    });
+    io.observe(mark);
+    return () => io.disconnect();
+  }, []);
   const flipState = useRef<Flip.FlipState | null>(null);
 
   // `season` is the visitor's: their in-season styles lead the featured order
@@ -77,7 +91,9 @@ export function CatalogView({ initial, season = null }: { initial: CatalogState;
     // snow tiles go translucent here too, so every surface reads as glass over the colour field
     <div className="relative [--color-tile:rgb(255_255_255/0.55)]">
       {/* toolbar */}
-      <div className="glass-strong sticky top-[70px] z-20 flex flex-wrap items-center gap-2 rounded-[26px] p-2">
+      {/* on phones it is three rows tall, so it slides away while you scroll down and returns as you scroll up (globals.css) */}
+      <span ref={toolbarTop} aria-hidden="true" className="block h-px" />
+      <div ref={toolbarRef} data-catalog-toolbar className="glass-strong sticky top-[70px] z-20 flex flex-wrap items-center gap-2 rounded-[26px] p-2">
         <form role="search" onSubmit={(e) => e.preventDefault()} className="flex h-12 min-w-0 flex-[1_1_260px] items-center gap-2 rounded-full bg-white/70 pr-1 pl-4 ring-1 ring-white focus-within:ring-2 focus-within:ring-brand/40">
           <Icon name="search" className="size-4 text-muted" />
           <label htmlFor="catalog-q" className="sr-only">

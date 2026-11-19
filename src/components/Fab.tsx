@@ -4,11 +4,13 @@ import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CartCount } from "./CartCount";
+import { InDock, useCompactDock } from "./Dock";
 import { Icon } from "./Icon";
 import { useInquiry, useUI } from "@/lib/store";
 
 /**
- * Floating inquiry button: appears once the hero (or the top of the page) scrolls away. Once styles are on the list
+ * Floating inquiry button, in the dock (components/Dock.tsx). On desktop it appears once the hero (or the top of the
+ * page) scrolls away; where the dock is one compact row it stays in that row, which tucks itself away instead. Once styles are on the list
  * it says what it will do with them ("Get pricing"), a quiet reminder of the list the buyer has already built.
  */
 export function Fab() {
@@ -17,6 +19,7 @@ export function Fab() {
   const drawerOpen = useUI((s) => s.drawerOpen);
   const listed = useInquiry((s) => s.lines.length) > 0;
   const pathname = usePathname();
+  const compact = useCompactDock();
 
   // Shown once the page's opening (the hero, or the first 280px) is behind you, and tucked away again over the footer,
   // which has its own contact details and would otherwise sit under the button.
@@ -50,21 +53,24 @@ export function Fab() {
   }, [pathname]);
 
   if (pathname === "/inquiry") return null;
+  const shown = (visible || compact) && !drawerOpen;
 
   return (
-    <button
-      type="button"
-      onClick={() => openDrawer()}
-      tabIndex={visible && !drawerOpen ? 0 : -1}
-      aria-hidden={!visible || drawerOpen}
-      className={clsx(
-        "btn btn-dark fixed right-[clamp(16px,3vw,32px)] bottom-[calc(20px+env(safe-area-inset-bottom,0px))] z-30 shadow-fab transition-[translate,background-color] duration-500 ease-soft",
-        visible && !drawerOpen ? "translate-y-0" : "translate-y-[120px]",
-      )}
-    >
-      <Icon name="list" />
-      {listed ? "Get pricing" : "Inquiry"}
-      <CartCount />
-    </button>
+    <InDock slot="inquiry">
+      <button
+        type="button"
+        onClick={() => openDrawer()}
+        tabIndex={shown ? 0 : -1}
+        aria-hidden={!shown}
+        className={clsx(
+          "btn btn-dark shadow-fab transition-[translate,background-color] duration-500 ease-soft compact-dock:h-[54px] compact-dock:gap-2 compact-dock:px-5",
+          shown ? "translate-y-0" : "translate-y-[120px]",
+        )}
+      >
+        <Icon name="list" />
+        {listed ? "Get pricing" : "Inquiry"}
+        <CartCount />
+      </button>
+    </InDock>
   );
 }

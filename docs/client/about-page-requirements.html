@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>About page: what we need from you · Chime Long</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,500;0,8..60,600;1,8..60,500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root {
+    --ink: #121416; --ink-2: #3d4247; --muted: #6b7178; --line: #e3e7ea;
+    --brand: #984080; --brand-soft: #f6ecf3; --frost: #eef3f5; --sky: #dfe9ee; --tile: #f5f5f2;
+    --must: #984080; --nice: #2d5d6f;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: Inter, "Inter Display", system-ui, sans-serif; font-size: 10.2pt; line-height: 1.5; color: var(--ink); }
+  h1, h2, h3 { font-family: "Source Serif 4", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  h1 { font-size: 34pt; line-height: 1.05; }
+  h2 { font-size: 19pt; line-height: 1.15; margin-bottom: 4mm; }
+  h2 .n { color: var(--brand); font-style: italic; font-weight: 500; margin-right: 2mm; }
+  h3 { font-size: 12.5pt; margin: 5mm 0 2mm; break-after: avoid; }
+  .group { break-inside: avoid; }
+  em { font-style: italic; color: var(--brand); }
+  p { margin: 0 0 2.6mm; }
+  .muted { color: var(--muted); }
+  .small { font-size: 8.8pt; }
+  section { break-before: page; }
+  .keep { break-inside: avoid; }
+
+  /* cover */
+  .cover { height: 258mm; display: flex; flex-direction: column; justify-content: space-between; break-before: auto;
+    background: radial-gradient(70% 55% at 100% 0%, #f2dcea 0%, transparent 70%), linear-gradient(160deg, var(--frost), var(--sky));
+    border-radius: 6mm; padding: 16mm 14mm; }
+  .cover .tag { display: inline-block; background: #fff; border-radius: 99px; padding: 1.6mm 4mm; font-weight: 600; font-size: 9pt; color: var(--ink-2); }
+  .cover h1 { margin-top: 10mm; max-width: 15ch; }
+  .cover .lead { font-size: 12.5pt; color: var(--ink-2); max-width: 52ch; margin-top: 6mm; }
+  .meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .meta div { background: rgb(255 255 255 / .7); border-radius: 3mm; padding: 3.5mm 4mm; }
+  .meta b { display: block; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 1mm; }
+
+  /* boxes */
+  .note { background: var(--brand-soft); border-left: 1.2mm solid var(--brand); border-radius: 0 3mm 3mm 0; padding: 3.5mm 4.5mm; margin: 4mm 0; }
+  .note.blue { background: var(--frost); border-color: var(--nice); }
+  .note p:last-child { margin: 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .card { background: var(--tile); border-radius: 3mm; padding: 4mm; break-inside: avoid; }
+  .card h3 { margin-top: 0; }
+
+  .pill { display: inline-block; font-size: 7.6pt; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border-radius: 99px; padding: .5mm 2.2mm; vertical-align: 1px; white-space: nowrap; }
+  .must { background: var(--brand); color: #fff; }
+  .nice { background: #d9e6ea; color: var(--nice); }
+  .risk { background: #f7e1da; color: #8a3a22; }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.2pt; }
+  th { text-align: left; font-size: 7.8pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 2mm 2.5mm; border-bottom: .4mm solid var(--ink); }
+  td { padding: 2.4mm 2.5mm; border-bottom: .25mm solid var(--line); vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.fill { min-width: 38mm; }
+  .blank { display: block; border-bottom: .3mm dotted #9aa1a7; height: 6mm; }
+  .check { display: inline-block; width: 3.4mm; height: 3.4mm; border: .35mm solid var(--ink-2); border-radius: .8mm; vertical-align: -.5mm; margin-right: 1.2mm; }
+
+  /* questions */
+  ol.q { padding-left: 5.5mm; margin: 0; }
+  ol.q li { margin-bottom: 3.2mm; break-inside: avoid; }
+  ol.q li b { display: block; }
+  ol.q .hint { color: var(--muted); font-size: 8.8pt; }
+  .lines .blank { height: 6.5mm; }
+
+  /* page map */
+  .map { display: grid; grid-template-columns: 30mm 1fr; gap: 2.2mm 4mm; align-items: stretch; }
+  .map .lab { font-size: 8.4pt; font-weight: 600; color: var(--ink-2); padding-top: 2mm; }
+  .map .blk { background: var(--tile); border-radius: 2.5mm; padding: 2.6mm 3mm; display: flex; gap: 2mm; align-items: center; flex-wrap: wrap; font-size: 8.8pt; color: var(--ink-2); }
+  .slot { background: #fff; border: .35mm dashed var(--brand); color: var(--brand); border-radius: 1.8mm; font-weight: 700; font-size: 8pt; padding: 1.4mm 2.4mm; white-space: nowrap; }
+
+  /* shots */
+  .shot { display: grid; grid-template-columns: 34mm 1fr; gap: 4mm; padding: 3.5mm 0; border-bottom: .25mm solid var(--line); break-inside: avoid; }
+  .frame { border: .35mm solid var(--ink-2); border-radius: 1.5mm; background: linear-gradient(135deg, var(--frost), var(--sky)); display: grid; place-items: center; font-weight: 700; color: var(--ink-2); font-size: 9pt; position: relative; }
+  .frame span { position: absolute; bottom: 1mm; right: 1.5mm; font-size: 6.8pt; font-weight: 600; color: var(--muted); }
+  .r169 { width: 34mm; height: 19.1mm; } .r32 { width: 34mm; height: 22.7mm; } .r43 { width: 34mm; height: 25.5mm; }
+  .r45 { width: 24mm; height: 30mm; } .r11 { width: 26mm; height: 26mm; }
+  .shot h3 { margin: 0 0 1mm; font-size: 11.5pt; }
+  .specs { display: flex; flex-wrap: wrap; gap: 1.5mm; margin: 1.6mm 0; }
+  .specs span { background: var(--tile); border-radius: 99px; padding: .6mm 2.4mm; font-size: 8pt; font-weight: 600; color: var(--ink-2); }
+  .shot ul { margin: 1mm 0 0; padding-left: 4.5mm; font-size: 9pt; color: var(--ink-2); }
+  .shot ul li { margin-bottom: .6mm; }
+
+  ul.tidy { padding-left: 4.5mm; margin: 0 0 3mm; }
+  ul.tidy li { margin-bottom: 1.2mm; }
+  .do li::marker { content: "✓  "; color: #2f7d4f; font-weight: 700; }
+  .dont li::marker { content: "✕  "; color: #a64b34; font-weight: 700; }
+  pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 8.4pt; background: var(--tile); border-radius: 3mm; padding: 4mm; line-height: 1.55; margin: 2mm 0 4mm; white-space: pre-wrap; }
+  .sign { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6mm; margin-top: 8mm; }
+  .sign div { border-top: .35mm solid var(--ink); padding-top: 1.5mm; font-size: 8.4pt; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div>
+    <span class="tag">Website project · About page</span>
+    <h1>About page: <em>what we need from you.</em></h1>
+    <p class="lead">Your new website is built and working. The About page is the last part that still needs your real company story, your real numbers and real photos. This document lists every item we need, why we need it, and the exact type of photo to take.</p>
+  </div>
+  <div class="meta">
+    <div><b>For</b>Owner, Guangzhou Chime Long Trading Co., Ltd</div>
+    <div><b>From</b>Website team</div>
+    <div><b>Date</b>15 November 2026</div>
+    <div><b>Reply by</b><span class="blank"></span></div>
+    <div><b>Your contact person</b><span class="blank"></span></div>
+    <div><b>Pages</b>Story · Facts · Photos · How to send</div>
+  </div>
+</div>
+
+<!-- ============ 1. SUMMARY ============ -->
+<section>
+  <h2><span class="n">1</span>Why this matters, in one page</h2>
+  <p>Wholesale buyers decide whether to trust a supplier in the first minute. Before they ask for a price, most of them open the About page to answer three questions: <b>Is this a real company? Can they make my order well? Can I talk to a real person?</b> Real photos and true facts answer these questions. Stock photos and big claims make buyers doubt.</p>
+
+  <div class="note">
+    <p><b>Important: some text on the page today is example text.</b> The current About page has certificates, test standards and numbers (for example "LWG Gold", "BSCI audited", "ISO 9001", "0.4% defect rate", "120+ retail partners") that we wrote as placeholders. If they are not true, they must not stay on a live website: a buyer may ask for the certificate, and a false claim can cost you the order, or worse. In section 3 please tick each one: <b>true</b> (send proof), <b>change</b> (give the correct value), or <b>remove</b>.</p>
+  </div>
+
+  <h3>Everything we need, at a glance</h3>
+  <table>
+    <tr><th style="width:8mm">#</th><th>Item</th><th style="width:24mm">Priority</th><th style="width:30mm">Section</th></tr>
+    <tr><td>1</td><td>Company basics: name, year started, address, size, and whether you own a factory</td><td><span class="pill must">Must have</span></td><td>2 · Company story</td></tr>
+    <tr><td>2</td><td>Your story in your own words (5 short questions)</td><td><span class="pill must">Must have</span></td><td>2 · Company story</td></tr>
+    <tr><td>3</td><td>Confirm, change or remove every claim on the current page</td><td><span class="pill must">Must have</span></td><td>3 · Facts to confirm</td></tr>
+    <tr><td>4</td><td>Copies of your real certificates and test reports</td><td><span class="pill must">Must have</span> if any claim stays</td><td>3 · Facts to confirm</td></tr>
+    <tr><td>5</td><td>Owner portrait and a short message from you</td><td><span class="pill must">Must have</span></td><td>4 · People</td></tr>
+    <tr><td>6</td><td>Names and roles of the people buyers will talk to</td><td><span class="pill must">Must have</span></td><td>4 · People</td></tr>
+    <tr><td>7</td><td>Photos: the 6 key shots (A1–A6)</td><td><span class="pill must">Must have</span></td><td>6 · Photo list</td></tr>
+    <tr><td>8</td><td>Photos: the extra shots (A7–A13)</td><td><span class="pill nice">Nice to have</span></td><td>6 · Photo list</td></tr>
+    <tr><td>9</td><td>Milestones, customer quotes, trade fairs, a short video</td><td><span class="pill nice">Nice to have</span></td><td>7 · Extras</td></tr>
+    <tr><td>10</td><td>Real email, phone, WhatsApp and office hours (used on every page)</td><td><span class="pill must">Must have</span></td><td>8 · Also needed</td></tr>
+  </table>
+
+  <div class="note blue">
+    <p><b>Easiest way to answer:</b> you can write on a printed copy and send photos of the pages, reply by email with the section numbers, or send a voice message in Chinese or English and we will write it up for you to approve. We write all final text; you only need to give us the facts.</p>
+  </div>
+</section>
+
+<!-- ============ 2. STORY ============ -->
+<section>
+  <h2><span class="n">2</span>Your company story</h2>
+  <h3>2.1 Company basics</h3>
+  <table>
+    <tr><th style="width:62mm">Question</th><th style="width:48mm">What the site says today</th><th>Your answer</th></tr>
+    <tr><td>Legal company name (English and Chinese)</td><td>Guangzhou Chime Long Trading Co., Ltd</td><td class="fill"><span class="blank"></span><span class="blank"></span></td></tr>
+    <tr><td>Short brand name buyers should use</td><td>Chime Long</td><td class="fill"><span class="blank"></span></td></tr>
+    <tr><td>Year the company started</td><td class="muted">Not given ("for decades")</td><td class="fill"><span class="blank"></span></td></tr>
+    <tr><td>Full office address (and showroom, if different)</td><td class="muted">"Guangzhou" only</td><td class="fill"><span class="blank"></span><span class="blank"></span></td></tr>
+    <tr><td><b>Do you own the factory, work with partner factories, or both?</b><br><span class="small muted">Very important: the page title says "footwear factory in Guangzhou", but the company name says "Trading". Buyers check this.</span></td><td class="muted">Says "factory" and "partner factories" in different places</td><td class="fill"><span class="check"></span>Own factory<br><span class="check"></span>Partner factories<br><span class="check"></span>Both<br>Where are they?<span class="blank"></span></td></tr>
+    <tr><td>Number of people (office / factory)</td><td class="muted">Not given</td><td class="fill"><span class="blank"></span></td></tr>
+    <tr><td>Main countries you sell to today</td><td class="muted">"Across North America"</td><td class="fill"><span class="blank"></span><span class="blank"></span></td></tr>
+    <tr><td>Main types of customer</td><td class="muted">Retailers, distributors, private label</td><td class="fill"><span class="check"></span>Correct <span class="check"></span>Change:<span class="blank"></span></td></tr>
+    <tr><td>Main products you are strongest in</td><td class="muted">Winter boots, plus women's, men's, kids' styles</td><td class="fill"><span class="blank"></span><span class="blank"></span></td></tr>
+    <tr><td>Languages your sales team speaks</td><td class="muted">Not given</td><td class="fill"><span class="blank"></span></td></tr>
+  </table>
+
+  <h3>2.2 Your story in your own words</h3>
+  <p class="muted">Short answers are fine. A few honest sentences are better than a long text. We will turn them into the page text and send it to you to approve.</p>
+  <ol class="q lines">
+    <li><b>How did the company start, and why footwear?</b><span class="hint">For example: who started it, which year, what you did first.</span><span class="blank"></span><span class="blank"></span><span class="blank"></span></li>
+    <li><b>What do you do better than other suppliers in Guangzhou?</b><span class="hint">For example: fast samples, small minimums, leather quality, English-speaking team, on-time shipping.</span><span class="blank"></span><span class="blank"></span><span class="blank"></span></li>
+    <li><b>What is one problem you solved for a customer that you are proud of?</b><span class="hint">A real example, no customer name needed.</span><span class="blank"></span><span class="blank"></span><span class="blank"></span></li>
+    <li><b>How do you check quality before a shipment leaves?</b><span class="hint">Who checks, what they check, and what happens if something is wrong.</span><span class="blank"></span><span class="blank"></span><span class="blank"></span></li>
+    <li><b>What should a buyer know before working with you?</b><span class="hint">For example: you welcome factory visits, you reply within 24 hours, you work with first-time importers.</span><span class="blank"></span><span class="blank"></span><span class="blank"></span></li>
+  </ol>
+</section>
+
+<!-- ============ 3. CLAIMS ============ -->
+<section>
+  <h2><span class="n">3</span>Facts to confirm, change or remove</h2>
+  <p>Below is <b>every number and certificate on the current About page</b>. Please tick one box for each. If you tick "true", please send the proof (a certificate, a test report, or a document we can keep on file; it will not be published unless you want it to be).</p>
+  <div class="note"><p><b>Our rule:</b> anything not confirmed by the launch date will be taken off the page. The page will still look complete; it will simply say less.</p></div>
+
+  <h3>3.1 Numbers</h3>
+  <table>
+    <tr><th>The page says</th><th style="width:30mm">True <span class="small">(send proof)</span></th><th style="width:42mm">Change to</th><th style="width:16mm">Remove</th></tr>
+    <tr><td><b>85,000 pairs</b> monthly capacity across 4 lines</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>100%</b> pre-shipment batch inspection</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>120+</b> retail partners across North America</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>0.4%</b> defect rate, "industry-lowest"</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Leather thickness <b>2.0–2.2 mm</b> cowhide</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Outsoles stay flexible to <b>−25°C</b> (nitrile rubber, Shore A 60)</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Waterproof: <b>4-hour immersion</b>, sealed membrane bootie, taped seams</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Aluminium thermal foil insole board in the soles</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Samples in <b>10 days</b>, bulk production about <b>45 days</b></td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td>Minimum <b>300 pairs</b> per style, <b>12-pair</b> mixed-size cases</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+  </table>
+
+  <div class="group">
+  <h3>3.2 Certificates and audits</h3>
+  <table>
+    <tr><th>The page says</th><th style="width:30mm">True <span class="small">(send copy)</span></th><th style="width:42mm">Valid until / number</th><th style="width:16mm">Remove</th></tr>
+    <tr><td><b>LWG Gold</b> rated tanneries (Leather Working Group)</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>BSCI</b> audited factories</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>SMETA</b> 4-pillar audit</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>ISO 9001</b> certified</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>REACH</b> compliant materials (EU chemicals rule)</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+  </table>
+  </div>
+
+  <div class="group">
+  <h3>3.3 Laboratory tests</h3>
+  <p class="small muted">The page says these are "third-party SATRA &amp; Intertek verified". Please send the test reports for any you keep.</p>
+  <table>
+    <tr><th>Test named on the page</th><th style="width:30mm">True <span class="small">(send report)</span></th><th style="width:42mm">Lab and report date</th><th style="width:16mm">Remove</th></tr>
+    <tr><td><b>SATRA TM144</b>: slip resistance on ice and wet floors</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>ISO 20344</b>: water penetration of the upper, 180 minutes</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>Bally penetrometer</b>: 50,000 flexes in water without leaking</td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+    <tr><td><b>ASTM F2413</b>: cold insulation at −25°C <span class="pill risk">Please check</span><br><span class="small muted">This standard is normally for safety-toe work boots, not cold insulation, so this line is probably wrong.</span></td><td><span class="check"></span></td><td><span class="blank"></span></td><td><span class="check"></span></td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 4. PEOPLE ============ -->
+<section>
+  <h2><span class="n">4</span>The people buyers will talk to</h2>
+  <p>Buyers trust a face and a name far more than a logo. The page will show the owner, a short message, and the trade desk team.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>4.1 The owner <span class="pill must">Must have</span></h3>
+      <p>Name as it should appear<span class="blank"></span></p>
+      <p>Title (Founder, General Manager…)<span class="blank"></span></p>
+      <p>A short message to buyers, 2–3 sentences, in your own words. For example: what you promise every customer.</p>
+      <span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span>
+      <p class="small muted" style="margin-top:2mm">Photo: see shot A2 in section 6.</p>
+    </div>
+    <div class="card">
+      <h3>4.2 The trade desk team <span class="pill must">Must have</span></h3>
+      <p class="small muted">The people who answer inquiries. First name and role is enough. Up to 4 people.</p>
+      <table style="margin:0">
+        <tr><th>Name</th><th>Role</th><th>Languages</th></tr>
+        <tr><td><span class="blank"></span></td><td><span class="blank"></span></td><td><span class="blank"></span></td></tr>
+        <tr><td><span class="blank"></span></td><td><span class="blank"></span></td><td><span class="blank"></span></td></tr>
+        <tr><td><span class="blank"></span></td><td><span class="blank"></span></td><td><span class="blank"></span></td></tr>
+        <tr><td><span class="blank"></span></td><td><span class="blank"></span></td><td><span class="blank"></span></td></tr>
+      </table>
+      <p class="small muted" style="margin-top:2mm">Each person agrees to be shown on the website: <span class="check"></span>Yes</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. PAGE MAP ============ -->
+<section>
+  <h2><span class="n">5</span>Where everything goes on the new About page</h2>
+  <p>This is the planned layout from top to bottom. Each dashed box is a photo from the list in section 6 (A1, A2…). It shows you why each photo is needed and how big it will appear. On phones the same sections stack in one column.</p>
+  <div class="map keep">
+    <div class="lab">Opening</div><div class="blk"><span class="slot">A1 wide</span> Headline, one line about who you are, and two buttons: "View the range" and "Get wholesale pricing".</div>
+    <div class="lab">Our story</div><div class="blk"><span class="slot">A2 portrait</span> Your story from section 2, with the owner's photo, name, title and short message.</div>
+    <div class="lab">In numbers</div><div class="blk">Up to 4 confirmed numbers from section 3 (years in business, pairs a month, countries, customers). No photo.</div>
+    <div class="lab">How we make it</div><div class="blk"><span class="slot">A3</span><span class="slot">A4</span><span class="slot">A5</span><span class="slot">A6</span> Four steps in a row: materials → cutting and stitching → lasting and soles → finishing and packing.</div>
+    <div class="lab">Quality</div><div class="blk"><span class="slot">A7</span><span class="slot">A8</span> How you check each batch, with the tests and certificates you confirmed.</div>
+    <div class="lab">Certificates</div><div class="blk">Logos and certificate numbers only for what you confirmed. Buyers can ask for the full copy.</div>
+    <div class="lab">The team</div><div class="blk"><span class="slot">A9 wide</span> Team photo, plus the trade desk names from section 4.</div>
+    <div class="lab">Visit us</div><div class="blk"><span class="slot">A10</span><span class="slot">A11</span> Showroom and office, address, a map, and "Book a visit".</div>
+    <div class="lab">Shipping</div><div class="blk"><span class="slot">A12</span><span class="slot">A13</span> Packed cases and container loading: proof that orders leave on time.</div>
+    <div class="lab">Closing</div><div class="blk">"Request the line sheet and samples" button. No photo.</div>
+  </div>
+  <div class="note blue" style="margin-top:5mm">
+    <p><b>Website look:</b> the site is bright and calm: white, frost blue and warm natural light, with the boots doing the selling. Photos that are bright, tidy and taken in daylight will fit best. Dark, yellow-lit or busy photos will look out of place.</p>
+  </div>
+</section>
+
+<!-- ============ 6. PHOTOS ============ -->
+<section>
+  <h2><span class="n">6</span>The photo list</h2>
+  <p>A good phone camera is enough for all of these. A professional photographer is better, but not required. The frame next to each shot shows its <b>shape</b> (landscape, portrait or square).</p>
+
+  <h3>The 6 key shots <span class="pill must">Must have</span></h3>
+
+  <div class="shot"><div class="frame r169">A1<span>16:9</span></div><div>
+    <h3>A1 · The building, showroom or factory floor, wide</h3>
+    <div class="specs"><span>Landscape 16:9</span><span>At least 2400 × 1350 px</span><span>Daylight</span></div>
+    <ul><li>The first thing buyers see. It should say "a real company with a real place".</li><li>Best options: the showroom with shoes on the shelves, a wide view of the production floor, or the front of the building with the company sign.</li><li>Leave empty space on the left side; the headline will sit there.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r45">A2<span>4:5</span></div><div>
+    <h3>A2 · Owner portrait</h3>
+    <div class="specs"><span>Portrait 4:5</span><span>At least 1600 × 2000 px</span><span>Window light</span></div>
+    <ul><li>From the waist up, looking at the camera, relaxed and smiling.</li><li>Business casual. Plain, light background, or the showroom softly out of focus behind.</li><li>Take 10–20 photos; we will choose the best. Holding a boot from the range is a nice touch.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r43">A3<span>4:3</span></div><div>
+    <h3>A3 · Materials close-up</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span><span>Close-up</span></div>
+    <ul><li>Leather hides, suede, shearling, soles or laces laid out on a table, or a hand feeling the leather.</li><li>Get very close so the texture is sharp.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r43">A4<span>4:3</span></div><div>
+    <h3>A4 · Cutting and stitching</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span><span>Hands at work</span></div>
+    <ul><li>Hands cutting leather or a stitching machine sewing an upper. Focus on the hands and the shoe, not the worker's face.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r43">A5<span>4:3</span></div><div>
+    <h3>A5 · Lasting and soles</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span><span>Hands at work</span></div>
+    <ul><li>A boot on the last (the foot form), or a sole being pressed or attached.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r43">A6<span>4:3</span></div><div>
+    <h3>A6 · Finishing and packing</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span><span>Hands at work</span></div>
+    <ul><li>Cleaning, lacing or boxing finished pairs. Shoe boxes going into a 12-pair case is ideal.</li></ul>
+  </div></div>
+
+  <h3>The extra shots <span class="pill nice">Nice to have</span></h3>
+
+  <div class="shot"><div class="frame r43">A7<span>4:3</span></div><div>
+    <h3>A7 · Quality inspection</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span></div>
+    <ul><li>An inspector checking pairs: measuring, checking stitching, pulling a zip, or a filled-in inspection sheet.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r43">A8<span>4:3</span></div><div>
+    <h3>A8 · Testing (only if it really happens)</h3>
+    <div class="specs"><span>Landscape 4:3</span><span>At least 2000 × 1500 px</span></div>
+    <ul><li>A flex test, a water test, a cold chamber, or a lab report on a desk. Skip this one if there is no real testing to show.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r169">A9<span>16:9</span></div><div>
+    <h3>A9 · The team together</h3>
+    <div class="specs"><span>Landscape 16:9</span><span>At least 2400 × 1350 px</span></div>
+    <ul><li>The office or trade desk team standing together in the showroom. Everyone looking at the camera. Also send one photo of each person on the trade desk (square, shoulders up).</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r32">A10<span>3:2</span></div><div>
+    <h3>A10 · Showroom detail</h3>
+    <div class="specs"><span>Landscape 3:2</span><span>At least 2400 × 1600 px</span></div>
+    <ul><li>Shelves of samples, a meeting table where buyers sit, or a buyer looking at shoes (with permission).</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r32">A11<span>3:2</span></div><div>
+    <h3>A11 · Office and building entrance</h3>
+    <div class="specs"><span>Landscape 3:2</span><span>At least 2400 × 1600 px</span></div>
+    <ul><li>The entrance with the company name visible, so visitors recognise it when they arrive.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r32">A12<span>3:2</span></div><div>
+    <h3>A12 · Packed cases in the warehouse</h3>
+    <div class="specs"><span>Landscape 3:2</span><span>At least 2400 × 1600 px</span></div>
+    <ul><li>Stacked export cartons with shipping marks. Cover or blur any customer's name on the boxes.</li></ul>
+  </div></div>
+
+  <div class="shot"><div class="frame r169">A13<span>16:9</span></div><div>
+    <h3>A13 · Container loading</h3>
+    <div class="specs"><span>Landscape 16:9</span><span>At least 2400 × 1350 px</span></div>
+    <ul><li>Cartons going into a container, or a sealed, loaded container. Shows orders leaving on time.</li></ul>
+  </div></div>
+
+  <div class="group">
+  <h3 style="margin-top:6mm">Rules for every photo</h3>
+  <div class="grid2">
+    <div class="card"><b>Please do</b>
+      <ul class="tidy do" style="margin-top:2mm"><li>Shoot in daylight; turn off the flash.</li><li>Clean and tidy the area first.</li><li>Hold the phone sideways for landscape shots.</li><li>Take several photos of each shot; we will pick.</li><li>Send the <b>original files</b>: email, Google Drive, WeTransfer or Baidu Netdisk.</li><li>Ask people in the photos for permission.</li></ul>
+    </div>
+    <div class="card"><b>Please don't</b>
+      <ul class="tidy dont" style="margin-top:2mm"><li>Send photos through WeChat or WhatsApp chat (they get compressed). Use "send as file" if you must.</li><li>Use filters, beauty mode, text, watermarks or collages.</li><li>Show other brands' logos or customers' private-label products.</li><li>Use stock photos or photos from other companies.</li><li>Send screenshots.</li></ul>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ 7. EXTRAS ============ -->
+<section>
+  <h2><span class="n">7</span>Extras that make the page stronger <span class="pill nice">Nice to have</span></h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>7.1 Milestones</h3>
+      <p class="small muted">3 to 6 key moments, for a short timeline.</p>
+      <table style="margin:0"><tr><th style="width:18mm">Year</th><th>What happened</th></tr>
+        <tr><td><span class="blank"></span></td><td><span class="blank"></span></td></tr><tr><td><span class="blank"></span></td><td><span class="blank"></span></td></tr><tr><td><span class="blank"></span></td><td><span class="blank"></span></td></tr><tr><td><span class="blank"></span></td><td><span class="blank"></span></td></tr><tr><td><span class="blank"></span></td><td><span class="blank"></span></td></tr></table>
+    </div>
+    <div class="card">
+      <h3>7.2 Customer quotes</h3>
+      <p class="small muted">1 to 3 short quotes from real customers, <b>with their written permission</b>. Name, company and country, or just "Retailer, Canada" if they prefer.</p>
+      <span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span>
+    </div>
+    <div class="card">
+      <h3>7.3 Trade fairs</h3>
+      <p class="small muted">Fairs you attend (Canton Fair, MICAM, WSA…), with booth photos if you have them.</p>
+      <span class="blank"></span><span class="blank"></span><span class="blank"></span>
+    </div>
+    <div class="card">
+      <h3>7.4 A short video</h3>
+      <p class="small muted">A 20–40 second walk through the showroom and production floor. Phone held sideways, 1080p or better, walking slowly, no music needed.</p>
+      <p><span class="check"></span>We will send one &nbsp; <span class="check"></span>Not now</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. ALSO NEEDED + HOW TO SEND ============ -->
+<section>
+  <h2><span class="n">8</span>Also needed: details used on every page</h2>
+  <p>These appear in the footer, the contact page and the inquiry emails. Some are still example values today.</p>
+  <table>
+    <tr><th style="width:44mm">Detail</th><th style="width:56mm">What the site shows today</th><th>Correct value</th></tr>
+    <tr><td>Main sales email</td><td>wholesale@articafootwear.com <span class="pill risk">Example</span></td><td><span class="blank"></span></td></tr>
+    <tr><td>Phone number</td><td>+1 (800) 412-8820 <span class="pill risk">Example</span></td><td><span class="blank"></span></td></tr>
+    <tr><td>WhatsApp number</td><td class="muted">None: WhatsApp buttons are hidden</td><td><span class="blank"></span></td></tr>
+    <tr><td>WeChat ID (optional)</td><td class="muted">None</td><td><span class="blank"></span></td></tr>
+    <tr><td>Office hours and time zone</td><td>Mon–Fri 9:00–18:00 EST <span class="pill risk">US time</span></td><td><span class="blank"></span></td></tr>
+    <tr><td>Social media links</td><td class="muted">None</td><td><span class="blank"></span><span class="blank"></span></td></tr>
+    <tr><td>Company logo, original file</td><td class="muted">We have a PNG</td><td><span class="check"></span>Send SVG or AI file if you have one</td></tr>
+  </table>
+
+  <h2 style="margin-top:9mm"><span class="n">9</span>How to send everything</h2>
+  <p>Put everything in <b>one shared folder</b> (Google Drive, WeTransfer or Baidu Netdisk) and send us the link. Please name the photo files with the shot number, so we know which is which:</p>
+  <pre>Chime-Long-About/
+  1-answers/        this document filled in (photos of the pages are fine)
+  2-certificates/   certificates and test reports (PDF or clear photos)
+  3-photos/
+      A1-showroom-01.jpg   A1-showroom-02.jpg
+      A2-owner-01.jpg      ...
+      A13-container-01.jpg
+  4-team/           one photo per trade desk person, named with their first name
+  5-extras/         video, fair photos, customer quotes</pre>
+
+  <div class="note">
+    <p><b>What happens next:</b> once we receive the answers, we write the page text and send it to you to approve, usually within 3 working days. Photos are colour-corrected and cropped for phone and desktop. Nothing goes live until you approve it.</p>
+  </div>
+
+  <div class="sign">
+    <div>Approved by (name)</div>
+    <div>Signature</div>
+    <div>Date</div>
+  </div>
+</section>
+
+</body>
+</html>
