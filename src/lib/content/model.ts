@@ -96,7 +96,8 @@ export type SiteContent = {
   controls: { effects: boolean; campaign: boolean };
   contact: { email?: string; phone?: string; hours?: string };
   assistant: { trade: boolean; plan: boolean; model: boolean; tone: Tone };
-  alerts: { notifyNew: boolean; notifyOverdue: boolean; weekly: boolean };
+  /** nudgeBuyers: the daily job emails a buyer once when a quote has gone 5 days without an answer. */
+  alerts: { notifyNew: boolean; notifyOverdue: boolean; weekly: boolean; nudgeBuyers: boolean };
   /**
    * The Social team's tracking tags (Meta Pixel, GA4…), each with its id and an on switch, and whether the site's
    * events (lead, add to list…) are sent to them. Tags load only after the visitor agrees (components/MarketingTags).
@@ -118,7 +119,7 @@ export const EMPTY_CONTENT: SiteContent = {
   controls: { effects: true, campaign: true },
   contact: {},
   assistant: { trade: true, plan: true, model: true, tone: "warm" },
-  alerts: { notifyNew: true, notifyOverdue: true, weekly: false },
+  alerts: { notifyNew: true, notifyOverdue: true, weekly: false, nudgeBuyers: false },
   tracking: { tags: {}, events: true },
 };
 

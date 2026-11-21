@@ -101,3 +101,68 @@ export async function purgeSpam(): Promise<number> {
   const { deletedCount } = await inquiries().deleteMany({ status: "spam", statusAt: { $lt: new Date(Date.now() - 30 * DAY) } });
   return deletedCount;
 }
+
+/** A quote the buyer hasn't answered: who to write to, and when the desk last wrote to them. */
+export type QuietQuote = Summary & { email: string; followup: InquiryDoc["followup"] | null; lastDeskAt: Date };
+
+/**
+ * For the daily follow-ups: quotes ("quoted") the buyer hasn't answered in 3 days. The desk's last contact is when the
+ * details went out (else when it was marked quoted), or a later reply sent from the panel; any buyer answer after that
+ * (on the quote page, or a reply) means it isn't quiet. Only the last 60 days: an older quote is a lost lead, not a
+ * follow-up. Oldest contact first. Not spam by construction (the status is "quoted").
+ */
+export async function quietQuotes(): Promise<QuietQuote[]> {
+  const now = Date.now();
+  const at = (from: "desk" | "buyer") => ({
+    $map: {
+      input: {
+        $filter: {
+          input: { $ifNull: ["$messages", []] },
+          // a reply that failed to send never reached the buyer
+          cond: from === "desk" ? { $and: [{ $eq: ["$$this.from", "desk"] }, { $eq: [{ $ifNull: ["$$this.error", null] }, null] }] } : { $eq: ["$$this.from", "buyer"] },
+        },
+      },
+      in: "$$this.at",
+    },
+  });
+  return inquiries()
+    .aggregate<QuietQuote>([
+      { $match: { status: "quoted", createdAt: { $gt: new Date(now - 60 * DAY) } } },
+      {
+        $addFields: {
+          lastDeskAt: { $max: [{ $ifNull: ["$details.sentAt", "$statusAt"] }, { $max: at("desk") }] },
+          lastBuyerAt: { $max: { $concatArrays: [{ $map: { input: { $ifNull: ["$buyerResponses", []] }, in: "$$this.at" } }, at("buyer")] } },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [{ $lt: ["$lastDeskAt", new Date(now - 3 * DAY)] }, { $or: [{ $eq: ["$lastBuyerAt", null] }, { $lte: ["$lastBuyerAt", "$lastDeskAt"] }] }],
+          },
+        },
+      },
+      { $sort: { lastDeskAt: 1 } },
+      { $limit: 200 },
+      { $project: { ...SUMMARY, email: 1, followup: { $ifNull: ["$followup", null] }, lastDeskAt: 1 } },
+    ])
+    .toArray();
+}
+
+/** Notes that the desk's digest listed these quotes, so each is listed once. */
+export async function markDeskFollowup(refs: string[], at = new Date()): Promise<void> {
+  if (refs.length) await inquiries().updateMany({ ref: { $in: refs } }, { $set: { "followup.deskAt": at } });
+}
+
+/**
+ * Claims one quote for the buyer nudge before it is sent, so two runs at once can't both send it: true when this call
+ * set followup.buyerAt. Only a quote that is still "quoted" (not won, lost or spam since) and never nudged.
+ */
+export async function claimBuyerNudge(ref: string, at: Date): Promise<boolean> {
+  const { modifiedCount } = await inquiries().updateOne({ ref, status: "quoted", "followup.buyerAt": null }, { $set: { "followup.buyerAt": at } });
+  return modifiedCount === 1;
+}
+
+/** Hands a claim back when the nudge couldn't be sent, so the next run tries again. */
+export async function releaseBuyerNudge(ref: string, at: Date): Promise<void> {
+  await inquiries().updateOne({ ref, "followup.buyerAt": at }, { $set: { "followup.buyerAt": null } });
+}

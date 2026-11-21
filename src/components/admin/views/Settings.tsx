@@ -1,11 +1,13 @@
 "use client";
 
+import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { usePanel, useSaver } from "../panel-data";
 import { Card, CardHead, Field, SaveBar, Segmented, Toggle } from "../ui";
 import { saveAssistantAction, saveSettingsAction } from "@/app/admin/content-actions";
 import { MARKETS } from "@/lib/buyer-desk";
 import { COMPANY } from "@/lib/company";
+import type { PanelData } from "@/lib/admin/panel";
 import type { SiteContent, Tone } from "@/lib/content/model";
 import { LEAD, MOQ_PAIRS, PACK, PRIVATE_LABEL_MIN } from "@/lib/products";
 
@@ -24,6 +26,19 @@ function Fixed({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+/**
+ * The outside services the site leans on, what stops working without each, and the environment variables that switch
+ * it on. Only whether each is set comes from the server (PanelData.connections), never a value.
+ */
+const CONNECTIONS: { key: keyof PanelData["connections"]; name: string; why: string; vars: string }[] = [
+  { key: "database", name: "Database", why: "Inquiries, edits from this panel, subscribers and the visitor log are stored here; without it nothing saves.", vars: "MONGODB_URI" },
+  { key: "mail", name: "Email", why: "Inquiry alerts, buyer receipts and quotes. Without it nothing is emailed.", vars: "RESEND_API_KEY, INQUIRY_TO, INQUIRY_FROM" },
+  { key: "deskLinks", name: "Desk links", why: "One-click status links in desk emails, and the links to each buyer's quote page.", vars: "DESK_SECRET (16+ characters)" },
+  { key: "cron", name: "Daily job", why: "Retries for emails that failed, the overdue digest and quote follow-ups. Without it none of them run.", vars: "CRON_SECRET" },
+  { key: "siteUrl", name: "Site address", why: "Correct links in emails; without it they may point at the wrong address.", vars: "NEXT_PUBLIC_SITE_URL" },
+  { key: "segment", name: "Line-sheet list", why: "Optional: line-sheet signups join a Resend segment. Without it they're emailed to the desk instead.", vars: "RESEND_SEGMENT_ID" },
+];
 
 const sea = () => {
   const n = MARKETS.flatMap((m) => m.transit.match(/\d+/g)?.map(Number) ?? []);
@@ -55,7 +70,7 @@ export function Settings() {
   const alert = (k: keyof State["alerts"]) => (v: boolean) => setS((x) => ({ ...x, alerts: { ...x.alerts, [k]: v } }));
   const changes =
     (["email", "phone", "hours"] as const).filter((k) => (s.contact[k] ?? "") !== (saved.contact[k] ?? "")).length +
-    (["notifyNew", "notifyOverdue", "weekly"] as const).filter((k) => s.alerts[k] !== saved.alerts[k]).length +
+    (["notifyNew", "notifyOverdue", "weekly", "nudgeBuyers"] as const).filter((k) => s.alerts[k] !== saved.alerts[k]).length +
     Number(s.tone !== saved.tone);
 
   return (
@@ -122,12 +137,13 @@ export function Settings() {
 
       <Card i={4} className="lg:col-span-2">
         <CardHead title="Alerts" sub="Emails to the trade desk" />
-        <div className="mt-4 grid gap-3 text-[14px] sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 text-[14px] sm:grid-cols-2 xl:grid-cols-4">
           {(
             [
               ["notifyNew", "Every new inquiry"],
               ["notifyOverdue", "No reply after 20 hours (daily)"],
               ["weekly", "Weekly summary (Mondays)"],
+              ["nudgeBuyers", "Nudge buyers who haven't answered a quote after 5 days"],
             ] as const
           ).map(([k, l]) => (
             <label key={k} className="flex items-center justify-between gap-3 rounded-2xl bg-white/70 px-4 py-3">
@@ -136,6 +152,41 @@ export function Settings() {
             </label>
           ))}
         </div>
+        <p className="mt-3 text-[12px] text-ink/50">
+          Quotes with no answer after 3 days are listed in the daily email either way. The nudge is one short, polite email per quote, sent by the daily job
+          when email is set up; replies come to the desk inbox.
+        </p>
+      </Card>
+
+      <Card i={5} className="lg:col-span-2">
+        <CardHead title="Connections" sub="What's set on the server. Only whether each is set is shown, never the value." />
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+          {CONNECTIONS.map((c) => {
+            const on = panel.connections[c.key];
+            return (
+              <li key={c.key} className="rounded-2xl bg-white/70 px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[14px] font-semibold">{c.name}</p>
+                  <span
+                    className={clsx(
+                      "rounded-full px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap",
+                      on ? "bg-[#2f8f5b]/12 text-[#1f6b45]" : "bg-[#b45309]/12 text-[#8a3b0a]",
+                    )}
+                  >
+                    {on ? "Connected" : "Not set"}
+                  </span>
+                </div>
+                <p className="mt-1 text-[12.5px] text-ink/60">{c.why}</p>
+                <p className="mt-1 text-[12px] text-ink/50">
+                  <code className="font-mono text-[11.5px] text-ink/70">{c.vars}</code>
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-3 text-[12px] text-ink/50">
+          Set them in Vercel → Settings → Environment Variables, then redeploy. .env.example in the code lists every one.
+        </p>
       </Card>
 
       <SaveBar count={changes} pending={saver.pending} error={saver.error} onDiscard={() => (setS(saved), saver.clearError())} onSave={() => saver.save(s)} />

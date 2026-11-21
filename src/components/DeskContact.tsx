@@ -123,7 +123,7 @@ function Box({ source }: { source: string }) {
               </Txt>
             </p>
           )}
-          {!state.delivered && <p className="mt-3 text-[12px] text-muted">Demo mode: email delivery isn&rsquo;t connected yet, so nothing was sent.</p>}
+          {state.demo && <p className="mt-3 text-[12px] text-muted">Demo mode: email delivery isn&rsquo;t connected yet, so nothing was sent.</p>}
         </div>
       ) : (
         <form action={action} noValidate className="min-w-0 self-center">

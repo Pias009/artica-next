@@ -27,6 +27,8 @@ const ACTION_LABEL: Record<string, string> = {
   status: "Marked",
   retry_emails: "Retried emails",
   reply_drafted: "Drafted a reply with Kai",
+  reply_sent: "Sent a reply",
+  reply_failed: "Reply not sent:",
 };
 
 export default async function InquiryPage({ params }: PageProps<"/admin/inquiries/[ref]">) {
@@ -39,6 +41,9 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
   const late = i.status === "new" && hoursSince(i.createdAt) >= DUE_HOURS;
   const unsent = MAIL_KINDS.some((k) => !i.mail[k].sentAt);
   const reply = `mailto:${encodeURIComponent(i.email)}?subject=${encodeURIComponent(`Your Chime Long inquiry ${i.ref}`)}`;
+  const messages = i.messages ?? [];
+  // the same test as the dashboard's board: older email requests were stored before the request flag existed
+  const request = !!i.request || (i.intent === "quote" && i.buyerType === "Not given");
 
   return (
     <>
@@ -55,8 +60,13 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge status={i.status} />
-          <a href={reply} className="btn btn-dark">
-            Reply by email
+          {request && (
+            <Link href={`/admin/inquiries/requests/${i.ref}`} className="btn btn-dark">
+              Open the response page
+            </Link>
+          )}
+          <a href="#reply" className={clsx("btn", request ? "btn-line" : "btn-dark")}>
+            Reply
           </a>
         </div>
       </div>
@@ -119,9 +129,46 @@ export default async function InquiryPage({ params }: PageProps<"/admin/inquirie
             <p className="mt-3 text-[12px] text-muted">Styles as they were when sent; the catalog may have changed since. Prices are your own (Products), at the tier each line reaches.</p>
           </Card>
 
-          <Card title="Reply with Kai">
-            <ReplyDraft inquiryRef={i.ref} email={i.email} />
+          {request && (
+            <section className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-ink p-5 text-white">
+              <div>
+                <h2 className="text-[15px] font-semibold">Email request</h2>
+                <p className="mt-1 text-[13px] text-white/70">This buyer left only an email. Add the styles and prices on the response page and send them from there.</p>
+              </div>
+              <Link href={`/admin/inquiries/requests/${i.ref}`} className="btn btn-line">
+                Open the response page
+              </Link>
+            </section>
+          )}
+
+          <Card title={messages.length ? `Conversation · ${messages.length}` : "Conversation"}>
+            {messages.length ? (
+              <ol className="grid gap-2.5">
+                {messages.map((m, k) => (
+                  <li
+                    key={`${m.at.getTime()}-${k}`}
+                    className={clsx("rounded-[12px] p-3 text-[13.5px]", m.error ? "bg-danger/[0.06] ring-1 ring-danger/30" : m.from === "desk" ? "bg-tile" : "border border-line")}
+                  >
+                    <p className="flex flex-wrap justify-between gap-x-3 text-[12px] text-muted">
+                      <span className="font-semibold text-ink-2">{m.from === "desk" ? `Desk${m.by ? ` · ${m.by}` : ""}` : "Buyer"}</span>
+                      <span className="tabular-nums">{when(m.at)}</span>
+                    </p>
+                    <p className="mt-1 font-semibold">{m.subject}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-ink-2">{m.body}</p>
+                    {m.error && <p className="mt-2 text-[12.5px] font-semibold text-danger">Not sent: {m.error}</p>}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-[14px] text-muted">No replies sent from the panel yet. Replies you send below are kept here.</p>
+            )}
           </Card>
+
+          <div id="reply" className="scroll-mt-6">
+            <Card title="Reply">
+              <ReplyDraft inquiryRef={i.ref} email={i.email} />
+            </Card>
+          </div>
 
           <Card title="Note">{i.note ? <p className="text-[14px] whitespace-pre-wrap">{i.note}</p> : <p className="text-[14px] text-muted">No note.</p>}</Card>
 

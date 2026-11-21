@@ -105,7 +105,7 @@ export function DraftCard({ draft }: { draft: Draft }) {
           <Icon name="check" className="size-4" /> Inquiry sent{result.ref ? ` · ${result.ref}` : ""}
         </p>
         <p className="mt-1 text-ink-2">{result.summary}</p>
-        {!result.delivered && <p className="mt-1 text-[12px] text-muted">Demo mode: email isn&rsquo;t connected yet, so it wasn&rsquo;t delivered.</p>}
+        {result.demo && <p className="mt-1 text-[12px] text-muted">Demo mode: email isn&rsquo;t connected yet, so it wasn&rsquo;t delivered.</p>}
       </div>
     );
   }

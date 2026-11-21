@@ -31,7 +31,7 @@ export function SeasonSignup({ heading: Heading = "h2" }: { heading?: "h2" | "h3
           <Icon name="check" className="mt-0.5 size-5 flex-none text-brand" />
           <span>
             You&rsquo;re on the list.
-            {!state.delivered && (
+            {state.demo && (
               <span className="mt-1 block text-[12px] font-normal text-muted">Demo mode: email delivery isn&rsquo;t connected yet, so nothing was sent.</span>
             )}
           </span>

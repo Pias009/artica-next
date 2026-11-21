@@ -3,9 +3,10 @@
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { startTransition, useActionState, useEffect, useId, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useId, useRef, useState, useTransition } from "react";
 import { Icon } from "../Icon";
-import { sendInquiry, type SendResult } from "@/app/actions";
+import { SHIP_TO } from "./InquiryForm";
+import { addRequestInfo, sendInquiry, type SendResult } from "@/app/actions";
 import { tagEvent } from "@/lib/marketing/tags";
 import { byId, MOQ_PAIRS, PACK, products } from "@/lib/products";
 import { useInquiry } from "@/lib/store";
@@ -14,6 +15,7 @@ import { useInquiry } from "@/lib/store";
 const SHOWN = 4;
 const PREVIEW = 6;
 const SENDS = ["Line sheet", "Tier pricing", "Sample timing"];
+const VOLUMES = ["Under 1,000 pairs", "1,000–5,000 pairs", "5,000–20,000 pairs", "Over 20,000 pairs"];
 
 /**
  * "Get your inquiry by email" (/send-inquiry): one line, a box with the inquiry's data (the styles on the buyer's list,
@@ -135,6 +137,8 @@ export function EmailForm({ lines, onAgain, compact = false }: { lines: Line[]; 
   const inputRef = useRef<HTMLInputElement>(null);
   // one key per inquiry, kept across retries, so a double click or a resend is stored once
   const keyRef = useRef<string | null>(null);
+  // the key as sent, for the optional second step (it proves to the server that it's the same visitor)
+  const [sentKey, setSentKey] = useState("");
   const error = state.status === "error" ? state.error : null;
 
   useEffect(() => {
@@ -158,7 +162,8 @@ export function EmailForm({ lines, onAgain, compact = false }: { lines: Line[]; 
           </p>
         )}
         <p className="mt-2 text-[12.5px] text-white/60">No receipt in a few minutes? Check the spam or Promotions folder.</p>
-        {!state.delivered && <p className="mt-2 text-[12px] text-white/60">Demo mode: email delivery isn&rsquo;t connected yet, so nothing was sent.</p>}
+        {state.demo && <p className="mt-2 text-[12px] text-white/60">Demo mode: email delivery isn&rsquo;t connected yet, so nothing was sent.</p>}
+        {state.ref && sentKey && <MoreInfo inquiryRef={state.ref} sentKey={sentKey} compact={compact} />}
         <div className={clsx("flex flex-wrap gap-2", compact ? "mt-4" : "mt-6")}>
           {!compact && (
             <Link href="/catalog" className="btn h-11! bg-white text-[14px]! text-ink hover:bg-white/90">
@@ -182,6 +187,7 @@ export function EmailForm({ lines, onAgain, compact = false }: { lines: Line[]; 
         // randomUUID exists only on https and localhost; without it the server makes one (no repeat protection)
         keyRef.current ??= crypto.randomUUID?.() ?? "";
         data.set("key", keyRef.current);
+        setSentKey(keyRef.current);
         data.set("source", location.pathname);
         data.set("lines", JSON.stringify(lines));
         startTransition(() => action(data));
@@ -219,6 +225,95 @@ export function EmailForm({ lines, onAgain, compact = false }: { lines: Line[]; 
           Privacy
         </Link>
       </p>
+    </form>
+  );
+}
+
+/**
+ * The optional second step after an email request: who they are, where it ships and roughly how many pairs, so the
+ * desk can price it sooner (addRequestInfo in app/actions.ts). Every field is optional and "Skip" just hides it.
+ */
+function MoreInfo({ inquiryRef, sentKey, compact }: { inquiryRef: string; sentKey: string; compact: boolean }) {
+  const uid = useId();
+  const [phase, setPhase] = useState<"form" | "done" | "skipped">("form");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+
+  if (phase === "skipped") return null;
+  if (phase === "done")
+    return (
+      <p className="mt-3 flex items-center gap-2 text-[13.5px] font-semibold text-white">
+        <Icon name="check" className="size-4" /> Thanks, that helps.
+      </p>
+    );
+
+  const label = "mb-1 block text-[12.5px] font-semibold text-white/80";
+  const input = clsx("field text-[16px] text-ink sm:text-[15px]", compact ? "h-11 py-2" : "h-12");
+  return (
+    <form
+      noValidate
+      aria-busy={pending}
+      aria-labelledby={`${uid}-title`}
+      className={clsx("rounded-card bg-white/8 ring-1 ring-white/12", compact ? "mt-4 p-3.5" : "mt-5 p-4")}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const f = new FormData(e.currentTarget);
+        const data = { name: String(f.get("name") ?? ""), country: String(f.get("country") ?? ""), volume: String(f.get("volume") ?? "") };
+        setError(null);
+        start(async () => {
+          const r = await addRequestInfo(inquiryRef, sentKey, data).catch(() => ({ ok: false as const, error: "We couldn't add that just now. The desk will still reply by email." }));
+          if (r.ok) setPhase("done");
+          else setError(r.error);
+        });
+      }}
+    >
+      <p id={`${uid}-title`} className={clsx("font-semibold text-white", compact ? "text-[14px]" : "text-[15px]")}>
+        Want faster pricing? Tell us a little more
+      </p>
+      <p className="mt-0.5 text-[12.5px] text-white/60">Optional. Helps the desk quote the right tier.</p>
+      <div className={clsx("mt-3 grid gap-2.5", !compact && "sm:grid-cols-2")}>
+        <div className={clsx(!compact && "sm:col-span-2")}>
+          <label htmlFor={`${uid}-name`} className={label}>
+            Name or company
+          </label>
+          <input id={`${uid}-name`} name="name" autoComplete="organization" maxLength={200} className={input} />
+        </div>
+        <div>
+          <label htmlFor={`${uid}-country`} className={label}>
+            Ships to
+          </label>
+          <select id={`${uid}-country`} name="country" autoComplete="country-name" defaultValue="" className={input}>
+            <option value="">Choose a country</option>
+            {SHIP_TO.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor={`${uid}-volume`} className={label}>
+            Volume
+          </label>
+          <select id={`${uid}-volume`} name="volume" defaultValue="" className={input}>
+            <option value="">Choose a range</option>
+            {VOLUMES.map((v) => (
+              <option key={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {error && (
+        <p role="alert" className="mt-2 text-[13px] font-medium text-[#ffb4a2]">
+          {error}
+        </p>
+      )}
+      <div className="mt-3 flex items-center gap-4">
+        <button type="submit" disabled={pending} className="btn h-10! bg-white px-5! text-[14px]! text-ink hover:bg-white/90">
+          {pending ? "Sending…" : "Send"}
+        </button>
+        <button type="button" onClick={() => setPhase("skipped")} className="text-[13px] font-semibold text-white/70 underline hover:text-white">
+          Skip
+        </button>
+      </div>
     </form>
   );
 }

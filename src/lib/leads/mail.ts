@@ -1,5 +1,6 @@
 import "server-only";
 import { deskPath, deskReady, DESK_STATUSES } from "./desk";
+import { quotePath, quoteReady } from "./quote-link";
 import { LEAD } from "@/lib/products";
 import { absoluteUrl } from "@/lib/site";
 
@@ -265,6 +266,8 @@ export function detailsEmail(i: Pick<Inquiry, "email" | "company"> & { ref: stri
       ["Shipping", d.shipping],
     ] as const
   ).filter(([, v]) => v);
+  // the buyer's own quote page, where they accept, ask for samples or ask a question in one click (only once signed)
+  const quote = quoteReady() ? absoluteUrl(quotePath(i.ref)) : null;
   return {
     to: [i.email],
     replyTo: MAIL.to,
@@ -284,12 +287,13 @@ export function detailsEmail(i: Pick<Inquiry, "email" | "company"> & { ref: stri
         : []),
       ...(terms.length ? [`Terms:`, ...terms.map(([k, v]) => `  ${(k + ":").padEnd(11)}${v}`), ``] : []),
       ...(d.message ? [d.message, ``] : []),
+      ...(quote ? [`See your quote and answer in one click: ${quote}`, ``] : []),
       `To go ahead, reply with the styles and size runs you want, or ask us anything. Quote ${i.ref}.`,
       ``,
       `Chime Long trade desk`,
       absoluteUrl("/"),
     ].join("\n"),
-    html: detailsHtml(i, d, { hello, priced: priced.length, total, pairs, terms }),
+    html: detailsHtml(i, d, { hello, priced: priced.length, total, pairs, terms, quote }),
   };
 }
 
@@ -303,7 +307,7 @@ const photo = (src?: string) => (src ? (/^https?:\/\//.test(src) ? src : absolut
 function detailsHtml(
   i: { ref: string },
   d: Details,
-  x: { hello: string; priced: number; total: number; pairs: number; terms: readonly (readonly [string, string])[] },
+  x: { hello: string; priced: number; total: number; pairs: number; terms: readonly (readonly [string, string])[]; quote: string | null },
 ) {
   const font = "font-family:-apple-system,'Segoe UI',Inter,Helvetica,Arial,sans-serif";
   const rows = d.lines
@@ -338,6 +342,21 @@ function detailsHtml(
   const message = d.message
     ? `<p style="margin:24px 0 0;font-size:15px;line-height:1.6;color:#121416;white-space:pre-line">${esc(d.message)}</p>`
     : "";
+  const reply = `mailto:${esc(String(MAIL.to[0] ?? ""))}?subject=${encodeURIComponent(`Re: inquiry ${i.ref}`)}`;
+  const button = (href: string, label: string) =>
+    `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#121416;border-radius:999px">
+      <a href="${href}" style="display:inline-block;padding:13px 24px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none">${label}</a>
+    </td></tr></table>`;
+  // with a quote page the main button opens it (accept, samples or a question in one click) and replying is the
+  // smaller second way; without one, replying by email is the only way, as before
+  const quoteButton = x.quote
+    ? `
+    ${button(esc(x.quote), "View your quote")}
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.5;color:#5f656b">Accept it, ask for samples or ask a question there. Or <a href="${reply}" style="color:#984080;font-weight:600">reply by email</a> and quote ${esc(i.ref)}.</p>`
+    : "";
+  const replyButton = `
+    ${button(reply, "Reply to confirm or ask")}
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.5;color:#5f656b">Reply with the styles and size runs you want, or any question. Please quote ${esc(i.ref)}.</p>`;
   return `<!doctype html><html><body style="margin:0;padding:0;background:#eef3f5">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef3f5;${font}">
 <tr><td align="center" style="padding:32px 12px">
@@ -356,11 +375,7 @@ function detailsHtml(
     ${terms}
     ${message}
   </td></tr>
-  <tr><td style="padding:28px">
-    <table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#121416;border-radius:999px">
-      <a href="mailto:${esc(String(MAIL.to[0] ?? ""))}?subject=${encodeURIComponent(`Re: inquiry ${i.ref}`)}" style="display:inline-block;padding:13px 24px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none">Reply to confirm or ask</a>
-    </td></tr></table>
-    <p style="margin:14px 0 0;font-size:13px;line-height:1.5;color:#5f656b">Reply with the styles and size runs you want, or any question. Please quote ${esc(i.ref)}.</p>
+  <tr><td style="padding:28px">${x.quote ? quoteButton : replyButton}
   </td></tr>
   <tr><td style="padding:18px 28px;border-top:1px solid #e8eaea;font-size:12px;color:#5f656b">
     Chime Long trade desk &middot; <a href="${esc(absoluteUrl("/"))}" style="color:#5f656b">${esc(absoluteUrl("/").replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>

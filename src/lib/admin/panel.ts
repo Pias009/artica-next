@@ -231,6 +231,10 @@ async function inquiryData() {
               request: 1,
               details: 1,
               sourcePath: 1,
+              buyerResponses: 1,
+              messages: 1,
+              requestInfo: 1,
+              followup: 1,
             },
           },
         )
@@ -273,6 +277,10 @@ async function inquiryData() {
             lastError: r.details.lastError,
           }
         : null,
+      buyerResponses: (r.buyerResponses ?? []).map((b) => ({ action: b.action, message: b.message, at: b.at.toISOString() })),
+      messages: (r.messages ?? []).map((m) => ({ from: m.from, by: m.by, subject: m.subject, body: m.body.slice(0, 4000), at: m.at.toISOString(), error: m.error })),
+      requestInfo: r.requestInfo ? { name: r.requestInfo.name, country: r.requestInfo.country, volume: r.requestInfo.volume, at: r.requestInfo.at.toISOString() } : null,
+      followup: r.followup ? { deskAt: r.followup.deskAt?.toISOString() ?? null, buyerAt: r.followup.buyerAt?.toISOString() ?? null } : null,
     })),
     stats,
   };
@@ -737,6 +745,15 @@ async function readPanel() {
       tpd: Number(process.env.ASSISTANT_TPD) || 2_000_000,
     },
     homePin: HOME_PIN,
+    /** Which outside connections are set on this server: names only, never the values (Settings shows them). */
+    connections: {
+      mail: !!(process.env.RESEND_API_KEY && process.env.INQUIRY_TO && process.env.INQUIRY_FROM),
+      deskLinks: (process.env.DESK_SECRET ?? "").length >= 16,
+      cron: !!process.env.CRON_SECRET,
+      segment: !!process.env.RESEND_SEGMENT_ID,
+      siteUrl: !!process.env.NEXT_PUBLIC_SITE_URL,
+      database: dbReady(),
+    },
   };
 }
 /** The whole dashboard, for the signed-in admin. Read once per request: the layout, a page and Vela's teams share it. */

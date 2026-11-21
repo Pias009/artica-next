@@ -10,6 +10,7 @@ import { VIEWS, viewHref, viewOf } from "./data";
 import { signOutAction } from "@/app/admin/actions";
 import { PanelDataProvider } from "./panel-data";
 import { AdminIcon, Flash, type AdminIconName } from "./ui";
+import { useNow, waitingOn } from "./views/inquiries/WaitingStrip";
 import type { PanelData } from "@/lib/admin/panel";
 
 /*
@@ -73,6 +74,12 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
     });
   }, [view]);
 
+  // what's waiting on the desk: a count on Inquiries in both navs, and in the tab title so it shows from another tab
+  const waiting = waitingOn(data.inquiries, useNow());
+  const waitingLabel = waiting.total ? `Inquiries, ${waiting.total} waiting` : "Inquiries";
+  const badge = (className: string) => waiting.total > 0 && <WaitingBadge n={waiting.total} urgent={waiting.overdue.length > 0} className={className} />;
+  useTabCount(waiting.total);
+
   const meta = VIEWS.find((v) => v.id === view)!;
   const active = VIEWS.findIndex((v) => v.id === view);
   // the catalogue is worked through as a table: the whole width of the screen, and a small title
@@ -96,7 +103,7 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
             const { action } = r;
             const on = (action === "overview" || action === "pages" || action === "inquiries") && view === action;
             const cls = clsx(
-              "grid size-11 place-items-center rounded-full transition-colors duration-200",
+              "relative grid size-11 place-items-center rounded-full transition-colors duration-200",
               on ? "bg-white text-ink" : "text-white/75 hover:bg-white/15 hover:text-white",
             );
             return action === "site" ? (
@@ -108,8 +115,16 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
                 <AdminIcon name={r.icon} />
               </button>
             ) : (
-              <Link key={r.label} href={viewHref(action)} prefetch={false} aria-label={r.label} title={r.label} className={cls}>
+              <Link
+                key={r.label}
+                href={viewHref(action)}
+                prefetch={false}
+                aria-label={action === "inquiries" ? waitingLabel : r.label}
+                title={action === "inquiries" ? waitingLabel : r.label}
+                className={cls}
+              >
                 <AdminIcon name={r.icon} />
+                {action === "inquiries" && badge("-top-0.5 -right-0.5 ring-ink")}
               </Link>
             );
           })}
@@ -153,12 +168,15 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
                   href={viewHref(v.id)}
                   prefetch={false}
                   aria-current={v.id === view ? "page" : undefined}
+                  aria-label={v.id === "inquiries" ? waitingLabel : undefined}
                   className={clsx(
                     "relative grid min-h-11 w-[92px] flex-none place-items-center rounded-full text-[13.5px] font-medium transition-colors",
                     v.id === view ? "text-white" : "text-white/65 hover:text-white",
                   )}
                 >
                   {v.label}
+                  {/* inside the fixed 92px, so the sliding highlight still lines up */}
+                  {v.id === "inquiries" && badge("top-0.5 right-2 ring-[#5d5f61]")}
                 </Link>
               ))}
             </div>
@@ -186,6 +204,44 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
       </div>
     </PanelDataProvider>
   );
+}
+
+/** The count on Inquiries: red while anything is past the 20-hour mark, amber for the rest. The link carries the label. */
+function WaitingBadge({ n, urgent, className }: { n: number; urgent: boolean; className: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={clsx(
+        "pointer-events-none absolute grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10.5px] leading-none font-bold text-white tabular-nums ring-2",
+        urgent ? "bg-danger" : "bg-[#b45309]",
+        className,
+      )}
+    >
+      {n > 99 ? "99+" : n}
+    </span>
+  );
+}
+
+/**
+ * "(3) Inquiries · Chime Long" while there's work waiting. Pages set their own titles (and Next sets them again on
+ * every navigation, sometimes after this has run), so the prefix is put back whenever the title changes.
+ */
+function useTabCount(n: number) {
+  useEffect(() => {
+    const strip = (t: string) => t.replace(/^\(\d+\+?\) /, "");
+    const apply = () => {
+      const want = n ? `(${n > 99 ? "99+" : n}) ${strip(document.title)}` : strip(document.title);
+      // only when it differs: writing the title is itself a change the observer sees
+      if (document.title !== want) document.title = want;
+    };
+    apply();
+    const watch = new MutationObserver(apply);
+    watch.observe(document.head, { subtree: true, childList: true, characterData: true });
+    return () => {
+      watch.disconnect();
+      document.title = strip(document.title);
+    };
+  }, [n]);
 }
 
 /** The avatar: who's signed in, the security page (sessions, audit log) and sign out. */

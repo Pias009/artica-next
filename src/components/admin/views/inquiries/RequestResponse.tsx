@@ -30,6 +30,14 @@ const PICK = 12;
 
 type Line = { productId: string; cases: number; price: number | null };
 type Details = NonNullable<PanelInquiry["details"]>;
+type Answer = PanelInquiry["buyerResponses"][number];
+
+/** The buyer's answers from their quote page (/q/CL-…), each with its own colour so the latest reads at a glance. */
+const ANSWER = {
+  accept: { label: "Buyer accepted the quote", short: "Accepted the quote", tone: "bg-[#e3f1e8] text-[#1f6b45] ring-[#1f6b45]/20", dot: "bg-[#1f6b45]" },
+  samples: { label: "Buyer asked for samples first", short: "Asked for samples", tone: "bg-[#fbf0dc] text-[#7a4a14] ring-[#7a4a14]/20", dot: "bg-[#b7791f]" },
+  question: { label: "Buyer asked a question", short: "Asked a question", tone: "bg-[#e3eef7] text-[#1d4f7a] ring-[#1d4f7a]/20", dot: "bg-[#2f6fa8]" },
+} as const;
 
 const INPUT = "min-h-11 w-full rounded-xl bg-white px-3.5 text-[14px] ring-1 ring-ink/10 outline-none placeholder:text-ink/40 focus:ring-2 focus:ring-ink";
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -77,6 +85,9 @@ function Response({ item }: { item: PanelInquiry }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  // newest first; the panel keeps them oldest first, as stored
+  const answers = useMemo(() => [...item.buyerResponses].reverse(), [item.buyerResponses]);
+
   const set = (id: string, patch: Partial<Line>) => setLines((all) => all.map((l) => (l.productId === id ? { ...l, ...patch } : l)));
   const add = (id: string) => setLines((all) => (all.some((l) => l.productId === id) ? all : [...all, { productId: id, cases: MOQ_CASES, price: suggest(id, MOQ_CASES)?.price ?? null }]));
   const cases = lines.reduce((a, l) => a + l.cases, 0);
@@ -119,6 +130,12 @@ function Response({ item }: { item: PanelInquiry }) {
             {item.ref} · asked {ago(item.createdAt)}
             {item.sourcePath ? ` from ${item.sourcePath}` : ""}
           </p>
+          <Link
+            href={`/admin/inquiries/${encodeURIComponent(item.ref)}`}
+            className="mt-1.5 inline-flex min-h-9 items-center gap-1.5 text-[13px] font-semibold text-ink/70 underline-offset-4 hover:text-ink hover:underline"
+          >
+            <AdminIcon name="page" className="size-3.5" /> Full record and history
+          </Link>
         </div>
         <RequestState d={status} />
       </div>
@@ -197,6 +214,7 @@ function Response({ item }: { item: PanelInquiry }) {
 
         {/* the summary and the send button stay in view while the desk works */}
         <aside className="grid gap-5 xl:sticky xl:top-6">
+          {answers.length > 0 && <LatestAnswer latest={answers[0]} earlier={answers.length - 1} email={item.email} refId={item.ref} />}
           <Card i={2} tone="dark">
             <p className="text-[13px] font-semibold text-white/65">Inquiry total</p>
             {priced.length ? (
@@ -289,11 +307,49 @@ function Response({ item }: { item: PanelInquiry }) {
                 </li>
               )}
               {status?.lastError && <li className="text-[#8a3424]">Not sent: {status.lastError}</li>}
+              {item.buyerResponses.map((a, i) => (
+                <li key={`${a.at}-${i}`} className="flex gap-2">
+                  <span aria-hidden="true" className={clsx("mt-[7px] size-1.5 shrink-0 rounded-full", ANSWER[a.action].dot)} />
+                  <span className="min-w-0">
+                    <span className="font-semibold text-ink">{ANSWER[a.action].short}</span> {ago(a.at)}
+                    {a.message && <span className="mt-0.5 line-clamp-3 block whitespace-pre-line text-ink/60 [overflow-wrap:anywhere]">&ldquo;{a.message}&rdquo;</span>}
+                  </span>
+                </li>
+              ))}
             </ul>
           </Card>
         </aside>
       </div>
     </div>
+  );
+}
+
+/** The buyer's latest answer, at the top of the right column: what they chose, when, and their message. */
+function LatestAnswer({ latest, earlier, email, refId }: { latest: Answer; earlier: number; email: string; refId: string }) {
+  const a = ANSWER[latest.action];
+  return (
+    <section aria-label="The buyer's latest answer" className={clsx("min-w-0 rounded-[28px] p-5 ring-1 motion-safe:animate-[admin-in_.6s_cubic-bezier(.22,1,.36,1)_both] sm:p-6", a.tone)}>
+      <p className="flex flex-wrap items-center gap-x-2 text-[15px] font-semibold">
+        <span aria-hidden="true" className={clsx("size-2 rounded-full", a.dot)} />
+        {a.label}
+        <span className="font-normal opacity-75">· {ago(latest.at)}</span>
+      </p>
+      {latest.message ? (
+        <p className="mt-2.5 text-[14px] leading-relaxed whitespace-pre-line text-ink [overflow-wrap:anywhere]">{latest.message}</p>
+      ) : (
+        <p className="mt-2 text-[13.5px] opacity-80">No message.</p>
+      )}
+      <p className="mt-3 text-[12.5px] opacity-75">
+        {new Date(latest.at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} · from the quote page
+        {earlier > 0 ? ` · ${earlier} earlier in Activity` : ""}
+      </p>
+      <a
+        href={`mailto:${email}?subject=${encodeURIComponent(`Re: your quote ${refId}`)}`}
+        className="mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-ink px-4 text-[13.5px] font-semibold text-white hover:bg-ink/85"
+      >
+        <AdminIcon name="send" className="size-3.5" /> Reply to the buyer
+      </a>
+    </section>
   );
 }
 

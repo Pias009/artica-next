@@ -57,7 +57,35 @@ export type InquiryDoc = Omit<Inquiry, "ref"> & {
   firstReplyAt: Date | null;
   mail: Record<MailKind, MailState>;
   /** For an email request: the details the desk prepared and, once sent, when, by whom, or why it failed. */
-  details?: Details & { savedAt: Date; sentAt: Date | null; sentBy: string | null; lastError: string | null };
+  details?: Details & {
+    savedAt: Date;
+    sentAt: Date | null;
+    sentBy: string | null;
+    lastError: string | null;
+    /** A copy of the details exactly as last emailed: the buyer's quote page shows this, not a later unsent draft. */
+    sent?: Details | null;
+  };
+  /** What the buyer answered on their quote page (/q/CL-…): accept, ask for samples, or a question. Newest last. */
+  buyerResponses?: BuyerResponse[];
+  /** Replies the desk sent from the admin panel (and, later, buyer replies), oldest first. */
+  messages?: InquiryMessage[];
+  /** What a buyer who asked by email added on the thank-you screen (optional second step). */
+  requestInfo?: { name?: string; country?: string; volume?: string; at: Date };
+  /** Automatic follow-ups already sent for an unanswered quote, so each goes once. */
+  followup?: { deskAt?: Date | null; buyerAt?: Date | null };
+};
+
+export type BuyerAction = "accept" | "samples" | "question";
+export type BuyerResponse = { action: BuyerAction; message: string; at: Date };
+export type InquiryMessage = {
+  from: "desk" | "buyer";
+  /** The admin who sent it (desk messages). */
+  by: string | null;
+  subject: string;
+  body: string;
+  at: Date;
+  /** Set when sending failed; the message is kept so it can be retried or copied. */
+  error: string | null;
 };
 
 export const database = () => client().db(process.env.MONGODB_DB || "chimelong");

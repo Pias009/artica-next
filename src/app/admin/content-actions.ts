@@ -74,6 +74,8 @@ const Settings = z.object({
     notifyNew: z.boolean(),
     notifyOverdue: z.boolean(),
     weekly: z.boolean(),
+    // added later: a save from a panel opened before the setting existed leaves it off
+    nudgeBuyers: z.boolean().default(false),
   }),
 });
 const Assistant = z.object({

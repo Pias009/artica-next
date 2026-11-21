@@ -70,7 +70,8 @@ export async function saveDetailsAction(ref: string, input: DetailsInput, send: 
   if (send && !lines.length && !details.message) return { ok: false, error: "Add at least one style or a message before sending." };
 
   const now = new Date();
-  const keep = { sentAt: doc.details?.sentAt ?? null, sentBy: doc.details?.sentBy ?? null };
+  // a draft saved after sending keeps what was sent (the buyer's quote page shows that copy)
+  const keep = { sentAt: doc.details?.sentAt ?? null, sentBy: doc.details?.sentBy ?? null, sent: doc.details?.sent ?? null };
   await inquiries().updateOne({ ref }, { $set: { details: { ...details, savedAt: now, ...keep, lastError: null } } });
 
   if (!send) {
@@ -94,7 +95,7 @@ export async function saveDetailsAction(ref: string, input: DetailsInput, send: 
   const error = await sendMail({ ...detailsEmail({ ref, email: doc.email, company: doc.company }, details), idempotencyKey: `${ref}-details-${now.getTime()}` });
   if (error) return failed(error, `Saved, but the email didn't go out: ${error.slice(0, 140)}`);
 
-  await inquiries().updateOne({ ref }, { $set: { "details.sentAt": now, "details.sentBy": admin.email, "details.lastError": null } });
+  await inquiries().updateOne({ ref }, { $set: { "details.sentAt": now, "details.sentBy": admin.email, "details.lastError": null, "details.sent": details } });
   await setStatus(ref, "quoted");
   await audit({ adminId: admin._id, email: admin.email, action: "send_details", ref, detail: `${lines.length} styles to ${doc.email}` });
   revalidatePath("/admin", "layout");

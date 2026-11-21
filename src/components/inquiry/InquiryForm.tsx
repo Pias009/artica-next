@@ -122,7 +122,7 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
               <Icon name="whatsapp" className="size-4" /> Prefer WhatsApp? Message us
             </a>
           )}
-          {!state.delivered && (
+          {state.demo && (
             <p className="max-w-[34ch] text-center text-[12px] text-muted">Demo mode: email delivery isn&rsquo;t connected yet, so this inquiry was not sent.</p>
           )}
         </div>

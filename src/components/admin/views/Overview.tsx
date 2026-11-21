@@ -8,6 +8,7 @@ import { askAssistant } from "../ai";
 import { intentLabel } from "../data";
 import { ago, useAsk, usePanel } from "../panel-data";
 import { AdminIcon, Card, CardHead, CountUp, flash, LineChart, Meter, PinBars, Ring, Toggle } from "../ui";
+import { WaitingStrip } from "./inquiries/WaitingStrip";
 import { saveControlsAction } from "@/app/admin/content-actions";
 
 const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
@@ -61,6 +62,8 @@ export function Overview() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-12">
+      {/* what the desk owes buyers right now, first thing on the dashboard (nothing shows when it's all answered) */}
+      <WaitingStrip className="lg:col-span-12" />
       {/* the AI brief */}
       <Card i={0} className="flex flex-col items-start gap-x-5 gap-y-3 py-4! sm:flex-row sm:items-center lg:col-span-12">
         <span className="grid size-10 flex-none place-items-center rounded-full bg-ink text-white">

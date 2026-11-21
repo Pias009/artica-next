@@ -4,10 +4,11 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { noteContact } from "@/lib/analytics/visits";
-import { dbReady } from "@/lib/leads/db";
+import { dbReady, inquiries } from "@/lib/leads/db";
 import { recordInquiry } from "@/lib/leads/inquiries";
 import { addContact, buyerEmail, contactsReady, deskEmail, deskInbox, INTENT_LABEL, mailReady, sendMail, type Inquiry, type InquiryLine, type Intent } from "@/lib/leads/mail";
 import { drain } from "@/lib/leads/outbox";
+import { rateLimited, receiptLimited } from "@/lib/leads/ratelimit";
 import { recordSubscriber, setSubscriberStatus } from "@/lib/marketing/store";
 import { unsubscribeTokenOk } from "@/lib/marketing/unsubscribe";
 import { byId, MOQ_CASES, PACK } from "@/lib/products";
@@ -16,7 +17,7 @@ import { SEASON_COOKIE } from "@/lib/season";
 export type InquiryResult =
   | { status: "idle" }
   | { status: "error"; errors: { company?: string; email?: string; form?: string } }
-  | { status: "success"; summary: string; delivered: boolean; ref?: string };
+  | { status: "success"; summary: string; delivered: boolean; demo: boolean; ref?: string };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -24,6 +25,15 @@ const isIntent = (v: unknown): v is Intent => typeof v === "string" && v in INTE
 
 /** Longest we wait on the database before sending the inquiry straight to the desk instead. */
 const DB_TIMEOUT = 4000;
+
+/** What a visitor sees once they've hit a limit in src/lib/leads/ratelimit.ts. */
+const LIMITED = "Too many tries from this connection. Please wait a few minutes and try again.";
+
+/**
+ * Whether success screens show the "Demo mode: email isn't connected" note. Only outside production: on the live site
+ * it would just look broken to a buyer (their inquiry is still stored, or logged, either way).
+ */
+const demoMode = () => !mailReady() && (process.env.VERCEL_ENV ? process.env.VERCEL_ENV !== "production" : process.env.NODE_ENV !== "production");
 
 /**
  * An inquiry from the drawer or /inquiry. Where it goes (docs/design/inquiry-lead-pipeline.md):
@@ -34,7 +44,7 @@ const DB_TIMEOUT = 4000;
  */
 export async function submitInquiry(_prev: InquiryResult, formData: FormData): Promise<InquiryResult> {
   // a field people never see; bots fill it in. Pretend it worked and drop it.
-  if (String(formData.get("website") ?? "")) return { status: "success", summary: "Thank you.", delivered: true };
+  if (String(formData.get("website") ?? "")) return { status: "success", summary: "Thank you.", delivered: true, demo: false };
 
   const company = String(formData.get("company") ?? "").trim().slice(0, 200);
   const email = String(formData.get("email") ?? "").trim().slice(0, 200);
@@ -47,6 +57,7 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
   if (!company) errors.company = "Enter your store or company name.";
   if (!EMAIL.test(email)) errors.email = "Enter a valid work email.";
   if (errors.company || errors.email) return { status: "error", errors };
+  if (await rateLimited("submitInquiry")) return { status: "error", errors: { form: LIMITED } };
 
   const lines = readLines(formData);
   if (!lines) return { status: "error", errors: { form: "Your inquiry list could not be read. Please try again." } };
@@ -91,7 +102,7 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
           console.error("[outbox] drain after submit failed; the cron will retry", e);
         }
       });
-      return { status: "success", summary: summary(ref), delivered: mailReady(), ref };
+      return { status: "success", summary: summary(ref), delivered: mailReady(), demo: demoMode(), ref };
     } catch (e) {
       // stored nothing: fall through and email the desk directly, so the lead still reaches someone
       console.error("[inquiry] lead.db_fallback", e);
@@ -107,10 +118,10 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
   } else {
     console.info("[inquiry] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", inquiry);
   }
-  return { status: "success", summary: summary(), delivered: mailReady() };
+  return { status: "success", summary: summary(), delivered: mailReady(), demo: demoMode() };
 }
 
-export type SignupResult = { status: "idle" } | { status: "error"; error: string } | { status: "success"; delivered: boolean };
+export type SignupResult = { status: "idle" } | { status: "error"; error: string } | { status: "success"; delivered: boolean; demo: boolean };
 
 /**
  * Joins the season mailing: Resend's contacts (RESEND_SEGMENT_ID), or, until that is set, an email to the desk. With a
@@ -137,24 +148,25 @@ async function joinList(email: string, from: string, source: "line-sheet" | "tal
 
 /** "Next line sheet first": one email field. */
 export async function subscribe(_prev: SignupResult, formData: FormData): Promise<SignupResult> {
-  if (String(formData.get("website") ?? "")) return { status: "success", delivered: true };
+  if (String(formData.get("website") ?? "")) return { status: "success", delivered: true, demo: false };
 
   const email = String(formData.get("email") ?? "").trim().slice(0, 200);
   const from = String(formData.get("from") ?? "").slice(0, 80);
   if (!EMAIL.test(email)) return { status: "error", error: "Enter a valid work email." };
+  if (await rateLimited("subscribe")) return { status: "error", error: LIMITED };
 
   const error = await joinList(email, from);
   if (error) {
     console.error("[signup] failed", error);
     return { status: "error", error: "We couldn't sign you up just now. Please try again in a minute." };
   }
-  return { status: "success", delivered: mailReady() };
+  return { status: "success", delivered: mailReady(), demo: demoMode() };
 }
 
 export type ContactResult =
   | { status: "idle" }
   | { status: "error"; error: string; field?: "email" | "phone" | "want" }
-  | { status: "success"; email: string; contact: boolean; updates: boolean; delivered: boolean; ref?: string };
+  | { status: "success"; email: string; contact: boolean; updates: boolean; delivered: boolean; demo: boolean; ref?: string };
 
 const PHONE = /^\+?[\d\s().-]{6,24}$/;
 
@@ -168,7 +180,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
   const email = String(formData.get("email") ?? "").trim().slice(0, 200);
   const contact = formData.get("contact") === "on";
   const updates = formData.get("updates") === "on";
-  if (String(formData.get("website") ?? "")) return { status: "success", email, contact, updates, delivered: true };
+  if (String(formData.get("website") ?? "")) return { status: "success", email, contact, updates, delivered: true, demo: false };
 
   const phone = String(formData.get("phone") ?? "").trim().slice(0, 40);
   const company = String(formData.get("company") ?? "").trim().slice(0, 200);
@@ -176,6 +188,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
   if (!EMAIL.test(email)) return { status: "error", error: "Enter a valid work email.", field: "email" };
   if (phone && !PHONE.test(phone)) return { status: "error", error: "Enter the number with its country code, e.g. +1 415 555 0134.", field: "phone" };
   if (!contact && !updates) return { status: "error", error: "Pick at least one: a message from the desk, or email updates.", field: "want" };
+  if (await rateLimited("requestContact")) return { status: "error", error: LIMITED };
 
   const failed = { status: "error", error: "We couldn't send that just now. Please try again in a minute." } as const;
   if (updates) {
@@ -186,7 +199,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
       if (!contact) return failed;
     }
   }
-  if (!contact) return { status: "success", email, contact, updates, delivered: mailReady() };
+  if (!contact) return { status: "success", email, contact, updates, delivered: mailReady(), demo: demoMode() };
 
   const inquiry: Inquiry = {
     company: company || email.split("@")[1],
@@ -226,7 +239,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
           console.error("[outbox] drain after contact request failed; the cron will retry", e);
         }
       });
-      return { status: "success", email, contact, updates, delivered: mailReady(), ref };
+      return { status: "success", email, contact, updates, delivered: mailReady(), demo: demoMode(), ref };
     } catch (e) {
       console.error("[talk] lead.db_fallback", e);
     }
@@ -241,7 +254,7 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
   } else {
     console.info("[talk] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", inquiry);
   }
-  return { status: "success", email, contact, updates, delivered: mailReady() };
+  return { status: "success", email, contact, updates, delivered: mailReady(), demo: demoMode() };
 }
 
 /** The inquiry list sent with a form: known styles only, at MOQ or more, once each, each as it is today (the catalog changes). Null if unreadable. */
@@ -266,7 +279,7 @@ function readLines(formData: FormData): InquiryLine[] | null {
 export type SendResult =
   | { status: "idle" }
   | { status: "error"; error: string }
-  | { status: "success"; email: string; styles: number; pairs: number; delivered: boolean; ref?: string };
+  | { status: "success"; email: string; styles: number; pairs: number; delivered: boolean; demo: boolean; ref?: string };
 
 /**
  * "Get your inquiry by email" (/send-inquiry, the short link the floating button and the menus point to): the buyer
@@ -276,8 +289,12 @@ export type SendResult =
  */
 export async function sendInquiry(_prev: SendResult, formData: FormData): Promise<SendResult> {
   const email = String(formData.get("email") ?? "").trim().slice(0, 200);
-  if (String(formData.get("website") ?? "")) return { status: "success", email, styles: 0, pairs: 0, delivered: true };
+  if (String(formData.get("website") ?? "")) return { status: "success", email, styles: 0, pairs: 0, delivered: true, demo: false };
   if (!EMAIL.test(email)) return { status: "error", error: "Enter your email address, e.g. yourname@gmail.com." };
+  if (await rateLimited("sendInquiry")) return { status: "error", error: LIMITED };
+  // each request emails a receipt to the address typed: cap them per address, so the site can't be used to mail a stranger
+  if (await receiptLimited(email))
+    return { status: "error", error: "We've already sent a few requests to this email today. Please check that inbox (and its spam folder), or try again tomorrow." };
 
   const lines = readLines(formData);
   if (!lines) return { status: "error", error: "Your inquiry list could not be read. Please try again." };
@@ -296,7 +313,7 @@ export async function sendInquiry(_prev: SendResult, formData: FormData): Promis
     // the desk prepares the details in Admin -> Inquiries -> Email requests; the buyer's first email is a receipt
     request: true,
   };
-  const done = (ref?: string): SendResult => ({ status: "success", email, styles: lines.length, pairs: inquiry.pairs, delivered: mailReady(), ref });
+  const done = (ref?: string): SendResult => ({ status: "success", email, styles: lines.length, pairs: inquiry.pairs, delivered: mailReady(), demo: demoMode(), ref });
 
   if (dbReady()) {
     const key = String(formData.get("key") ?? "");
@@ -339,6 +356,49 @@ export async function sendInquiry(_prev: SendResult, formData: FormData): Promis
     console.info("[send] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", inquiry);
   }
   return done();
+}
+
+export type RequestInfo = { name?: string; country?: string; volume?: string };
+export type RequestInfoResult = { ok: true } | { ok: false; error: string };
+
+/** A form value as plain one-line text, capped: control characters become spaces. */
+const oneLine = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f]+/g, " ").trim().slice(0, max) : "");
+
+/**
+ * The optional second step on the email request's thank-you screen (EmailForm in components/inquiry/SendInquiry.tsx):
+ * a name or company, where it ships and the volume, so the desk can price it sooner. It only changes the request just
+ * made: the idempotency key the browser sent with it proves it's the same visitor, and only for a day. The name and
+ * country also replace the placeholders on the inquiry (the email stands in as its company), so the board shows them.
+ */
+export async function addRequestInfo(ref: string, key: string, data: RequestInfo): Promise<RequestInfoResult> {
+  const missing = { ok: false, error: "We couldn't add that to your request. The desk will still reply by email." } as const;
+  if (typeof ref !== "string" || !/^CL-\d{4}-\d{4,}$/.test(ref) || typeof key !== "string" || !UUID.test(key) || !dbReady()) return missing;
+
+  const name = oneLine(data?.name, 200);
+  const country = oneLine(data?.country, 80);
+  const volume = oneLine(data?.volume, 40);
+  if (!name && !country && !volume) return { ok: false, error: "Fill in at least one, or skip this step." };
+  if (await rateLimited("addRequestInfo")) return { ok: false, error: LIMITED };
+
+  try {
+    const { matchedCount } = await withTimeout(
+      inquiries().updateOne(
+        { ref, idempotencyKey: key, request: true, createdAt: { $gte: new Date(Date.now() - 24 * 3600_000) } },
+        {
+          $set: {
+            requestInfo: { ...(name && { name }), ...(country && { country }), ...(volume && { volume }), at: new Date() },
+            ...(name && { company: name }),
+            ...(country && { country }),
+          },
+        },
+      ),
+      DB_TIMEOUT,
+    );
+    return matchedCount ? { ok: true } : missing;
+  } catch (e) {
+    console.error("[send] request info not saved", e);
+    return missing;
+  }
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
