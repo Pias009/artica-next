@@ -63,6 +63,7 @@ export async function saveDetailsAction(ref: string, input: DetailsInput, send: 
         cases: l.cases,
         pairs: l.cases * PACK,
         price: l.price === null ? null : Math.round(l.price * 100) / 100,
+        image: p.outer.src,
       };
     });
   const details = { ...parsed.data, lines };

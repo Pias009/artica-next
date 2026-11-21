@@ -66,7 +66,7 @@ export function Inquiries() {
       </div>
 
       {/* buyers who left only an email: the desk adds the details and sends them */}
-      <EmailRequests items={items} onChange={(ref, patch) => setItems((all) => all.map((i) => (i.ref === ref ? { ...i, ...patch } : i)))} />
+      <EmailRequests items={items} />
 
       <p className="mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-[13px] text-ink/55">
         {items.length

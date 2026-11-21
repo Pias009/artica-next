@@ -38,7 +38,10 @@ const RAIL: {
 ];
 
 export function AdminPanel({ admin, data, children }: { admin?: { name: string; email: string }; data: PanelData; children: ReactNode }) {
-  const view = viewOf(usePathname());
+  const path = usePathname();
+  const view = viewOf(path);
+  // a work page inside a section (a request's response): the small title, so the work starts near the top
+  const sub = path.startsWith("/admin/inquiries/requests/");
   const [assistant, setAssistant] = useState(false);
   const [prompt, setPrompt] = useState<{ text: string; n: number } | null>(null);
   const ask = useCallback((text?: string) => {
@@ -113,10 +116,10 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
         </nav>
 
         <div className={clsx("mx-auto w-full px-4 sm:px-6 md:pl-20", !wide && "max-w-[1584px]")}>
-          <header className={clsx("flex flex-wrap items-end justify-between gap-4", wide ? "pt-5 pb-4" : "pt-8 pb-6 sm:pt-12")}>
+          <header className={clsx("flex flex-wrap items-end justify-between gap-4", wide || sub ? "pt-5 pb-4" : "pt-8 pb-6 sm:pt-12")}>
             <div key={view} className="motion-safe:animate-[admin-in_.5s_cubic-bezier(.22,1,.36,1)_both]">
               <p className="text-[13px] font-medium text-ink/55">Chime Long · admin</p>
-              <h1 className={clsx("leading-[0.95] font-light tracking-[-0.045em]", wide ? "text-[clamp(30px,3vw,40px)]" : "text-[clamp(48px,8vw,112px)]")}>{meta.title}</h1>
+              <h1 className={clsx("leading-[0.95] font-light tracking-[-0.045em]", wide || sub ? "text-[clamp(30px,3vw,40px)]" : "text-[clamp(48px,8vw,112px)]")}>{meta.title}</h1>
             </div>
             <div className="flex items-center gap-2">
               <button
