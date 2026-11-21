@@ -115,7 +115,7 @@ export function Inquiries() {
                           <span aria-hidden="true">{i.flag}</span> {i.country}
                         </span>
                         <span className="mt-2.5 flex items-center justify-between gap-2">
-                          <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[11px] font-semibold">{intentLabel(i.intent)}</span>
+                          <span className="rounded-full bg-ink/[0.06] px-2 py-0.5 text-[11px] font-semibold">{i.request ? "Email request" : intentLabel(i.intent)}</span>
                           {i.pairs > 0 && <span className="text-[12px] font-semibold tabular-nums">{i.pairs.toLocaleString("en-US")} pr</span>}
                         </span>
                       </button>

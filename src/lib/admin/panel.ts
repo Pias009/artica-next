@@ -255,7 +255,8 @@ async function inquiryData() {
       note: (r.note ?? "").slice(0, 600),
       styles: r.lines.map((l) => l.name),
       /** Asked for by email only: the desk adds the details in Inquiries -> Email requests and sends them. */
-      request: !!r.request,
+      // also the ones stored before the flag existed: only the email-only form leaves the buyer type "Not given" on a quote
+      request: !!r.request || (r.intent === "quote" && r.buyerType === "Not given"),
       sourcePath: r.sourcePath,
       lines: r.lines.map((l) => ({ productId: l.productId, cases: l.cases })),
       details: r.details
