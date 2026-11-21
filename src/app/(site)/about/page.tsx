@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
 
@@ -148,9 +149,12 @@ export default function AboutPage() {
         title="Request the wholesale line sheet and samples."
         text="Feel the leather and the construction in your own hands before you commit."
         action={
-          <OpenInquiryButton className="btn flex-none bg-white text-ink hover:bg-white/85">
-            Request line sheet <Icon name="arrow" />
-          </OpenInquiryButton>
+          <div className="flex flex-none flex-wrap gap-2">
+            <OpenInquiryButton className="btn flex-none bg-white text-ink hover:bg-white/85">
+              Request line sheet <Icon name="arrow" />
+            </OpenInquiryButton>
+            <AskInquiryButton className="btn flex-none text-white ring-1 ring-white/30 hover:bg-white/10" />
+          </div>
         }
       />
     </>

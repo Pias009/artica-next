@@ -102,6 +102,23 @@ export type Inquiry = {
   note: string;
   lines: InquiryLine[];
   pairs: number;
+  /**
+   * Asked for by email only ("Ask inquiry" box, /send-inquiry): the buyer gave just an address and the desk prepares
+   * the details (prices, terms) in the admin panel and sends them (detailsEmail). Their first email is a receipt.
+   */
+  request?: boolean;
+};
+
+/** One style in the details the desk sends: as it was when sent, with its price per pair (USD), if given. */
+export type DetailLine = InquiryLine & { price: number | null };
+/** What the desk sends a buyer who asked by email (Admin -> Inquiries -> Email requests). */
+export type Details = {
+  lines: DetailLine[];
+  leadTime: string;
+  samples: string;
+  payment: string;
+  shipping: string;
+  message: string;
 };
 
 const n = (x: number) => x.toLocaleString("en-US");
@@ -116,8 +133,7 @@ export function deskEmail(i: Inquiry): Mail {
   return {
     to: MAIL.to,
     replyTo: i.email,
-    subject: `${i.ref ? `[${i.ref}] ` : ""}${INTENT_LABEL[i.intent]}: ${i.company} (${i.buyerType}, ${i.country})${i.pairs ? `, ${n(i.pairs)} pairs` : ""}`,
-    text: [
+    subject: `${i.ref ? `[${i.ref}] ` : ""}${INTENT_LABEL[i.intent]}: ${i.company} (${i.buyerType}, ${i.country})${i.pairs ? `, ${n(i.pairs)} pairs` : ""}`,    text: [
       `New wholesale inquiry${i.ref ? ` ${i.ref}` : ""}`,
       ``,
       `Company:   ${i.company}`,
@@ -141,27 +157,36 @@ export function deskEmail(i: Inquiry): Mail {
   };
 }
 
-/** To the buyer: what we got and what happens next. Replying reaches the desk. */
-export function buyerEmail(i: Inquiry & { ref: string }): Mail {
-  if (i.intent === "contact") return contactEmail(i);
-  const rows = i.lines.map((l) => `  - ${l.name} (${l.color}): ${l.cases} cases, ${n(l.pairs)} pairs`);
+/**
+ * To the buyer: a copy of their inquiry (styles, where it ships, their notes) and what happens next. Replying reaches
+ * the desk. Without a reference (sent directly, the database down) it still goes out, just without the number.
+ */
+export function buyerEmail(i: Inquiry): Mail {
+  if (i.intent === "contact" && i.ref) return contactEmail({ ...i, ref: i.ref });
+  if (i.request) return requestEmail(i);
+  const rows = i.lines.map((l) => `  - ${l.name} (${l.color}, ${l.sizes}): ${l.cases} cases, ${n(l.pairs)} pairs`);
+  // the quick form asks for no company; then company holds their address, which makes a poor greeting
+  const hello = i.company && !i.company.includes("@") ? `Hello ${i.company},` : `Hello,`;
   return {
     to: [i.email],
     replyTo: MAIL.to,
-    subject: `We have your inquiry (${i.ref}): tier pricing within 24 hours`,
+    subject: `Your Chime Long inquiry${i.ref ? ` (${i.ref})` : ""}: tier pricing within 24 hours`,
     text: [
-      `Hello ${i.company},`,
+      hello,
       ``,
-      `Thank you for your inquiry. Your reference is ${i.ref}.`,
+      `Thank you for your inquiry. Here is a copy for your records.${i.ref ? ` Your reference is ${i.ref}.` : ""}`,
       ``,
       i.lines.length ? `You asked about ${i.lines.length} style${i.lines.length > 1 ? "s" : ""}, ${n(i.pairs)} pairs in all:\n${rows.join("\n")}` : `You asked for the full line sheet.`,
       ``,
+      ...(i.country !== "Not given" ? [`Ships to: ${i.country}`] : []),
+      ...(i.note ? [`Your notes:`, ...i.note.split("\n").map((l) => `  ${l}`)] : []),
+      ...(i.country !== "Not given" || i.note ? [``] : []),
       `What happens next:`,
       `  1. Within 24 hours: your line sheet and tier pricing, by email.`,
       `  2. If you'd like samples, they reach you in about ${LEAD.samples.replace("d", "")} days.`,
       `  3. When you're ready, confirm styles and sizes and production starts.`,
       ``,
-      `Anything to add? Just reply to this email and quote ${i.ref}.`,
+      `Anything to add? Just reply to this email${i.ref ? ` and quote ${i.ref}` : ""}.`,
       ``,
       `Chime Long trade desk`,
       absoluteUrl("/"),
@@ -187,6 +212,78 @@ function contactEmail(i: Inquiry & { ref: string }): Mail {
       `  - the season you're buying for`,
       ``,
       `Meanwhile, the full catalogue is at ${absoluteUrl("/catalog")}.`,
+      ``,
+      `Chime Long trade desk`,
+      absoluteUrl("/"),
+    ].join("\n"),
+  };
+}
+
+/** To a buyer who asked by email: we have it, and the desk is preparing the details (sent later with detailsEmail). */
+function requestEmail(i: Inquiry): Mail {
+  const rows = i.lines.map((l) => `  - ${l.name} (${l.color}, ${l.sizes}): ${l.cases} cases, ${n(l.pairs)} pairs`);
+  return {
+    to: [i.email],
+    replyTo: MAIL.to,
+    subject: `We have your inquiry request${i.ref ? ` (${i.ref})` : ""}: details within one working day`,
+    text: [
+      `Hello,`,
+      ``,
+      `Thank you for asking Chime Long.${i.ref ? ` Your reference is ${i.ref}.` : ""}`,
+      ``,
+      i.lines.length ? `You asked about ${i.lines.length} style${i.lines.length > 1 ? "s" : ""}:\n${rows.join("\n")}` : `You asked for the full line sheet.`,
+      ``,
+      `Our trade desk is preparing the details for you: prices per pair, lead time, samples, payment and shipping terms.`,
+      `They come to this address within one working day.`,
+      ``,
+      `Anything to add meanwhile? Just reply to this email.`,
+      ``,
+      `Chime Long trade desk`,
+      absoluteUrl("/"),
+    ].join("\n"),
+  };
+}
+
+const money = (x: number) => `$${x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** The details the desk prepared in the admin panel, to the buyer who asked by email. Replying reaches the desk. */
+export function detailsEmail(i: Pick<Inquiry, "email" | "company"> & { ref: string }, d: Details): Mail {
+  const rows = d.lines.map((l) => {
+    const head = `  - ${l.name} (${l.color}, ${l.sizes}): ${l.cases} cases, ${n(l.pairs)} pairs`;
+    return l.price !== null ? `${head} x ${money(l.price)} per pair = ${money(l.price * l.pairs)}` : `${head} (price on request)`;
+  });
+  const priced = d.lines.filter((l) => l.price !== null);
+  const total = priced.reduce((a, l) => a + l.price! * l.pairs, 0);
+  const pairs = d.lines.reduce((a, l) => a + l.pairs, 0);
+  const hello = i.company && !i.company.includes("@") ? `Hello ${i.company},` : `Hello,`;
+  const terms = (
+    [
+      ["Lead time", d.leadTime],
+      ["Samples", d.samples],
+      ["Payment", d.payment],
+      ["Shipping", d.shipping],
+    ] as const
+  ).filter(([, v]) => v);
+  return {
+    to: [i.email],
+    replyTo: MAIL.to,
+    subject: `Your Chime Long inquiry details (${i.ref})`,
+    text: [
+      hello,
+      ``,
+      `Here are the details of your inquiry ${i.ref}.`,
+      ``,
+      ...(d.lines.length
+        ? [
+            `Styles (${d.lines.length}, ${n(pairs)} pairs):`,
+            ...rows,
+            ``,
+            ...(priced.length ? [`${priced.length === d.lines.length ? "Order total" : "Total for the priced styles"}: ${money(total)} (USD, FOB)`, ``] : []),
+          ]
+        : []),
+      ...(terms.length ? [`Terms:`, ...terms.map(([k, v]) => `  ${(k + ":").padEnd(11)}${v}`), ``] : []),
+      ...(d.message ? [d.message, ``] : []),
+      `To go ahead, reply with the styles and size runs you want, or ask us anything. Quote ${i.ref}.`,
       ``,
       `Chime Long trade desk`,
       absoluteUrl("/"),

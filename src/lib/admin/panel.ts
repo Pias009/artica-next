@@ -228,6 +228,9 @@ async function inquiryData() {
               note: 1,
               lines: 1,
               ipCountry: 1,
+              request: 1,
+              details: 1,
+              sourcePath: 1,
             },
           },
         )
@@ -251,6 +254,24 @@ async function inquiryData() {
       createdAt: r.createdAt.toISOString(),
       note: (r.note ?? "").slice(0, 600),
       styles: r.lines.map((l) => l.name),
+      /** Asked for by email only: the desk adds the details in Inquiries -> Email requests and sends them. */
+      request: !!r.request,
+      sourcePath: r.sourcePath,
+      lines: r.lines.map((l) => ({ productId: l.productId, cases: l.cases })),
+      details: r.details
+        ? {
+            lines: r.details.lines.map((l) => ({ productId: l.productId, cases: l.cases, price: l.price })),
+            leadTime: r.details.leadTime,
+            samples: r.details.samples,
+            payment: r.details.payment,
+            shipping: r.details.shipping,
+            message: r.details.message,
+            savedAt: r.details.savedAt.toISOString(),
+            sentAt: r.details.sentAt?.toISOString() ?? null,
+            sentBy: r.details.sentBy,
+            lastError: r.details.lastError,
+          }
+        : null,
     })),
     stats,
   };

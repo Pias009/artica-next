@@ -4,6 +4,7 @@ import { DockState, FloatDock } from "./Dock";
 import { Fab } from "./Fab";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
+import { AskBox } from "./inquiry/AskInquiry";
 import { InquiryDrawer } from "./inquiry/InquiryDrawer";
 import { JsonLd } from "./JsonLd";
 import { MarketingTags } from "./MarketingTags";
@@ -83,6 +84,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <FloatDock />
       <DockState />
       <Fab />
+      <AskBox />
       <KaiLauncher />
       <SeasonDock />
       {/* the visitor log for the admin panel; useSearchParams needs a boundary on prerendered pages */}

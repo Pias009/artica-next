@@ -6,7 +6,7 @@ import { after } from "next/server";
 import { noteContact } from "@/lib/analytics/visits";
 import { dbReady } from "@/lib/leads/db";
 import { recordInquiry } from "@/lib/leads/inquiries";
-import { addContact, contactsReady, deskEmail, deskInbox, INTENT_LABEL, mailReady, sendMail, type Inquiry, type Intent } from "@/lib/leads/mail";
+import { addContact, buyerEmail, contactsReady, deskEmail, deskInbox, INTENT_LABEL, mailReady, sendMail, type Inquiry, type InquiryLine, type Intent } from "@/lib/leads/mail";
 import { drain } from "@/lib/leads/outbox";
 import { recordSubscriber, setSubscriberStatus } from "@/lib/marketing/store";
 import { unsubscribeTokenOk } from "@/lib/marketing/unsubscribe";
@@ -48,22 +48,8 @@ export async function submitInquiry(_prev: InquiryResult, formData: FormData): P
   if (!EMAIL.test(email)) errors.email = "Enter a valid work email.";
   if (errors.company || errors.email) return { status: "error", errors };
 
-  let asked: { id: string; cases: number }[];
-  try {
-    asked = JSON.parse(String(formData.get("lines") ?? "[]"));
-    if (!Array.isArray(asked)) throw new Error();
-  } catch {
-    return { status: "error", errors: { form: "Your inquiry list could not be read. Please try again." } };
-  }
-  // known styles only, at MOQ or more, once each; each line keeps the style as it is today (the catalog changes)
-  const seen = new Set<string>();
-  const lines = asked
-    .filter((l) => byId[l?.id] && Number.isInteger(l.cases) && l.cases >= MOQ_CASES && l.cases <= 10_000 && !seen.has(l.id) && seen.add(l.id))
-    .slice(0, 200)
-    .map((l) => {
-      const p = byId[l.id];
-      return { productId: p.id, name: p.name, color: p.color.name, sizes: p.sizes, cases: l.cases, pairs: l.cases * PACK };
-    });
+  const lines = readLines(formData);
+  if (!lines) return { status: "error", errors: { form: "Your inquiry list could not be read. Please try again." } };
 
   const inquiry: Inquiry = {
     company,
@@ -256,6 +242,103 @@ export async function requestContact(_prev: ContactResult, formData: FormData): 
     console.info("[talk] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", inquiry);
   }
   return { status: "success", email, contact, updates, delivered: mailReady() };
+}
+
+/** The inquiry list sent with a form: known styles only, at MOQ or more, once each, each as it is today (the catalog changes). Null if unreadable. */
+function readLines(formData: FormData): InquiryLine[] | null {
+  let asked: { id: string; cases: number }[];
+  try {
+    asked = JSON.parse(String(formData.get("lines") ?? "[]"));
+    if (!Array.isArray(asked)) return null;
+  } catch {
+    return null;
+  }
+  const seen = new Set<string>();
+  return asked
+    .filter((l) => byId[l?.id] && Number.isInteger(l.cases) && l.cases >= MOQ_CASES && l.cases <= 10_000 && !seen.has(l.id) && seen.add(l.id))
+    .slice(0, 200)
+    .map((l) => {
+      const p = byId[l.id];
+      return { productId: p.id, name: p.name, color: p.color.name, sizes: p.sizes, cases: l.cases, pairs: l.cases * PACK };
+    });
+}
+
+export type SendResult =
+  | { status: "idle" }
+  | { status: "error"; error: string }
+  | { status: "success"; email: string; styles: number; pairs: number; delivered: boolean; ref?: string };
+
+/**
+ * "Get your inquiry by email" (/send-inquiry, the short link the floating button and the menus point to): the buyer
+ * gives only an email. The inquiry list goes with it (none: the full line sheet). It is stored like any other inquiry
+ * (Admin -> Inquiries -> Email requests), the desk is told and the buyer gets a receipt; the desk then adds prices and
+ * terms there and sends the details (saveDetailsAction in app/admin/request-actions.ts).
+ */
+export async function sendInquiry(_prev: SendResult, formData: FormData): Promise<SendResult> {
+  const email = String(formData.get("email") ?? "").trim().slice(0, 200);
+  if (String(formData.get("website") ?? "")) return { status: "success", email, styles: 0, pairs: 0, delivered: true };
+  if (!EMAIL.test(email)) return { status: "error", error: "Enter your email address, e.g. yourname@gmail.com." };
+
+  const lines = readLines(formData);
+  if (!lines) return { status: "error", error: "Your inquiry list could not be read. Please try again." };
+  const source = String(formData.get("source") ?? "").slice(0, 200) || null;
+
+  const inquiry: Inquiry = {
+    // no company asked for: their address stands in, so the desk and the panel always have something to show
+    company: email,
+    email,
+    country: "Not given",
+    buyerType: "Not given",
+    intent: "quote",
+    note: "",
+    lines,
+    pairs: lines.reduce((a, l) => a + l.pairs, 0),
+    // the desk prepares the details in Admin -> Inquiries -> Email requests; the buyer's first email is a receipt
+    request: true,
+  };
+  const done = (ref?: string): SendResult => ({ status: "success", email, styles: lines.length, pairs: inquiry.pairs, delivered: mailReady(), ref });
+
+  if (dbReady()) {
+    const key = String(formData.get("key") ?? "");
+    const [h, jar] = await Promise.all([headers(), cookies()]);
+    try {
+      const { ref } = await withTimeout(
+        recordInquiry(inquiry, {
+          key: UUID.test(key) ? key : crypto.randomUUID(),
+          ipCountry: h.get("x-vercel-ip-country") ?? h.get("cf-ipcountry"),
+          season: jar.get(SEASON_COOKIE.pick)?.value ?? jar.get(SEASON_COOKIE.season)?.value ?? null,
+          sourcePath: source,
+        }),
+        DB_TIMEOUT,
+      );
+      after(() => noteContact({ email, via: "inquiry", path: source, ref }));
+      // the desk's alert and the buyer's copy go out right after the response; the cron retries either if it fails
+      after(async () => {
+        try {
+          await drain({ ref });
+        } catch (e) {
+          console.error("[outbox] drain after quick inquiry failed; the cron will retry", e);
+        }
+      });
+      return done(ref);
+    } catch (e) {
+      console.error("[send] lead.db_fallback", e);
+    }
+  }
+
+  if (mailReady()) {
+    // nothing stored: the desk first (that one must arrive), then the buyer's copy
+    const error = await sendMail(deskEmail(inquiry));
+    if (error) {
+      console.error("[send] delivery failed", error, inquiry);
+      return { status: "error", error: "We couldn't send your inquiry just now. Please try again in a minute." };
+    }
+    const copy = await sendMail(buyerEmail(inquiry));
+    if (copy) console.error("[send] buyer copy failed", copy);
+  } else {
+    console.info("[send] not sent (RESEND_API_KEY, INQUIRY_TO and INQUIRY_FROM are not all set)", inquiry);
+  }
+  return done();
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

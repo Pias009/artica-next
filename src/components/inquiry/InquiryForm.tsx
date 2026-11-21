@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import Link from "next/link";
 import { startTransition, useActionState, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../Icon";
 import { InquiryLines } from "./InquiryLines";
@@ -11,7 +12,7 @@ import { useInquiry, useUI, type BuyerType } from "@/lib/store";
 import { tagEvent } from "@/lib/marketing/tags";
 
 /** Where the order ships: the main markets first, then "Other" for anywhere else. */
-const SHIP_TO = [
+export const SHIP_TO = [
   "United States",
   "Canada",
   "United Kingdom",
@@ -240,6 +241,11 @@ function InquiryForm({ variant, onNavigate, onReset }: { variant: Variant; onNav
         <Icon name="arrow" />
       </button>
       <small className="text-center text-[12px] text-muted">Free quote · no payment · tier pricing within 24 hours</small>
+      {isDrawer && (
+        <Link href="/send-inquiry" onClick={onNavigate} className="text-center text-[13px] font-semibold text-ink-2 underline hover:text-ink">
+          Only want to leave your email? Send a quick inquiry
+        </Link>
+      )}
       {/* the notice that lets the desk send existing buyers trade updates (soft opt-in; Admin → Marketing) */}
       <small className="text-center text-[11.5px] text-muted">
         We may send you occasional trade updates; every one has an unsubscribe link.{" "}

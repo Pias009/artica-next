@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { PIPELINE, intentLabel } from "../data";
 import { ago, usePanel } from "../panel-data";
 import { AdminIcon, Card, CountUp, flash, Segmented, Sheet, useStream } from "../ui";
+import { EmailRequests } from "./inquiries/EmailRequests";
 import { draftReplyAction } from "@/app/admin/actions";
 import { moveInquiryAction } from "@/app/admin/content-actions";
 import type { PanelInquiry } from "@/lib/admin/panel";
@@ -63,6 +64,9 @@ export function Inquiries() {
           </Card>
         ))}
       </div>
+
+      {/* buyers who left only an email: the desk adds the details and sends them */}
+      <EmailRequests items={items} onChange={(ref, patch) => setItems((all) => all.map((i) => (i.ref === ref ? { ...i, ...patch } : i)))} />
 
       <p className="mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-[13px] text-ink/55">
         {items.length

@@ -31,6 +31,7 @@ export const SITE_PAGES: Page[] = [
   { path: "/verify", name: "Verify us", summary: "Ways to check the company before paying: registration, live tour, bank account, inspection.", section: "Company", priority: 0.6, changeFrequency: "monthly" },
   { path: "/meet", name: "Meet us", summary: "Factory tours by video or in Guangzhou, and trade shows.", section: "Company", priority: 0.5, changeFrequency: "monthly" },
   { path: "/about", name: "About Chime Long", summary: "Who makes the shoes, the materials and how they are tested.", section: "Company", priority: 0.5, changeFrequency: "yearly" },
+  { path: "/send-inquiry", name: "Get your inquiry by email", summary: "Add an email and get the details of your wholesale inquiry: line sheet, tier pricing and sample timing.", section: "Company", priority: 0.6, changeFrequency: "yearly" },
   { path: "/contact", name: "Contact", summary: "The trade desk for pricing, line sheets and samples.", section: "Company", priority: 0.5, changeFrequency: "yearly" },
   { path: "/terms", name: "Terms of trade", summary: "Terms for quotes, samples, orders, inspection, delivery and claims.", section: "Legal", priority: 0.2, changeFrequency: "yearly" },
   { path: "/privacy", name: "Privacy policy", summary: "What we collect from inquiries and sign-ups, and your rights.", section: "Legal", priority: 0.2, changeFrequency: "yearly" },

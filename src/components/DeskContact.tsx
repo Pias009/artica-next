@@ -20,7 +20,8 @@ import { FOOTER_BLOCK } from "@/lib/home-sections";
  */
 export function DeskContact({ where = "footer" }: { where?: "footer" | "page" }) {
   const pathname = usePathname();
-  if (where === "footer" && pathname === "/inquiry") return null;
+  // the inquiry page has its own copy; /send-inquiry is this same ask, so the footer's would repeat it
+  if (where === "footer" && (pathname === "/inquiry" || pathname === "/send-inquiry")) return null;
   return (
     <SectionScope id={FOOTER_BLOCK.id}>
       <Box source={pathname} />

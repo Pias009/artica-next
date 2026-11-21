@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { DeliveryRoute } from "@/components/shipping/DeliveryRoute";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { ArrowLink, SectionHead } from "@/components/ui/SectionHead";
@@ -216,9 +217,12 @@ export default function ShippingPage() {
         title="Request a shipping quote to your door."
         text="Send your warehouse ZIP or postal code and we'll quote the exact DDP delivered rate."
         action={
-          <OpenInquiryButton note="Shipping quote request." className="btn flex-none bg-white text-ink hover:bg-white/85">
-            Request a shipping rate <Icon name="arrow" />
-          </OpenInquiryButton>
+          <div className="flex flex-none flex-wrap gap-2">
+            <OpenInquiryButton note="Shipping quote request." className="btn flex-none bg-white text-ink hover:bg-white/85">
+              Request a shipping rate <Icon name="arrow" />
+            </OpenInquiryButton>
+            <AskInquiryButton className="btn flex-none text-white ring-1 ring-white/30 hover:bg-white/10" />
+          </div>
         }
       />
     </>

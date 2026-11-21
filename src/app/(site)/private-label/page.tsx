@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { MOQ_PAIRS, PRIVATE_LABEL_MIN } from "@/lib/products";
@@ -220,9 +221,12 @@ export default function PrivateLabelPage() {
         title="Talk directly with our OEM technical lead."
         text="Send your moodboard or volume plan. We sign an NDA on request."
         action={
-          <OpenInquiryButton buyerType="Private label brand" className="btn flex-none bg-white text-ink hover:bg-white/85">
-            Start a private label brief <Icon name="arrow" />
-          </OpenInquiryButton>
+          <div className="flex flex-none flex-wrap gap-2">
+            <OpenInquiryButton buyerType="Private label brand" className="btn flex-none bg-white text-ink hover:bg-white/85">
+              Start a private label brief <Icon name="arrow" />
+            </OpenInquiryButton>
+            <AskInquiryButton className="btn flex-none text-white ring-1 ring-white/30 hover:bg-white/10" />
+          </div>
         }
       />
     </>

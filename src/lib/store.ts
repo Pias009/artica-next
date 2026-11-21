@@ -22,6 +22,10 @@ type UIState = {
   quickView: string | null;
   railFilter: Filter;
   toast: { msg: string; key: number } | null;
+  /** The small "Ask inquiry" box (components/inquiry/AskInquiry.tsx): open, and the style it was opened about, if any. */
+  ask: { product: string | null; key: number } | null;
+  openAsk: (product?: string) => void;
+  closeAsk: () => void;
   openDrawer: (type?: BuyerType, email?: string, note?: string, intent?: Intent) => void;
   closeDrawer: () => void;
   openQuickView: (id: string) => void;
@@ -40,10 +44,14 @@ export const useUI = create<UIState>()((set) => ({
   quickView: null,
   railFilter: "all",
   toast: null,
+  ask: null,
+  openAsk: (product) => set({ ask: { product: product ?? null, key: Date.now() }, drawerOpen: false, quickView: null }),
+  closeAsk: () => set({ ask: null }),
   openDrawer: (type, email, note, intent) =>
     set((s) => ({
       drawerOpen: true,
       quickView: null,
+      ask: null,
       buyerType: type ?? s.buyerType,
       prefillEmail: email ? { value: email, key: Date.now() } : s.prefillEmail,
       prefillNote: note ? { value: note, key: Date.now() } : s.prefillNote,

@@ -1,7 +1,7 @@
 import "server-only";
 import { attachDatabasePool } from "@vercel/functions";
 import { MongoClient, type ObjectId } from "mongodb";
-import type { Inquiry } from "./mail";
+import type { Details, Inquiry } from "./mail";
 
 /**
  * The leads database: MongoDB Atlas at MONGODB_URI (database MONGODB_DB, default "chimelong"). The client is made on
@@ -56,6 +56,8 @@ export type InquiryDoc = Omit<Inquiry, "ref"> & {
   statusAt: Date;
   firstReplyAt: Date | null;
   mail: Record<MailKind, MailState>;
+  /** For an email request: the details the desk prepared and, once sent, when, by whom, or why it failed. */
+  details?: Details & { savedAt: Date; sentAt: Date | null; sentBy: string | null; lastError: string | null };
 };
 
 export const database = () => client().db(process.env.MONGODB_DB || "chimelong");

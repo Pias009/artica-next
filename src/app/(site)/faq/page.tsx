@@ -4,6 +4,7 @@ import { PageIntro } from "@/components/PageIntro";
 import { Icon } from "@/components/Icon";
 import { JsonLd } from "@/components/JsonLd";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { FAQ } from "@/lib/faq";
 import { MOQ_CASES, MOQ_PAIRS, PACK } from "@/lib/products";
 
@@ -72,6 +73,7 @@ export default function FaqPage() {
             <OpenInquiryButton className="btn btn-dark mt-5 w-full">
               Contact the accounts team <Icon name="arrow" />
             </OpenInquiryButton>
+            <AskInquiryButton className="btn btn-line mt-2 w-full" />
           </div>
 
           <div className="rounded-shell bg-tile p-7">

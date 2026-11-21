@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/PageIntro";
 import { Icon, type IconName } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
+import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
 
@@ -141,6 +142,7 @@ export default function ContactPage() {
             <OpenInquiryButton className="btn bg-white text-ink hover:bg-white/85">
               Book a walkthrough <Icon name="arrow" />
             </OpenInquiryButton>
+            <AskInquiryButton className="btn flex-none text-white ring-1 ring-white/30 hover:bg-white/10" />
             <Link href="/catalog" className="inline-flex min-h-11 items-center text-[14px] font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline">
               Browse the catalog first
             </Link>

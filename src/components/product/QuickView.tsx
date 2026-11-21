@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
+import { AskInquiryButton } from "../inquiry/AskInquiry";
 import { Badge } from "../ui/Badge";
 import { CropImage } from "../ui/CropImage";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
@@ -197,9 +198,12 @@ function Panel({ p, onClose }: { p: Product; onClose: () => void }) {
             Request sample
           </button>
         </div>
-        <Link href={`/products/${p.slug}`} onClick={onClose} className="-mt-2 self-start py-2 text-[14px] font-semibold text-ink underline decoration-ink/25 underline-offset-[6px] hover:decoration-ink">
-          Full product page →
-        </Link>
+        <div className="-mt-2 flex flex-wrap items-center gap-x-6">
+          <Link href={`/products/${p.slug}`} onClick={onClose} className="py-2 text-[14px] font-semibold text-ink underline decoration-ink/25 underline-offset-[6px] hover:decoration-ink">
+            Full product page →
+          </Link>
+          <AskInquiryButton product={p.id} className="inline-flex items-center gap-2 py-2 text-[14px] font-semibold text-ink-2 hover:text-ink" />
+        </div>
       </div>
     </div>
   );

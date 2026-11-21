@@ -463,16 +463,9 @@ export function Header() {
             <p className="text-[18px] leading-snug font-semibold tracking-[-0.01em] text-brand-deep">Tier pricing within 24 hours.</p>
             <p className="mt-1 text-[14px] text-ink-2">From {MOQ_PAIRS} pairs per style, samples in 10 days.</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  openDrawer();
-                }}
-                className="btn btn-dark h-11! px-5! text-[14px]!"
-              >
-                Get wholesale pricing <Icon name="arrow" className="size-4" />
-              </button>
+              <Link href="/send-inquiry" className="btn btn-dark h-11! px-5! text-[14px]!">
+                Send inquiry <Icon name="arrow" className="size-4" />
+              </Link>
               <a href={tel(COMPANY.phone)} className="btn h-11! bg-white px-4! text-[14px]! text-ink">
                 <Icon name="phone" className="size-4" /> Call us
               </a>

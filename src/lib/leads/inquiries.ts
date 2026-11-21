@@ -37,6 +37,7 @@ export async function recordInquiry(i: Inquiry, c: Context): Promise<{ ref: stri
       country: i.country,
       buyerType: i.buyerType,
       intent: i.intent,
+      ...(i.request && { request: true }),
       note: i.note,
       lines: i.lines,
       pairs: i.pairs,

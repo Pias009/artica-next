@@ -6,18 +6,26 @@ import { useEffect, useState } from "react";
 import { CartCount } from "./CartCount";
 import { InDock, useCompactDock } from "./Dock";
 import { Icon } from "./Icon";
+import { AskInquiryButton } from "./inquiry/AskInquiry";
+import { prefersReducedMotion } from "@/lib/gsap";
 import { useInquiry, useUI } from "@/lib/store";
+
+/** Seconds each face of the button shows before it turns over. */
+const FLIP_EVERY = 4;
 
 /**
  * Floating inquiry button, in the dock (components/Dock.tsx). On desktop it appears once the hero (or the top of the
- * page) scrolls away; where the dock is one compact row it stays in that row, which tucks itself away instead. Once styles are on the list
- * it says what it will do with them ("Get pricing"), a quiet reminder of the list the buyer has already built.
+ * page) scrolls away; where the dock is one compact row it stays in that row, which tucks itself away instead. Its label
+ * turns over between "Send inquiry" and "Ask inquiry" on a slow loop (still while hovered, focused or open, and for
+ * reduced motion); it opens the small "Ask inquiry" box (inquiry/AskInquiry.tsx), the list (its count) going along.
  */
 export function Fab() {
   const [visible, setVisible] = useState(false);
-  const openDrawer = useUI((s) => s.openDrawer);
   const drawerOpen = useUI((s) => s.drawerOpen);
+  const asking = useUI((s) => s.ask !== null);
   const listed = useInquiry((s) => s.lines.length) > 0;
+  const [face, setFace] = useState<0 | 1>(0);
+  const [held, setHeld] = useState(false);
   const pathname = usePathname();
   const compact = useCompactDock();
 
@@ -52,25 +60,54 @@ export function Fab() {
     };
   }, [pathname]);
 
-  if (pathname === "/inquiry") return null;
   const shown = (visible || compact) && !drawerOpen;
+  const still = held || asking || !shown;
+
+  // turn the label over every few seconds while the button is on screen and nobody is pointing at it
+  useEffect(() => {
+    if (still || prefersReducedMotion()) return;
+    const id = setInterval(() => setFace((f) => (f ? 0 : 1)), FLIP_EVERY * 1000);
+    return () => clearInterval(id);
+  }, [still]);
+
+  if (pathname === "/inquiry" || pathname === "/send-inquiry") return null;
 
   return (
     <InDock slot="inquiry">
-      <button
-        type="button"
-        onClick={() => openDrawer()}
+      <AskInquiryButton
         tabIndex={shown ? 0 : -1}
         aria-hidden={!shown}
+        aria-label={listed ? "Ask inquiry about your list" : "Ask inquiry"}
+        onPointerEnter={() => setHeld(true)}
+        onPointerLeave={() => setHeld(false)}
+        onFocus={() => setHeld(true)}
+        onBlur={() => setHeld(false)}
         className={clsx(
           "btn btn-dark shadow-fab transition-[translate,background-color] duration-500 ease-soft compact-dock:h-[54px] compact-dock:gap-2 compact-dock:px-5",
           shown ? "translate-y-0" : "translate-y-[120px]",
         )}
       >
-        <Icon name="list" />
-        {listed ? "Get pricing" : "Inquiry"}
+        <span aria-hidden="true" className="grid [perspective:300px] [&>*]:col-start-1 [&>*]:row-start-1">
+          {(
+            [
+              ["mail", "Send inquiry"],
+              ["chat", "Ask inquiry"],
+            ] as const
+          ).map(([icon, label], i) => (
+            <span
+              key={label}
+              className={clsx(
+                "flip-face flex items-center gap-2 whitespace-nowrap",
+                face === i ? "[transform:rotateX(0deg)] opacity-100" : i ? "[transform:rotateX(-90deg)] opacity-0" : "[transform:rotateX(90deg)] opacity-0",
+              )}
+            >
+              <Icon name={icon} />
+              {label}
+            </span>
+          ))}
+        </span>
         <CartCount />
-      </button>
+      </AskInquiryButton>
     </InDock>
   );
 }

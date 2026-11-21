@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { useState } from "react";
 import { Icon } from "../Icon";
+import { AskInquiryButton } from "../inquiry/AskInquiry";
 import { useGroupInList } from "./ColorChooser";
 import { byId, groupOf, MOQ_CASES, PACK, STEP_CASES } from "@/lib/products";
 import { describe } from "@/lib/availability";
@@ -149,9 +150,15 @@ export function BuyBox({ id }: { id: string }) {
           Send inquiry <Icon name="arrow" className="size-4" />
         </button>
       </div>
-      <button type="button" onClick={() => openDrawer(undefined, undefined, `Sample request: ${picked.map((x) => byId[x].name).join(", ") || p.name}. One pair each.`)} className="mt-3 inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-ink-2 hover:text-ink">
-        <Icon name="sample" className="size-4" /> Request a sample first
-      </button>
+      <div className="mt-3 flex flex-wrap gap-x-5">
+        {/* just an email: the box sends this style's details (and the list's) to the buyer */}
+        <AskInquiryButton product={id} className="inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-ink-2 hover:text-ink">
+          <Icon name="mail" className="size-4" /> Ask inquiry by email
+        </AskInquiryButton>
+        <button type="button" onClick={() => openDrawer(undefined, undefined, `Sample request: ${picked.map((x) => byId[x].name).join(", ") || p.name}. One pair each.`)} className="inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold text-ink-2 hover:text-ink">
+          <Icon name="sample" className="size-4" /> Request a sample first
+        </button>
+      </div>
     </div>
   );
 }

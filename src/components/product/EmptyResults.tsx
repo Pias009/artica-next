@@ -2,6 +2,7 @@
 
 import { Icon } from "../Icon";
 import { OpenInquiryButton } from "../OpenInquiryButton";
+import { AskInquiryButton } from "../inquiry/AskInquiry";
 
 /** Shown when search/filters match nothing: explain, then offer a way out. */
 export function EmptyResults({ onReset }: { onReset: () => void }) {
@@ -19,6 +20,7 @@ export function EmptyResults({ onReset }: { onReset: () => void }) {
           Clear search and filters
         </button>
         <OpenInquiryButton className="btn btn-dark">Ask about a custom style</OpenInquiryButton>
+        <AskInquiryButton className="btn btn-line" />
       </div>
     </div>
   );
