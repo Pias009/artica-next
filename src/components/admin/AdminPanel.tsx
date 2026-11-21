@@ -115,7 +115,7 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
         <div className={clsx("mx-auto w-full px-4 sm:px-6 md:pl-20", !wide && "max-w-[1584px]")}>
           <header className={clsx("flex flex-wrap items-end justify-between gap-4", wide ? "pt-5 pb-4" : "pt-8 pb-6 sm:pt-12")}>
             <div key={view} className="motion-safe:animate-[admin-in_.5s_cubic-bezier(.22,1,.36,1)_both]">
-              <p className="text-[13px] font-medium text-ink/55">Chime Long · admins</p>
+              <p className="text-[13px] font-medium text-ink/55">Chime Long · admin</p>
               <h1 className={clsx("leading-[0.95] font-light tracking-[-0.045em]", wide ? "text-[clamp(30px,3vw,40px)]" : "text-[clamp(48px,8vw,112px)]")}>{meta.title}</h1>
             </div>
             <div className="flex items-center gap-2">
