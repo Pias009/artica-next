@@ -177,7 +177,7 @@ export function AdminPanel({ admin, data, children }: { admin?: { name: string; 
             role="status"
             className="fixed top-3 left-1/2 z-40 -translate-x-1/2 rounded-full bg-danger px-4 py-2 text-[13px] font-semibold text-white shadow-lg"
           >
-            No database connected (MONGODB_URI): nothing can be saved, and there&apos;s no live data to show.
+            No database connected (MONGODB_URI): nothing can be saved, and there&apos;s no live data to show..
           </p>
         )}
       </div>
