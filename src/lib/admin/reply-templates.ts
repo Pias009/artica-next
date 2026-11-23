@@ -1,5 +1,8 @@
 import { LEAD, MOQ_CASES, PACK } from "@/lib/products";
 
+/** LEAD keeps short codes ("10d", "24h"); buyers read them as words. */
+const span = (s: string) => s.replace(/^(\d+)d$/, "$1 days").replace(/^(\d+)h$/, "$1 hours");
+
 /**
  * Canned replies for the desk's most common answers, shown as chips above the reply box (the dashboard's inquiry sheet
  * and the full inquiry page). Plain data so client components can import it; the wholesale terms come from the
@@ -23,7 +26,7 @@ export const REPLY_TEMPLATES: readonly ReplyTemplate[] = [
 
 Thank you for your interest. Your samples for inquiry {ref} are packed and leave our Guangzhou warehouse [date], by [courier], tracking number [tracking].
 
-They usually arrive in ${LEAD.samples}. Once you have tried them, tell us which styles and size runs you would like and we will confirm prices and the bulk lead time.
+They usually arrive in ${span(LEAD.samples)}. Once you have tried them, tell us which styles and size runs you would like and we will confirm prices and the bulk lead time.
 
 ${SIGN}`,
   },
@@ -35,7 +38,7 @@ ${SIGN}`,
 
 Thank you for your inquiry {ref}. Our minimum order is ${MOQ_CASES} cases per style (${MOQ_CASES * PACK} pairs), and each case holds ${PACK} pairs in a mixed size run, so you can start small and still cover the full size curve.
 
-Bulk orders ship in about ${LEAD.bulk} from confirmation. Tell us the styles and quantities you have in mind and we will send a quote within ${LEAD.quote}.
+Bulk orders ship in about ${span(LEAD.bulk)} from confirmation. Tell us the styles and quantities you have in mind and we will send a quote within ${span(LEAD.quote)}.
 
 ${SIGN}`,
   },
@@ -77,7 +80,7 @@ Thank you for your order. We confirm inquiry {ref} as follows:
 [styles, colours, cases]
 
 Payment: [terms]
-Production and shipping: about ${LEAD.bulk} from your deposit.
+Production and shipping: about ${span(LEAD.bulk)} from your deposit.
 
 We will send the proforma invoice shortly. Please check the details and tell us if anything needs changing.
 

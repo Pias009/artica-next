@@ -2,9 +2,11 @@ import Link from "next/link";
 import { Txt } from "../ui/Txt";
 import { SeasonCards } from "../buyer/SeasonCards";
 import { ArrowLink, SectionHead } from "../ui/SectionHead";
-import { LEAD_DAYS } from "@/lib/buyer-desk";
 
-/** The order calendar's main point: the next date to confirm bulk for each season, counting down from today. */
+/**
+ * The order calendar in brief, on the home page: the three seasons and the steps each one takes, without dates (the
+ * order calendar page has them, counted from today).
+ */
 export function WhenToOrder() {
   return (
     <section id="when-to-order" aria-labelledby="h-when" className="mt-sec scroll-mt-24">
@@ -13,17 +15,17 @@ export function WhenToOrder() {
         eyebrow="Order calendar"
         title={
           <>
-            Order by the date, <em>not the season.</em>
+            Plan ahead for <em>every season.</em>
           </>
         }
-        sub={`Samples ${LEAD_DAYS.samples} days, production ${LEAD_DAYS.bulk}, delivery ${LEAD_DAYS.delivery}. Worked back from the day the boots should be on your shelves.`}
+        sub="Samples first, then the bulk order, production and delivery, in that order, so the boots are on your shelves before the season starts."
         right={
           <Link href="/order-calendar">
-            <ArrowLink><Txt k="link" label="Link on the right">Plan your own date</Txt></ArrowLink>
+            <ArrowLink><Txt k="link" label="Link on the right">Open the order calendar</Txt></ArrowLink>
           </Link>
         }
       />
-      <SeasonCards />
+      <SeasonCards dates={false} />
     </section>
   );
 }

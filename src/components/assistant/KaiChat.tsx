@@ -162,6 +162,8 @@ export function KaiChat({ mode = "trade", wide = false, autoFocus = false }: { m
             )}
           </ol>
         )}
+        {/* the plan desk stays hidden until a planning question comes up here */}
+        {mode === "trade" && !busy && deskOn("plan") && PLAN_QUESTION.test(lastUserText) && <PlanOffer question={lastUserText} />}
         {error && (
           <div role="alert" className="kai-rise mt-3 rounded-[16px] bg-blush/90 px-4 py-3 text-[13px] text-danger ring-1 ring-white/70">
             <p>{/429|a lot of messages/.test(error.message) ? "You've sent a lot of messages; please wait a few minutes." : `${ASSISTANT.name} couldn't answer just then.`}</p>
@@ -350,27 +352,50 @@ function BackOptions({ options, onAsk }: { options: BackOption[]; onAsk?: (q: st
   );
 }
 
-/** Switches between Kai's two desks. Each keeps its own conversation. */
+/**
+ * The business plan desk is out of sight until it's wanted: the chat opens on trade help with no tabs. Once the
+ * visitor is at the plan desk (a planning question in the chat, the planner's "Ask the planning desk", the home page's
+ * planner teaser), this bar says where they are and takes them back. Each desk keeps its own conversation.
+ */
 export function KaiModeTabs({ className }: { className?: string }) {
   const mode = useKai((s) => s.mode);
   const setMode = useKai((s) => s.setMode);
-  // with one desk switched off in the admin panel there's nothing to choose
-  if (!MODES.every((m) => deskOn(m.id))) return null;
+  // with one desk switched off in the admin panel there's nothing to switch between
+  if (mode !== "plan" || !MODES.every((m) => deskOn(m.id))) return null;
+  const plan = MODES.find((m) => m.id === "plan")!;
   return (
-    <div role="tablist" aria-label="Choose a desk" className={clsx("kai-pane grid grid-cols-2 gap-1 rounded-full p-1", className)}>
-      {MODES.map((m) => (
-        <button
-          key={m.id}
-          type="button"
-          role="tab"
-          aria-selected={mode === m.id}
-          title={m.hint}
-          onClick={() => setMode(m.id)}
-          className={clsx("min-h-10 rounded-full px-3 text-[13.5px] font-semibold transition-colors md:min-h-9 md:text-[13px]", mode === m.id ? "kai-ink text-white" : "text-ink-2 hover:text-ink")}
-        >
-          {m.label}
-        </button>
-      ))}
+    <div className={clsx("kai-pane flex items-center justify-between gap-2 rounded-full p-1 pl-4", className)}>
+      <span className="truncate text-[13px] font-semibold" title={plan.hint}>
+        {plan.label} desk
+      </span>
+      <button
+        type="button"
+        onClick={() => setMode("trade")}
+        className="min-h-10 shrink-0 rounded-full px-3 text-[13px] font-semibold text-ink-2 transition-colors hover:text-ink md:min-h-9"
+      >
+        <span aria-hidden="true">← </span>Back to trade help
+      </button>
+    </div>
+  );
+}
+
+/** Questions that belong at the business plan desk: timing, what to buy, money. */
+const PLAN_QUESTION =
+  /\b(business plan|plan(ning)? (my|the|a|our|next) (season|order|year)|when (should|do|must|to) (i|we)? ?order|order[- ]by|deadline|margin|landed cost|budget|cash ?flow|profit|forecast|sell[- ]through|how (many|much) (pairs|cases|stock|should)|what (should|to) (i |we )?(buy|order|stock))\b/i;
+
+/** In the trade chat, after a planning question: an offer to take it to the business plan desk, question and all. */
+function PlanOffer({ question }: { question: string }) {
+  const show = useKai((s) => s.show);
+  const plan = MODES.find((m) => m.id === "plan")!;
+  return (
+    <div className="kai-rise kai-pane mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] px-4 py-3">
+      <p className="min-w-0 flex-1 text-[13.5px] text-ink-2">
+        <b className="block text-ink">Planning a season?</b>
+        The business plan desk works out {plan.hint.charAt(0).toLowerCase() + plan.hint.slice(1)}.
+      </p>
+      <button type="button" onClick={() => show("plan", question)} className="kai-ink min-h-10 shrink-0 rounded-full px-4 text-[13px] font-semibold text-white">
+        Open the business plan desk
+      </button>
     </div>
   );
 }

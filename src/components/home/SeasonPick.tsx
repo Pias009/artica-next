@@ -26,7 +26,7 @@ function nextFour(windows: Timed[]) {
 }
 
 /**
- * Straight after the hero, on plain white: stock takes about two months to arrive, so one question, which season
+ * Straight after the hero, on plain white: one question, which season
  * the buyer is selling in, and four photo cards to answer it. The headline reads itself in word by word; the cards
  * rise in after it. Choosing one switches the whole home page to that season's styles. Every word is editable in
  * the admin panel (Pages → Home → Choose your season).
@@ -80,7 +80,7 @@ export function SeasonPick() {
             Plan ahead
           </Txt>
           <SectionText as="h2" part="title" id="h-pick" className="type-section mt-4">
-            Stock arrives in two months. <em>Which season are you selling?</em>
+            Which season are you <em>selling?</em>
           </SectionText>
           <SectionText part="sub" className="mx-auto mt-4 max-w-[44ch] text-[17px] text-ink-2">
             Pick one and we&apos;ll show you the styles that sell then.
