@@ -1422,3 +1422,184 @@ html[data-dock="tucked"]:not([data-dock-hold]) #float-dock:not(:has(:focus-visib
     translate: 0 calc(-100% - 90px);
   }
 }
+
+/*
+ * ---- Season scenes ----
+ * The season-pick cards' tops (components/home/SeasonScene.tsx): each season's sky, its weather moving across it and
+ * its shoes riding a shelf line. Everything moves with CSS only, pauses while the section is off screen
+ * ([data-pick-cards] without data-live) and, for reduced motion, stands still part-way through, like a picture.
+ */
+.season-scene {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  isolation: isolate;
+}
+.season-scene[data-scene="spring"] { background: linear-gradient(165deg, #f5f9ef 0%, #fbe8ee 100%); }
+.season-scene[data-scene="summer"] { background: linear-gradient(165deg, #fff7e6 0%, #fddcb8 100%); }
+.season-scene[data-scene="rainy"] { background: linear-gradient(165deg, #edf3f4 0%, #cddfe2 100%); }
+.season-scene[data-scene="autumn"] { background: linear-gradient(165deg, #fbf2e7 0%, #f0d3b6 100%); }
+.season-scene[data-scene="winter"] { background: linear-gradient(165deg, #f4f8fa 0%, #d6e5ed 100%); }
+.season-scene[data-scene="holiday"] { background: linear-gradient(165deg, #fbeef1 0%, #f2d9c8 100%); }
+
+.sp-bit {
+  position: absolute;
+  top: -24px;
+  left: var(--x);
+  width: calc(10px * var(--s));
+  height: calc(10px * var(--s));
+  animation: sp-fall var(--t) linear var(--d) infinite;
+  will-change: transform;
+}
+/* spring: petals drifting and turning */
+[data-scene="spring"] .sp-bit { height: calc(7px * var(--s)); border-radius: 80% 0 80% 0; background: #f2b5c4; animation-name: sp-sway; }
+[data-scene="spring"] .sp-bit[data-tone="1"] { background: #f8d6de; }
+[data-scene="spring"] .sp-bit[data-tone="2"] { background: #ffffff; }
+/* summer: warm sparkles rising, under a turning sun */
+[data-scene="summer"] .sp-bit {
+  top: auto;
+  bottom: -12px;
+  width: calc(5px * var(--s));
+  height: calc(5px * var(--s));
+  border-radius: 50%;
+  background: #fffaf0;
+  box-shadow: 0 0 8px 2px rgb(255 214 120 / 0.7);
+  animation-name: sp-rise;
+}
+.sp-sun {
+  position: absolute;
+  top: -34px;
+  right: -26px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #ffe7a3 0 30%, rgb(255 205 110 / 0.55) 31% 34%, transparent 35%),
+    repeating-conic-gradient(rgb(255 196 92 / 0.45) 0 6deg, transparent 6deg 22deg);
+  -webkit-mask: radial-gradient(circle, #000 55%, transparent 71%);
+  mask: radial-gradient(circle, #000 55%, transparent 71%);
+  animation: sp-spin 40s linear infinite;
+}
+/* rainy: quick slanted streaks */
+[data-scene="rainy"] .sp-bit {
+  width: 1.5px;
+  height: calc(20px * var(--s));
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, rgb(42 98 102 / 0.7));
+  animation-name: sp-rain;
+  animation-duration: calc(var(--t) * 0.13);
+}
+/* autumn: leaves swaying down */
+[data-scene="autumn"] .sp-bit { width: calc(12px * var(--s)); height: calc(12px * var(--s)); border-radius: 0 80% 0 80%; background: #c98b52; animation-name: sp-sway; }
+[data-scene="autumn"] .sp-bit[data-tone="1"] { background: #b86b3c; }
+[data-scene="autumn"] .sp-bit[data-tone="2"] { background: #dfae6c; }
+/* winter: soft snow, slow, drifting */
+[data-scene="winter"] .sp-bit {
+  width: calc(6px * var(--s));
+  height: calc(6px * var(--s));
+  border-radius: 50%;
+  background: #ffffff;
+  /* white on an icy sky needs an edge to be seen */
+  box-shadow: 0 0 0 1px rgb(45 93 111 / 0.14), 0 1px 5px rgb(45 93 111 / 0.35);
+  animation-duration: calc(var(--t) * 1.4);
+}
+/* holiday: gold and berry confetti under a string of lights */
+[data-scene="holiday"] .sp-bit { width: calc(7px * var(--s)); height: calc(3px * var(--s)); border-radius: 1px; background: #d8b36a; }
+[data-scene="holiday"] .sp-bit[data-tone="1"] { background: #c25a6e; }
+[data-scene="holiday"] .sp-bit[data-tone="2"] { background: #2f8f5b; }
+.sp-lights {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 46px;
+}
+.sp-lights::before {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: -40px;
+  height: 66px;
+  border-bottom: 1.5px solid rgb(18 20 22 / 0.28);
+  border-radius: 0 0 50% 50%;
+}
+.sp-light {
+  position: absolute;
+  left: calc(4% + var(--i) * 9.2%);
+  top: calc(26px - (var(--i) - 5) * (var(--i) - 5) * 0.62px);
+  width: 8px;
+  height: 11px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: #c25a6e;
+  box-shadow: 0 0 10px 2px currentColor;
+  color: rgb(194 90 110 / 0.6);
+  animation: sp-twinkle 1.6s ease-in-out var(--d) infinite;
+}
+.sp-light:nth-child(3n + 2) { background: #d8b36a; color: rgb(216 179 106 / 0.7); }
+.sp-light:nth-child(3n) { background: #2f8f5b; color: rgb(47 143 91 / 0.55); }
+
+/* the shoes on their shelf line */
+.sp-shelf {
+  position: absolute;
+  inset: auto 0 0;
+  height: 78px;
+}
+.sp-shelf::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(18 20 22 / 0.22) 12%, rgb(18 20 22 / 0.22) 88%, transparent);
+}
+.sp-track {
+  position: absolute;
+  left: 0;
+  bottom: 13px;
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  animation: sp-marquee var(--dur) linear infinite;
+}
+
+@keyframes sp-fall {
+  to { transform: translate(28px, 340px) rotate(var(--r)); }
+}
+@keyframes sp-sway {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(20px, 85px) rotate(90deg); }
+  50% { transform: translate(-12px, 170px) rotate(180deg); }
+  75% { transform: translate(18px, 255px) rotate(270deg); }
+  100% { transform: translate(0, 340px) rotate(360deg); }
+}
+@keyframes sp-rain {
+  to { transform: translate(-46px, 340px) rotate(12deg); }
+}
+@keyframes sp-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-260px) scale(1); opacity: 0; }
+}
+@keyframes sp-spin {
+  to { rotate: 360deg; }
+}
+@keyframes sp-twinkle {
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+@keyframes sp-marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* off screen: hold still (the section sets data-live while it's in view) */
+[data-pick-cards]:not([data-live]) .sp-anim {
+  animation-play-state: paused;
+}
+/* reduced motion: still, but part-way through, so each card reads as a picture rather than an empty sky */
+@media (prefers-reduced-motion: reduce) {
+  .season-scene .sp-anim {
+    animation-duration: var(--t, 12s) !important;
+    animation-iteration-count: infinite !important;
+    animation-play-state: paused !important;
+  }
+}
