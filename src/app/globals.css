@@ -1603,3 +1603,21 @@ html[data-dock="tucked"]:not([data-dock-hold]) #float-dock:not(:has(:focus-visib
     animation-play-state: paused !important;
   }
 }
+
+/* ---- About page hero (components/about/AboutHero.tsx) ---- */
+/* the photo showing drifts in slowly (the class moves to each photo as it arrives, so the drift starts again); the
+   bar under its caption fills for as long as it stays */
+.about-drift {
+  animation: about-drift 7s ease-out both;
+}
+@keyframes about-drift {
+  from { transform: scale(1.08) translate3d(-1%, 0, 0); }
+  to { transform: scale(1) translate3d(0, 0, 0); }
+}
+.about-progress {
+  width: 0;
+  animation: about-progress linear forwards;
+}
+@keyframes about-progress {
+  to { width: 100%; }
+}

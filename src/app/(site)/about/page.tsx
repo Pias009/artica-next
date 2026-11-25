@@ -1,16 +1,21 @@
 import { editableMeta } from "@/lib/content/meta";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { PageIntro } from "@/components/PageIntro";
+import { AboutGallery } from "@/components/about/AboutGallery";
+import { AboutHero } from "@/components/about/AboutHero";
+import { AboutVideo } from "@/components/about/AboutVideo";
 import { Icon } from "@/components/Icon";
 import { OpenInquiryButton } from "@/components/OpenInquiryButton";
 import { AskInquiryButton } from "@/components/inquiry/AskInquiry";
 import { ClosingBand } from "@/components/ui/ClosingBand";
 import { SectionHead } from "@/components/ui/SectionHead";
+import { ABOUT_VIDEOS, aboutPhoto, aboutPhotos } from "@/lib/about-photos";
+import { PACK } from "@/lib/products";
 
 export const generateMetadata = (): Promise<Metadata> => editableMeta({
   title: "About us: footwear factory in Guangzhou",
-  description: "Learn about Chime Long's technical footwear engineering, LWG certified leathers, sub-zero testing laboratory, and ethical manufacturing standards.",
+  description: "See the Chime Long factory floor, sample room, testing room, automated material warehouse and showroom, and how a pair goes from leather to carton.",
   path: "/about",
 });
 
@@ -44,18 +49,33 @@ const LAB_TESTS = [
   { test: "ASTM F2413", label: "Cold insulation at −25°C", standard: "< 5°C temp drop after 30 min exposure" },
 ];
 
+/** A pair from leather to container, with the factory's own photo of each step. */
+const STEPS: { slug: string; title: string; text: string }[] = [
+  { slug: "step-materials", title: "Materials", text: "Leather, suede and linings are checked for grain, thickness and colour before anything is cut." },
+  { slug: "step-cutting", title: "Cutting", text: "Pattern pieces are cut by machine, so every pair in a run matches." },
+  { slug: "step-stitching", title: "Stitching", text: "Uppers are stitched on dedicated sewing lines, one stage per station." },
+  { slug: "step-lasting", title: "Lasting and soles", text: "Each upper is pulled over its last, then the sole is attached and pressed." },
+  { slug: "step-finishing", title: "Finishing", text: "Pairs are cleaned, checked and laced before they are boxed." },
+  { slug: "step-cartons", title: "Packed in cases", text: `Boxed pairs go into export cartons, ${PACK} pairs to a case in a mixed size run.` },
+  { slug: "step-container", title: "Container loading", text: "Cartons are loaded and sealed into the container for the trip to your port." },
+];
+
+/** The rooms behind the production floor, each with its photos. */
+const ROOMS: { group: string; title: string; text: string }[] = [
+  { group: "warehouse", title: "Raw material warehouse", text: "Leather and materials wait on automated racks and come to the line when a run needs them." },
+  { group: "sample", title: "Sample room", text: "Where new styles and your samples are made and corrected, before any bulk order starts." },
+  { group: "testing", title: "Testing room", text: "Where materials and finished pairs are checked on the bench." },
+];
+
 export default function AboutPage() {
+  const band = aboutPhoto("band-factory-floor");
+  const wide = aboutPhoto("showroom-wide");
   return (
     <>
-      <PageIntro
-        crumbs={[{ href: "/", label: "Home" }, { label: "About Chime Long" }]}
-        eyebrow="Specialist footwear engineering"
-        title="Wholesale footwear, built to sell through."
-        text="Boots that hold up in the weather and look right on the shelf, so fewer pairs come back."
-      />
+      <AboutHero slides={aboutPhotos("hero")} />
 
       {/* Story & philosophy */}
-      <section aria-labelledby="h-philosophy" className="bg-studio relative overflow-hidden rounded-shell border border-line/60 p-[clamp(24px,4vw,56px)] shadow-soft">
+      <section aria-labelledby="h-philosophy" className="bg-studio relative mt-sec overflow-hidden rounded-shell border border-line/60 p-[clamp(24px,4vw,56px)] shadow-soft">
         <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div>
             <p className="eyebrow">Our philosophy</p>
@@ -90,6 +110,117 @@ export default function AboutPage() {
             ))}
           </dl>
         </div>
+      </section>
+
+      {/* From material to carton: the A-shots, in order */}
+      <section aria-labelledby="h-steps" className="mt-sec">
+        <SectionHead id="h-steps" eyebrow="How a pair is made" title={<>From leather <em>to carton.</em></>} sub="Seven steps on our own floor, photographed as they happen." />
+        <ol className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s, i) => {
+            const p = aboutPhoto(s.slug);
+            return (
+              <li key={s.slug} className={i === 0 ? "sm:col-span-2" : undefined}>
+                <figure className="group flex h-full flex-col overflow-hidden rounded-card bg-tile">
+                  <span className={`relative block overflow-hidden bg-photo ${i === 0 ? "aspect-[4/3] sm:aspect-[8/3.05]" : "aspect-[4/3]"}`}>
+                    <Image src={p.src} alt={p.alt} fill sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"} className="object-cover transition-transform duration-700 ease-soft group-hover:scale-[1.04]" />
+                    <span className="absolute top-3 left-3 grid size-9 place-items-center rounded-full bg-white text-[13px] font-semibold text-ink tabular-nums shadow-soft">{String(i + 1).padStart(2, "0")}</span>
+                  </span>
+                  <figcaption className="p-5">
+                    <h3 className="text-[16px] font-semibold">{s.title}</h3>
+                    <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">{s.text}</p>
+                  </figcaption>
+                </figure>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      {/* the factory floor, edge to edge */}
+      <section aria-label={band.caption} className="bleed relative mt-sec h-[clamp(360px,62vw,760px)] overflow-hidden">
+        <Image src={band.src} alt={band.alt} fill sizes="100vw" className="object-cover" />
+        <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(0deg,rgb(12_13_14/.7),transparent_60%)]" />
+        <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[1440px] px-(--shell-pad) pb-[clamp(24px,4vw,48px)] text-white">
+          <p className="text-[12.5px] font-semibold tracking-[0.18em] text-white/75 uppercase">Under one roof</p>
+          <p className="mt-2 max-w-[22ch] font-headline text-[clamp(28px,3.6vw,52px)] leading-[1.05] font-semibold tracking-[-0.02em]">
+            Cutting, stitching, lasting and packing <em className="font-normal">on one floor.</em>
+          </p>
+        </div>
+      </section>
+
+      {/* the rooms behind the floor */}
+      <section aria-labelledby="h-rooms" className="mt-sec">
+        <SectionHead id="h-rooms" eyebrow="Inside the factory" title={<>The rooms <em>behind the line.</em></>} />
+        <div className="grid gap-3.5 lg:grid-cols-3">
+          {ROOMS.map((r) => {
+            const [main, ...more] = aboutPhotos(r.group);
+            return (
+              <article key={r.group} className="flex flex-col overflow-hidden rounded-card bg-tile">
+                <span className="relative block aspect-[16/10] overflow-hidden bg-photo">
+                  <Image src={main.src} alt={main.alt} fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
+                </span>
+                {more.length > 0 && (
+                  <ul className="grid grid-cols-3 gap-1.5 px-1.5 pt-1.5">
+                    {more.map((p) => (
+                      <li key={p.slug} className="relative aspect-[4/3] overflow-hidden rounded-lg bg-photo">
+                        <Image src={p.src} alt={p.alt} fill sizes="(min-width: 1024px) 11vw, 33vw" className="object-cover" />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="p-5">
+                  <h3 className="text-[17px] font-semibold">{r.title}</h3>
+                  <p className="mt-1.5 text-[14px] leading-relaxed text-ink-2">{r.text}</p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* the floor moving */}
+      <section aria-labelledby="h-video" className="mt-sec">
+        <SectionHead id="h-video" eyebrow="Walk the floor" title={<>See the line <em>at work.</em></>} />
+        <div className="grid items-start gap-3.5 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+          <figure className="overflow-hidden rounded-card bg-ink">
+            <AboutVideo src={ABOUT_VIDEOS.factoryWalk.src} poster={ABOUT_VIDEOS.factoryWalk.poster} label="A walk along the assembly line" className="aspect-video w-full object-cover" />
+            <figcaption className="bg-tile px-5 py-3.5 text-[14px] text-ink-2">Along the assembly line</figcaption>
+          </figure>
+          <figure className="overflow-hidden rounded-card bg-ink">
+            <AboutVideo src={ABOUT_VIDEOS.sewingLine.src} poster={ABOUT_VIDEOS.sewingLine.poster} label="The sewing floor" className="aspect-[3/4] w-full object-cover" />
+            <figcaption className="bg-tile px-5 py-3.5 text-[14px] text-ink-2">The sewing floor</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      {/* everything else from the floor */}
+      <section aria-labelledby="h-floor" className="mt-sec">
+        <SectionHead id="h-floor" eyebrow="Production" title={<>On the <em>factory floor.</em></>} sub="Lines, machines, packing and the people who run them. Tap a photo to see it large." />
+        <AboutGallery photos={aboutPhotos("gallery")} shown={12} />
+      </section>
+
+      {/* the showroom */}
+      <section aria-labelledby="h-showroom" className="mt-sec">
+        <div className="bleed relative h-[clamp(380px,56vw,720px)] overflow-hidden">
+          <Image src={wide.src} alt={wide.alt} fill sizes="100vw" className="object-cover" />
+          <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,rgb(12_13_14/.62),transparent_65%)]" />
+          <div className="absolute inset-0 mx-auto flex max-w-[1440px] flex-col justify-center px-(--shell-pad) text-white">
+            <p className="text-[12.5px] font-semibold tracking-[0.18em] text-white/75 uppercase">The showroom</p>
+            <h2 id="h-showroom" className="mt-2 max-w-[16ch] font-headline text-[clamp(30px,4vw,56px)] leading-[1.04] font-semibold tracking-[-0.02em]">
+              Every style on the shelf, <em className="font-normal">in one visit.</em>
+            </h2>
+            <p className="mt-4 max-w-[42ch] text-[16px] leading-relaxed text-white/85">Handle the range, compare leathers and pick your styles with the trade desk beside you.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <OpenInquiryButton className="btn bg-white text-ink hover:bg-white/90">
+                Book a showroom visit <Icon name="arrow" />
+              </OpenInquiryButton>
+              <Link href="/meet" className="btn text-white ring-1 ring-white/40 hover:bg-white/10">
+                Video tours and trade shows
+              </Link>
+            </div>
+          </div>
+        </div>
+        <AboutGallery photos={aboutPhotos("showroom").filter((p) => p.slug !== "showroom-wide")} shown={8} className="mt-4" />
       </section>
 
       {/* Engineering pillars */}

@@ -43,3 +43,7 @@ next-env.d.ts
 
 # raw style photos — hosted on Cloudinary (scripts/upload-cloudinary.mjs)
 /Need to Add/
+
+# the client's raw About photos (473 MB); the web-ready copies are in public/images/about and public/videos/about
+/About.zip
+/.about-media/

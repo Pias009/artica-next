@@ -1,0 +1,294 @@
+{
+ "images": {
+  "band-factory-floor": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585572/chime-long/about/band-factory-floor.jpg",
+   "w": 2560,
+   "h": 1923
+  },
+  "floor-08": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585573/chime-long/about/floor-08.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-09": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585574/chime-long/about/floor-09.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-10": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585575/chime-long/about/floor-10.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-11": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585575/chime-long/about/floor-11.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-12": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585576/chime-long/about/floor-12.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-13": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585577/chime-long/about/floor-13.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-14": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585578/chime-long/about/floor-14.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-15": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585578/chime-long/about/floor-15.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-16": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585579/chime-long/about/floor-16.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-19": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585580/chime-long/about/floor-19.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-20": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585581/chime-long/about/floor-20.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-22": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585582/chime-long/about/floor-22.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-23": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585583/chime-long/about/floor-23.jpg",
+   "w": 1600,
+   "h": 1202
+  },
+  "floor-26": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585585/chime-long/about/floor-26.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-27": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585586/chime-long/about/floor-27.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "floor-36": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585587/chime-long/about/floor-36.jpg",
+   "w": 1200,
+   "h": 1600
+  },
+  "floor-37": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585588/chime-long/about/floor-37.jpg",
+   "w": 1200,
+   "h": 1600
+  },
+  "floor-38": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585589/chime-long/about/floor-38.jpg",
+   "w": 1200,
+   "h": 1600
+  },
+  "floor-39": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585590/chime-long/about/floor-39.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-40": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585590/chime-long/about/floor-40.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-41": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585591/chime-long/about/floor-41.jpg",
+   "w": 1200,
+   "h": 1600
+  },
+  "floor-42": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585592/chime-long/about/floor-42.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-43": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585593/chime-long/about/floor-43.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-45": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585594/chime-long/about/floor-45.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-46": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585595/chime-long/about/floor-46.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-47": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585596/chime-long/about/floor-47.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "floor-48": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585596/chime-long/about/floor-48.jpg",
+   "w": 1200,
+   "h": 1600
+  },
+  "floor-49": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585597/chime-long/about/floor-49.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "hero-production-floor": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585598/chime-long/about/hero-production-floor.jpg",
+   "w": 2560,
+   "h": 1440
+  },
+  "hero-sewing-hall": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585599/chime-long/about/hero-sewing-hall.jpg",
+   "w": 2560,
+   "h": 1923
+  },
+  "hero-showroom": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585600/chime-long/about/hero-showroom.jpg",
+   "w": 2560,
+   "h": 1180
+  },
+  "hero-warehouse": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585601/chime-long/about/hero-warehouse.jpg",
+   "w": 2560,
+   "h": 1657
+  },
+  "room-sample-1": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585601/chime-long/about/room-sample-1.jpg",
+   "w": 1800,
+   "h": 1119
+  },
+  "room-sample-2": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585602/chime-long/about/room-sample-2.jpg",
+   "w": 1600,
+   "h": 906
+  },
+  "room-sample-3": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585603/chime-long/about/room-sample-3.jpg",
+   "w": 1600,
+   "h": 1008
+  },
+  "room-sample-4": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585603/chime-long/about/room-sample-4.jpg",
+   "w": 1600,
+   "h": 1011
+  },
+  "room-testing-1": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585604/chime-long/about/room-testing-1.jpg",
+   "w": 1800,
+   "h": 913
+  },
+  "room-warehouse-1": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585605/chime-long/about/room-warehouse-1.jpg",
+   "w": 1800,
+   "h": 936
+  },
+  "room-warehouse-2": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585606/chime-long/about/room-warehouse-2.jpg",
+   "w": 1600,
+   "h": 840
+  },
+  "showroom-aisle": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585607/chime-long/about/showroom-aisle.jpg",
+   "w": 645,
+   "h": 1400
+  },
+  "showroom-boots": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585607/chime-long/about/showroom-boots.jpg",
+   "w": 645,
+   "h": 1400
+  },
+  "showroom-curve": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585608/chime-long/about/showroom-curve.jpg",
+   "w": 645,
+   "h": 1400
+  },
+  "showroom-meeting": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585609/chime-long/about/showroom-meeting.jpg",
+   "w": 1600,
+   "h": 738
+  },
+  "showroom-room": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585609/chime-long/about/showroom-room.jpg",
+   "w": 1600,
+   "h": 738
+  },
+  "showroom-shelves": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585610/chime-long/about/showroom-shelves.jpg",
+   "w": 645,
+   "h": 1400
+  },
+  "showroom-table": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585611/chime-long/about/showroom-table.jpg",
+   "w": 1600,
+   "h": 738
+  },
+  "showroom-wall": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585612/chime-long/about/showroom-wall.jpg",
+   "w": 1600,
+   "h": 738
+  },
+  "showroom-wide": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585613/chime-long/about/showroom-wide.jpg",
+   "w": 2400,
+   "h": 1106
+  },
+  "step-cartons": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585614/chime-long/about/step-cartons.jpg",
+   "w": 1440,
+   "h": 960
+  },
+  "step-container": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585614/chime-long/about/step-container.jpg",
+   "w": 1600,
+   "h": 899
+  },
+  "step-cutting": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585615/chime-long/about/step-cutting.jpg",
+   "w": 1600,
+   "h": 1195
+  },
+  "step-finishing": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585616/chime-long/about/step-finishing.jpg",
+   "w": 1600,
+   "h": 1200
+  },
+  "step-lasting": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585617/chime-long/about/step-lasting.jpg",
+   "w": 1600,
+   "h": 1199
+  },
+  "step-materials": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585618/chime-long/about/step-materials.jpg",
+   "w": 1600,
+   "h": 1201
+  },
+  "step-stitching": {
+   "src": "https://res.cloudinary.com/doulxmmm/image/upload/v1795585619/chime-long/about/step-stitching.jpg",
+   "w": 1600,
+   "h": 1200
+  }
+ },
+ "videos": {
+  "factory-walk": {
+   "src": "https://res.cloudinary.com/doulxmmm/video/upload/v1795585620/chime-long/about/factory-walk.mp4",
+   "poster": "https://res.cloudinary.com/doulxmmm/video/upload/so_2,q_auto,w_1280/v1795585620/chime-long/about/factory-walk.jpg"
+  },
+  "sewing-line": {
+   "src": "https://res.cloudinary.com/doulxmmm/video/upload/v1795585622/chime-long/about/sewing-line.mp4",
+   "poster": "https://res.cloudinary.com/doulxmmm/video/upload/so_2,q_auto,w_1280/v1795585622/chime-long/about/sewing-line.jpg"
+  }
+ }
+}
