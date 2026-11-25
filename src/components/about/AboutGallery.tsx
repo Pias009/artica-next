@@ -7,10 +7,10 @@ import { Icon } from "../Icon";
 import type { AboutPhoto } from "@/lib/about-photos";
 
 /**
- * A wall of photos in columns (each keeps its own shape), the first `shown` at once and the rest behind a button.
- * Any photo opens large, with the ones before and after a click or an arrow key away; Escape closes it.
+ * A contact sheet: an even grid of photos, each numbered and named under it, the first `shown` at once and the rest
+ * behind a button. Any photo opens large, with the ones before and after a click or an arrow key away; Escape closes.
  */
-export function AboutGallery({ photos, shown = 12, className }: { photos: AboutPhoto[]; shown?: number; className?: string }) {
+export function AboutGallery({ photos, shown = 12, columns = 4, className }: { photos: AboutPhoto[]; shown?: number; columns?: 3 | 4; className?: string }) {
   const [all, setAll] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -28,48 +28,39 @@ export function AboutGallery({ photos, shown = 12, className }: { photos: AboutP
 
   return (
     <>
-      <ul className={clsx("columns-2 gap-3 sm:gap-4 md:columns-3 lg:columns-4", className)}>
+      <ul className={clsx("grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-4", columns === 4 && "lg:grid-cols-4", className)}>
         {list.map((ph, i) => (
-          <li key={ph.slug} className="mb-3 break-inside-avoid sm:mb-4">
+          <li key={ph.slug}>
             <button
               type="button"
               onClick={() => setOpen(i)}
-              className="group relative block w-full overflow-hidden rounded-card bg-photo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              aria-label={`Open photo: ${ph.alt}`}
+              className="group block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+              aria-label={`Open photo ${i + 1}: ${ph.alt}`}
             >
-              {/* very tall phone shots would tower over the rest: shown 3:4 here, whole when opened */}
-              {ph.h / ph.w > 1.4 ? (
-                <span className="relative block aspect-[3/4]">
-                  <Image
-                    src={ph.src}
-                    alt={ph.alt}
-                    fill
-                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                    className="object-cover transition-transform duration-700 ease-soft group-hover:scale-[1.04]"
-                  />
-                </span>
-              ) : (
+              <span className="relative block aspect-[4/3] overflow-hidden rounded-ph bg-photo">
                 <Image
                   src={ph.src}
                   alt={ph.alt}
-                  width={ph.w}
-                  height={ph.h}
-                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                  className="h-auto w-full transition-transform duration-700 ease-soft group-hover:scale-[1.04]"
+                  fill
+                  sizes={columns === 4 ? "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" : "(min-width: 640px) 33vw, 50vw"}
+                  className="object-cover transition-transform duration-700 ease-soft group-hover:scale-[1.04]"
                 />
-              )}
-              <span aria-hidden="true" className="absolute inset-x-0 bottom-0 bg-[linear-gradient(0deg,rgb(12_13_14/.6),transparent)] px-3 pt-8 pb-2.5 text-left text-[12.5px] font-medium text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                {ph.alt}
+              </span>
+              <span className="mt-2 flex gap-2.5 text-[13px] leading-snug">
+                <span className="shrink-0 font-semibold text-muted tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                <span className="text-ink-2 transition-colors group-hover:text-ink">{ph.alt}</span>
               </span>
             </button>
           </li>
         ))}
       </ul>
       {photos.length > shown && (
-        <div className="mt-4 text-center">
+        <div className="mt-8 flex items-center gap-4">
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
           <button type="button" onClick={() => setAll((v) => !v)} className="btn btn-line">
-            {all ? "Show fewer photos" : `Show all ${photos.length} photos`}
+            {all ? "Show fewer" : `Show all ${photos.length} photos`}
           </button>
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
       )}
 
@@ -82,7 +73,7 @@ export function AboutGallery({ photos, shown = 12, className }: { photos: AboutP
           if (e.key === "ArrowRight") step(1);
           if (e.key === "ArrowLeft") step(-1);
         }}
-        className="m-0 h-dvh max-h-none w-screen max-w-none bg-ink/92 p-0 text-white backdrop:bg-ink/60"
+        className="m-0 h-dvh max-h-none w-screen max-w-none bg-ink/95 p-0 text-white backdrop:bg-ink/60"
       >
         {p && (
           <div className="relative flex h-full flex-col items-center justify-center p-[clamp(12px,3vw,40px)]">
@@ -90,7 +81,7 @@ export function AboutGallery({ photos, shown = 12, className }: { photos: AboutP
               <Image src={p.src} alt={p.alt} fill sizes="100vw" quality={85} className="object-contain" />
             </div>
             <p className="mt-4 text-center text-[14px] text-white/80">
-              {p.alt} <span className="text-white/50 tabular-nums">· {open! + 1} / {photos.length}</span>
+              <span className="text-white/50 tabular-nums">{String(open! + 1).padStart(2, "0")} / {photos.length}</span> · {p.alt}
             </p>
             <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="absolute top-4 right-4 grid size-11 place-items-center rounded-full bg-white/10 hover:bg-white/20">
               <Icon name="close" />

@@ -70,12 +70,11 @@ export function AboutHero({ slides }: { slides: AboutPhoto[] }) {
             About Chime Long
           </span>
         </nav>
-        <p className="text-[12.5px] font-semibold tracking-[0.18em] text-white/75 uppercase">Specialist footwear engineering</p>
-        <h1 id="h-about" className="mt-3 max-w-[16ch] font-headline text-[clamp(40px,6vw,86px)] leading-[0.98] font-semibold tracking-[-0.03em]">
+        <h1 id="h-about" className="max-w-[16ch] font-headline text-[clamp(40px,6vw,86px)] leading-[0.98] font-semibold tracking-[-0.03em]">
           Wholesale footwear, <em className="font-normal">built to sell through.</em>
         </h1>
         <p className="mt-5 max-w-[46ch] text-[clamp(16px,1.4vw,19px)] leading-relaxed text-white/85">
-          Boots that hold up in the weather and look right on the shelf, so fewer pairs come back. Made on our own floor, from cutting to carton.
+          Boots that hold up in the weather and look right on the shelf, so fewer pairs come back. This is the floor they&rsquo;re made on, from cutting to carton.
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link href="/catalog" className="btn bg-white text-ink hover:bg-white/90">
